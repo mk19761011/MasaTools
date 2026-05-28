@@ -33,19 +33,13 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 18px;
       margin-bottom: 12px;
     }
-    .mark {
-      width: 54px;
-      height: 54px;
-      border-radius: 14px;
-      background: #dbeafe;
-      display: grid;
-      place-items: center;
-      color: #1d4ed8;
-      font-size: 28px;
-      font-weight: 800;
+    .brand-logo {
+      width: min(320px, 42vw);
+      height: auto;
+      display: block;
     }
     h1 { font-size: 34px; margin: 0; letter-spacing: 0; }
     .lead { max-width: 820px; margin: 8px 0 0; color: var(--muted); font-size: 16px; }
@@ -159,7 +153,7 @@
   <header>
     <div class="wrap">
       <div class="brand">
-        <div class="mark">ML</div>
+        <img class="brand-logo" src="help_assets/MultiLibLink_header.png" alt="MultiLibLink">
         <div>
           <h1>MultiLibLink ヘルプ</h1>
           <p class="lead">図書館の貸出・予約状況を取得し、次に予約したい本を候補化して、予約操作を支援するツールです。</p>
@@ -189,7 +183,7 @@
         <div class="step"><strong>4. 予約候補を確認</strong>Excelの <code>予約候補</code> シートで予約したい本にチェックします。</div>
         <div class="step"><strong>5. 予約する</strong>チェックした候補を図書館HPで検索し、予約します。</div>
       </div>
-      <p class="ok">初めて使う場合は、図書館設定後に <code>今すぐ取得</code> だけ実行して、Excelに現在の状態が出ることを確認してください。</p>
+      <p class="ok">初回は、まず <code>今すぐ取得</code> を1回だけ実行してください。取得が終わったらExcelを開き、現在借りている本・予約中の本・読書履歴が表示されていることを確認してから、予約候補のチェックに進むと安心です。</p>
       <figure>
         <img src="help_assets/main.png" alt="実行タブの画面">
         <figcaption>実行タブ。まずは「今すぐ取得」で貸出・予約状況をExcelへ保存します。予約候補を確認した後は「予約する」から実行します。</figcaption>
@@ -236,6 +230,10 @@
 
     <section id="reserve">
       <h2>予約実行</h2>
+      <figure>
+        <img src="help_assets/yoyaku.png" alt="予約実行の確認画面">
+        <figcaption>予約実行の確認画面。予約する本と、今回実行しない本の理由を確認してから実行します。</figcaption>
+      </figure>
       <ol>
         <li><code>予約候補を開く</code> でExcelを開きます。</li>
         <li>予約したい行の <code>予約する</code> にチェックを入れます。</li>
@@ -273,6 +271,10 @@
     <section id="backup">
       <h2>バックアップと復旧</h2>
       <p>MultiLibLinkは、取得結果を保存する前に現在のExcelを自動でバックアップします。通常画面に復元ボタンはありません。誤操作を避けるため、復旧が必要なときだけ以下の手順で手動復元してください。</p>
+      <figure>
+        <img src="help_assets/backup.png" alt="バックアップファイルの画面">
+        <figcaption>バックアップフォルダの例。日時付きのExcelバックアップと、読書履歴ログが保存されます。</figcaption>
+      </figure>
       <table>
         <thead><tr><th>種類</th><th>保存場所</th><th>用途</th></tr></thead>
         <tbody>
@@ -300,8 +302,6 @@
       <p>検索ワード1・2を予約候補シート上で調整してください。副題まで検索語に入れると1冊だけに絞られすぎることがあります。</p>
       <h3>予約したはずなのに予約状況に出ない</h3>
       <p>アプリは予約状況一覧への反映を確認できた場合だけ <code>予約済</code> と記録します。反映されない場合は <code>予約未成立（一覧未反映）</code> として、同日中の再実行を止めます。</p>
-      <h3>ヘルプが古い内容に見える</h3>
-      <p>ヘルプボタンを押すたびに、このヘルプをデータフォルダへ上書きして開きます。古い内容が表示される場合は、ブラウザの再読み込みを行ってください。</p>
     </section>
   </main>
 
