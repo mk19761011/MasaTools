@@ -1,0 +1,10 @@
+# Windows and editor noise
+Thumbs.db
+Desktop.ini
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Local tool output
+.DS_Store
