@@ -1,11 +1,129 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Talk Notes ダウンロード</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Talk Notes ダウンロード | MasaTools</title>
+  <meta name="description" content="AI Talk Notes（Androidアプリ）のAPKダウンロードページ。無料アプリです。インストール手順もご案内します。" />
+  <style>
+    :root {
+      --bg: #f3f7fb;
+      --bg-soft: #edf4f6;
+      --text: #1f2937;
+      --muted: #5f6f82;
+      --line: rgba(30, 41, 59, 0.12);
+      --green: #15803d;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(34, 197, 94, 0.12), transparent 30%),
+        radial-gradient(circle at 88% 0%, rgba(20, 184, 166, 0.14), transparent 28%),
+        linear-gradient(135deg, var(--bg), var(--bg-soft));
+      min-height: 100vh; line-height: 1.8; font-size: 17px;
+    }
+    a { color: inherit; text-decoration: none; }
+    .site-header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(18px); background: rgba(245, 248, 251, 0.82); border-bottom: 1px solid var(--line); }
+    .header-inner { max-width: 860px; margin: 0 auto; padding: 13px 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; }
+    .logo-mark { width: 32px; height: 32px; border-radius: 11px; background: linear-gradient(135deg, #2563eb, #14b8a6); }
+    .back { color: var(--muted); font-size: 15px; display: inline-flex; align-items: center; gap: 6px; }
+    .back:hover { color: var(--green); }
+    .back svg { width: 15px; height: 15px; }
+
+    main { max-width: 860px; margin: 0 auto; padding: 44px 22px 60px; }
+
+    .dl-head { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 28px; }
+    .dl-icon { width: 80px; height: 80px; border-radius: 20px; flex: 0 0 auto; box-shadow: 0 14px 32px rgba(21, 128, 61, 0.22); }
+    .dl-head h1 { margin: 0; font-size: 30px; letter-spacing: -0.02em; }
+    .dl-head .meta { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+
+    .dl-card {
+      background: rgba(255, 255, 255, 0.86); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 26px 28px; box-shadow: var(--shadow); margin-bottom: 28px;
+    }
+    .download-button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      min-height: 56px; padding: 0 28px; border-radius: 14px; font-weight: 700; font-size: 17px;
+      color: #fff; border: 0; background: linear-gradient(135deg, #22c55e, #15803d);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    }
+    .download-button:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16); opacity: 0.97; }
+    .download-button svg { width: 19px; height: 19px; }
+    .file-meta { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+
+    h2 { font-size: 22px; margin: 0 0 14px; letter-spacing: -0.02em; }
+    .steps { background: rgba(255, 255, 255, 0.82); border: 1px solid var(--line); border-radius: 16px; padding: 8px 26px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06); }
+    .steps ol { margin: 16px 0; padding-left: 1.3em; }
+    .steps li { margin: 9px 0; color: #334155; font-size: 15px; }
+
+    .note { margin-top: 24px; background: rgba(255,247,237,0.7); border: 1px solid rgba(180,83,9,0.22); border-radius: 16px; padding: 16px 22px; }
+    .note p { margin: 6px 0; font-size: 14.5px; color: #7c2d12; }
+    .note strong { color: #7c2d12; }
+
+    .footer { border-top: 1px solid var(--line); padding: 24px 22px; margin-top: 48px; color: var(--muted); text-align: center; font-size: 15px; }
+
+    @media (max-width: 640px) { .dl-head h1 { font-size: 25px; } }
+  </style>
 </head>
 <body>
-  <h1>AI Talk Notes ダウンロード</h1>
-  <p>このページでは、AI Talk Notes のAPKを配布します。</p>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="/" aria-label="MasaTools トップへ">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>MasaTools</span>
+      </a>
+      <a class="back" href="/aitalknotes/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        AI Talk Notes の紹介へ
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="dl-head">
+      <img class="dl-icon" src="../assets/icon-512.png" alt="AI Talk Notes アプリアイコン" />
+      <div>
+        <h1>AI Talk Notes ダウンロード</h1>
+        <p class="meta">Androidアプリ / 無料（広告なし・アプリ内課金なし）</p>
+      </div>
+    </div>
+
+    <div class="dl-card">
+      <a class="download-button" href="AITalkNotes-0.3.1.apk" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        APKをダウンロード（v0.3.1）
+      </a>
+      <p class="file-meta">ファイル: AITalkNotes-0.3.1.apk / 約13MB / Android 8.0 以降</p>
+    </div>
+
+    <section>
+      <h2>インストール手順</h2>
+      <div class="steps">
+        <ol>
+          <li>上のボタンから APK ファイルをAndroidスマートフォンへダウンロードまたはPCから転送します。</li>
+          <li>ファイルアプリなどから APK を開きます。Google Play 以外からのインストールのため、初回は「このアプリのインストールを許可」を求められます。</li>
+          <li>表示にしたがって「提供元不明のアプリ（このソースを許可）」をオンにし、インストールを進めます。</li>
+          <li>インストール後、初回起動時にマイク権限を許可すると文字起こしを開始できます。</li>
+        </ol>
+      </div>
+
+      <div class="note">
+        <p><strong>ご利用にあたって</strong></p>
+        <p>・アプリ自体は無料です。OpenAI高精度文字起こし・AI相談を使う場合のみ、ご自身のOpenAI APIキーが必要で、API料金はご自身のOpenAIアカウントに発生します。</p>
+        <p>・旧バージョン（com.example系）を入れている場合は別アプリ扱いになります。必要なログは設定 &gt; エクスポート / バックアップ で保存してから入れ替えてください。</p>
+        <p>・第三者の会話・個人情報を扱う場合は、録音・送信してよいかをご自身でご判断ください。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <small>&copy; 2026 MasaTools. All rights reserved. &nbsp;|&nbsp; <a href="/aitalknotes/">AI Talk Notes の紹介へ</a> &nbsp;|&nbsp; <a href="/">ツール一覧へ戻る</a></small>
+  </footer>
 </body>
 </html>

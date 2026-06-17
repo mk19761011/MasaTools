@@ -9,6 +9,9 @@ Desktop.ini
 # Local tool output
 .DS_Store
 
+# Local dev tooling (preview server config etc.)
+.claude/
+
 # IQ-Test: development-only materials (not for public deploy)
 IQ-Test/save/
 IQ-Test/apps-script.gs

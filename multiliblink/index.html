@@ -1,601 +1,219 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MultiLibLink ヘルプ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MultiLibLink | MasaTools</title>
+  <meta name="description" content="MultiLibLinkは、図書館の貸出状況・予約状況・読書履歴を取得し、Excel上で読みたい本を選んで予約までサポートするWindowsツールです。" />
   <style>
     :root {
-      color-scheme: light;
-      --bg: #f4f7fb;
-      --panel: #ffffff;
-      --ink: #10233f;
-      --muted: #5d6d82;
-      --line: #d7e1ec;
-      --blue: #2563eb;
-      --blue-soft: #eaf2ff;
-      --green: #15803d;
-      --green-soft: #eefdf3;
-      --amber: #b45309;
-      --amber-soft: #fff7ed;
-      --red: #b91c1c;
-      --red-soft: #fef2f2;
-      --shadow: 0 10px 28px rgba(16, 35, 63, 0.08);
+      --bg: #f3f7fb;
+      --bg-soft: #edf4f6;
+      --text: #1f2937;
+      --muted: #5f6f82;
+      --line: rgba(30, 41, 59, 0.12);
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
+      --radius: 22px;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: "Meiryo", "Yu Gothic UI", system-ui, sans-serif;
-      line-height: 1.75;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(37, 99, 235, 0.13), transparent 30%),
+        radial-gradient(circle at 88% 0%, rgba(20, 184, 166, 0.14), transparent 28%),
+        linear-gradient(135deg, var(--bg), var(--bg-soft));
+      min-height: 100vh;
+      line-height: 1.8;
+      font-size: 17px;
     }
+    a { color: inherit; text-decoration: none; }
 
-    header {
-      background: linear-gradient(135deg, #ffffff 0%, #e9f2ff 100%);
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(18px);
+      background: rgba(245, 248, 251, 0.82);
       border-bottom: 1px solid var(--line);
     }
-
-    .wrap {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 30px 24px;
+    .header-inner {
+      max-width: 980px; margin: 0 auto; padding: 13px 22px;
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
     }
+    .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.02em; }
+    .logo-mark { width: 32px; height: 32px; border-radius: 11px; background: linear-gradient(135deg, #2563eb, #14b8a6); }
+    .back { color: var(--muted); font-size: 15px; display: inline-flex; align-items: center; gap: 6px; }
+    .back:hover { color: var(--accent); }
+    .back svg { width: 15px; height: 15px; }
 
-    .brand {
-      display: grid;
-      grid-template-columns: minmax(220px, 330px) 1fr;
-      gap: 22px;
-      align-items: center;
+    main { max-width: 980px; margin: 0 auto; padding: 44px 22px 60px; }
+
+    .hero { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-bottom: 14px; }
+    .hero-icon { width: 92px; height: 92px; border-radius: 22px; flex: 0 0 auto; box-shadow: 0 14px 32px rgba(37, 99, 235, 0.22); }
+    .hero-text h1 { margin: 0 0 6px; font-size: 36px; letter-spacing: -0.02em; line-height: 1.2; }
+    .hero-label {
+      display: inline-flex; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700;
+      background: rgba(37, 99, 235, 0.12); color: var(--accent-dark); margin-bottom: 10px;
     }
+    .hero-text p { margin: 0; color: var(--muted); font-size: 17px; max-width: 620px; }
 
-    .brand-logo {
-      display: block;
-      width: 100%;
-      height: auto;
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 24px 0 8px; }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 50px; padding: 0 24px; border-radius: 13px; font-weight: 700; font-size: 16px;
+      color: #fff; border: 0; background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
     }
+    .button.secondary { color: var(--text); background: rgba(255,255,255,0.9); border: 1px solid var(--line); }
+    .button svg { width: 17px; height: 17px; }
+    .button:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16); opacity: 0.97; }
+    .status-note { font-size: 14px; color: var(--muted); }
 
-    h1 {
-      margin: 0 0 8px;
-      font-size: 32px;
-      letter-spacing: 0;
-    }
+    section.block { margin-top: 44px; }
+    h2 { font-size: 24px; margin: 0 0 16px; letter-spacing: -0.02em; }
 
-    .lead {
-      margin: 0;
-      color: var(--muted);
-      font-size: 16px;
-      max-width: 760px;
-    }
-
-    main {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    nav {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    nav a {
-      display: block;
-      padding: 12px 14px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      color: var(--blue);
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    section {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 10px;
+    .shot {
+      margin: 0; border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--line); background: rgba(255,255,255,0.7);
       box-shadow: var(--shadow);
-      padding: 24px;
-      margin: 18px 0;
+    }
+    .shot img { display: block; width: 100%; height: auto; }
+    .shot figcaption { padding: 10px 16px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); }
+
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .feature {
+      background: rgba(255, 255, 255, 0.82); border: 1px solid var(--line);
+      border-radius: 16px; padding: 20px 22px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+    .feature h3 { margin: 0 0 6px; font-size: 18px; display: flex; align-items: center; gap: 9px; }
+    .feature h3 svg { width: 19px; height: 19px; color: var(--accent); flex: 0 0 auto; }
+    .feature p { margin: 0; color: #475569; font-size: 15px; line-height: 1.7; }
+
+    .note-card {
+      background: rgba(255, 255, 255, 0.82); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 22px 26px; box-shadow: var(--shadow);
+    }
+    .note-card ul { margin: 0; padding-left: 1.2em; color: #334155; }
+    .note-card li { margin: 7px 0; font-size: 15px; }
+    .note-card strong { color: var(--text); }
+    .note-card code { background: rgba(37,99,235,0.08); border-radius: 5px; padding: 1px 6px; font-size: 14px; }
+
+    .footer {
+      border-top: 1px solid var(--line); padding: 24px 22px; margin-top: 52px;
+      color: var(--muted); text-align: center; font-size: 15px;
     }
 
-    h2 {
-      margin: 0 0 12px;
-      font-size: 24px;
-      letter-spacing: 0;
-    }
-
-    h3 {
-      margin: 24px 0 8px;
-      font-size: 18px;
-      letter-spacing: 0;
-    }
-
-    p {
-      margin: 8px 0;
-    }
-
-    ul,
-    ol {
-      margin: 8px 0 8px 1.35em;
-      padding: 0;
-    }
-
-    li {
-      margin: 4px 0;
-    }
-
-    code {
-      background: #eef4fb;
-      border: 1px solid #d8e6f3;
-      border-radius: 5px;
-      padding: 1px 5px;
-      font-family: Consolas, "Meiryo", monospace;
-      font-size: 0.95em;
-    }
-
-    .toc-note {
-      color: var(--muted);
-      margin: 0 0 12px;
-    }
-
-    .flow {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 10px;
-      margin: 14px 0;
-    }
-
-    .step {
-      border: 1px solid var(--line);
-      border-left: 5px solid var(--blue);
-      border-radius: 8px;
-      padding: 12px;
-      background: #fbfdff;
-      min-height: 104px;
-    }
-
-    .step strong {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .note,
-    .ok,
-    .warn {
-      padding: 12px 14px;
-      border-radius: 8px;
-      margin: 12px 0;
-    }
-
-    .note {
-      border-left: 5px solid var(--amber);
-      background: var(--amber-soft);
-    }
-
-    .ok {
-      border-left: 5px solid var(--green);
-      background: var(--green-soft);
-    }
-
-    .warn {
-      border-left: 5px solid var(--red);
-      background: var(--red-soft);
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      margin: 10px 0;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      min-width: 720px;
-      font-size: 14px;
-    }
-
-    th,
-    td {
-      border: 1px solid var(--line);
-      padding: 8px 10px;
-      vertical-align: top;
-    }
-
-    th {
-      background: var(--blue-soft);
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    figure {
-      margin: 16px 0;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: #fbfdff;
-      overflow: hidden;
-    }
-
-    figure img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    figcaption {
-      padding: 9px 12px;
-      color: var(--muted);
-      font-size: 13px;
-      border-top: 1px solid var(--line);
-      background: #ffffff;
-    }
-
-    .small {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    footer {
-      color: var(--muted);
-      font-size: 13px;
-      padding: 10px 24px 38px;
-      text-align: center;
-    }
-
-    @media (max-width: 720px) {
-      .brand {
-        grid-template-columns: 1fr;
-      }
-
-      h1 {
-        font-size: 26px;
-      }
-
-      main,
-      .wrap {
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-
-      section {
-        padding: 18px;
-      }
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero-text h1 { font-size: 28px; }
+      .hero-icon { width: 76px; height: 76px; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <div class="brand">
-        <img class="brand-logo" src="help_assets/MultiLibLink_header.png" alt="MultiLibLink">
-        <div>
-          <h1>MultiLibLink ヘルプ</h1>
-          <p class="lead">図書館の貸出状況・予約状況・読書履歴を取得し、次に予約したい本を Excel で選んで予約まで支援する Windows 用ツールです。</p>
-        </div>
-      </div>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="/" aria-label="MasaTools トップへ">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>MasaTools</span>
+      </a>
+      <a class="back" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        ツール一覧へ戻る
+      </a>
     </div>
   </header>
 
   <main>
-    <p class="toc-note">このヘルプは Web 版です。アプリのヘルプボタンから開くページと同じ内容を想定しています。</p>
-    <nav aria-label="目次">
-      <a href="#environment">動作環境</a>
-      <a href="#supported-libraries">対応図書館</a>
-      <a href="#quickstart">はじめて使う</a>
-      <a href="#data-folder">データ保存場所</a>
-      <a href="#candidate-generation">予約候補の作られ方</a>
-      <a href="#candidate-sheet">予約候補シート</a>
-      <a href="#reservation">予約実行</a>
-      <a href="#mail">メール監視</a>
-      <a href="#backup">バックアップ</a>
-      <a href="#trouble">困ったとき</a>
-    </nav>
-
-    <section id="environment">
-      <h2>動作環境</h2>
-      <div class="table-wrap">
-        <table>
-          <tbody>
-            <tr>
-              <th>対応 OS</th>
-              <td>Windows 10 / 11 を想定しています。macOS、Linux、スマートフォンでは利用できません。</td>
-            </tr>
-            <tr>
-              <th>インストール方法</th>
-              <td>通常は配布されている <code>MultiLibLink_Setup.exe</code> を実行してインストールします。開発用の <code>MultiLibLink.exe</code> を直接起動することもできますが、通常利用ではインストーラー版を推奨します。</td>
-            </tr>
-            <tr>
-              <th>追加ランタイム</th>
-              <td>アプリ本体は必要な Python ライブラリを同梱した exe として配布する想定です。別途 .NET ランタイムや Python をインストールする必要はありません。</td>
-            </tr>
-            <tr>
-              <th>ブラウザ部品</th>
-              <td>図書館 HP の操作には Playwright Chromium を使用します。初回実行時にブラウザ部品が無い場合、自動で準備されます。インターネット接続と、セキュリティソフトによる通信許可が必要になることがあります。</td>
-            </tr>
-            <tr>
-              <th>ダウンロード</th>
-              <td>配布ページは <a href="https://masatools.netlify.app/">MasaTools</a> を想定しています。最新版のインストーラーがある場合は、そちらから入手してください。</td>
-            </tr>
-          </tbody>
-        </table>
+    <section class="hero">
+      <img class="hero-icon" src="help_assets/icon-192.png" alt="MultiLibLink アプリアイコン" />
+      <div class="hero-text">
+        <span class="hero-label">Windowsアプリ</span>
+        <h1>MultiLibLink</h1>
+        <p>図書館の貸出状況・予約状況・読書履歴を取得し、Excel上で読みたい本を選んで予約までサポートするWindowsツールです。</p>
       </div>
     </section>
 
-    <section id="supported-libraries">
+    <div class="cta-row">
+      <a class="button" href="help/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        詳しい使い方（ヘルプ）
+      </a>
+      <span class="button secondary" aria-disabled="true" style="cursor: default; opacity: 0.75;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Vectorで公開予定
+      </span>
+    </div>
+    <p class="status-note">Windows 10 / 11 対応。Vectorでの公開を準備中です。公開でき次第、こちらにダウンロードリンクを掲載します。</p>
+
+    <section class="block">
+      <figure class="shot">
+        <img src="help_assets/main.png" alt="MultiLibLink のメイン画面" />
+        <figcaption>メイン画面 — 「情報を取得」で最新状況を取得し、Excelで予約する本を選びます。</figcaption>
+      </figure>
+    </section>
+
+    <section class="block">
+      <h2>主な機能</h2>
+      <div class="grid">
+        <div class="feature">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/><path d="M21 4v5h-5"/></svg>一括で情報取得</h3>
+          <p>登録ユーザーの貸出状況・予約状況・読書履歴を図書館サイトから取得し、Excelに保存。複数のユーザー（家族）も登録できます。</p>
+        </div>
+        <div class="feature">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>Excelで予約</h3>
+          <p>予約候補シートで「予約する」にチェックして実行するだけ。図書館サイトを開いて検索する手間なく、まとめて予約できます。</p>
+        </div>
+        <div class="feature">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>読書履歴の整理</h3>
+          <p>直近の読書履歴・貸出中・予約中の本を組み合わせ、同じシリーズを自動でまとめて「次に予約する巻」を分かりやすく提示します。</p>
+        </div>
+        <div class="feature">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>メール監視・バックアップ</h3>
+          <p>図書館からの通知メールを受信したときだけ自動で情報取得（任意）。Excelや設定はデータフォルダに自動バックアップされます。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
       <h2>対応図書館</h2>
-      <p>現時点で主に動作確認しているのは、大阪市立図書館の蔵書検索・予約システムです。URL に <code>licsxp-opac</code> を含む LICS-XP / iLis 系の画面構造を前提に、ログイン、貸出状況取得、予約状況取得、検索、予約確定を行います。</p>
-      <p>LibraXX、Calista、その他の OPAC については、画面構造やボタン名が異なる場合があるため、そのまま対応できるとは限りません。新しい図書館を追加する場合は、図書館設定でログイン URL とユーザー情報を登録し、接続確認でログインできるかを確認してください。</p>
-      <div class="note">
-        <strong>プリセットについて</strong><br>
-        現在は「多くの図書館を一覧から選べるプリセット集」ではなく、図書館名・ログイン URL・ユーザー情報をアプリ内に登録して使う方式です。同じアプリ内に複数の図書館プロファイルを作成できます。
+      <div class="note-card">
+        <ul>
+          <li>主に確認しているのは<strong>大阪市立図書館</strong>の蔵書検索・予約システムです。URLに <code>licsxp-opac</code> を含む LICS-XP / iLis 系の画面構成を前提としています。</li>
+          <li>LibraXX・Calista など他のOPACは画面構成やボタン名が異なる場合があるため、そのまま対応できるとは限りません。</li>
+          <li>新しい図書館を追加する場合は、図書館設定にログインURLとユーザー情報を登録し、接続確認でログインできるかをご確認ください。</li>
+        </ul>
       </div>
     </section>
 
-    <section id="quickstart">
-      <h2>はじめて使う</h2>
-      <div class="flow">
-        <div class="step"><strong>1. 図書館を登録</strong>図書館設定で、図書館名、ログイン URL、カード番号、パスワードを入力します。</div>
-        <div class="step"><strong>2. 接続確認</strong>登録したユーザーで図書館 HP にログインできるか確認します。</div>
-        <div class="step"><strong>3. 設定を保存</strong>接続できたら、設定を保存します。</div>
-        <div class="step"><strong>4. 今すぐ取得</strong>実行タブで貸出中の本、予約中の本、読書履歴を取得します。</div>
-        <div class="step"><strong>5. Excel を確認</strong>取得後に Excel を開き、予約候補シートや予約状況を確認します。</div>
-      </div>
-      <p class="ok">初めて使う場合は、まず予約操作をせずに <code>今すぐ取得</code> だけを実行してください。取得が終わったら Excel を開き、予約中の本、借りている本、読書履歴が表示されていることを確認します。ここまで確認できてから、予約候補のチェックと予約実行に進むのが安全です。</p>
-      <figure>
-        <img src="help_assets/main.png" alt="実行タブの画面">
-        <figcaption>実行タブ。通常の流れは「今すぐ取得」で最新状態を取得し、Excel で予約候補を選び、「予約する」で実行します。</figcaption>
-      </figure>
-      <h3>ボタンの意味</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>ボタン</th><th>動作</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>今すぐ取得</code></td>
-              <td>登録ユーザーの貸出状況、予約状況、読書履歴を図書館 HP から取得し、Excel に保存します。予約候補シートも更新されます。</td>
-            </tr>
-            <tr>
-              <td><code>予約候補を開く</code></td>
-              <td><code>library_data.xlsx</code> を開き、予約候補シートを表示します。画面や版によって <code>取得データを開く（予約候補入力）</code> と表示されることがありますが、同じ Excel を開く操作です。</td>
-            </tr>
-            <tr>
-              <td><code>予約する</code></td>
-              <td>予約候補シートで <code>予約する</code> にチェックした行だけを、図書館 HP で検索して予約します。</td>
-            </tr>
-            <tr>
-              <td><code>データフォルダを開く</code></td>
-              <td>Excel、設定、バックアップが保存されているデータフォルダを開きます。通常はトラブル対応やバックアップ確認のときに使います。</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>定期的に自動取得するスケジュール実行は、現在の基本機能には含めていません。取得は <code>今すぐ取得</code> で手動実行します。メール監視を有効にした場合のみ、図書館からの通知メールをきっかけに取得処理を行います。</p>
-    </section>
-
-    <section id="settings">
-      <h2>図書館設定</h2>
-      <figure>
-        <img src="help_assets/library-setting.png" alt="図書館設定タブの画面">
-        <figcaption>図書館設定タブ。図書館プロファイル、ログイン URL、登録ユーザー、メール監視の対象を設定します。</figcaption>
-      </figure>
-      <ol>
-        <li><code>図書館名</code> を選ぶか、追加します。</li>
-        <li><code>図書館ログイン用 URL</code> に、ブラウザでログイン画面が開く URL を入力します。</li>
-        <li>カード番号とパスワードを入力し、ユーザーを追加します。</li>
-        <li>登録ユーザー一覧で対象ユーザーを選び、<code>接続確認</code> を実行します。</li>
-        <li>接続できたら <code>設定を保存</code> を押します。</li>
-      </ol>
-      <p>登録ユーザーは、一覧の上から順に予約処理で使われます。ユーザーごとの予約上限に近い場合は、次のユーザーへ自動で切り替えます。</p>
-    </section>
-
-    <section id="data-folder">
-      <h2>データ保存場所</h2>
-      <p>取得データや設定は、通常は次のフォルダに保存されます。</p>
-      <p><code>%LOCALAPPDATA%\MultiLibLink\</code></p>
-      <p>エクスプローラーでは、アドレスバーに上記を貼り付けて Enter を押すと開けます。アプリの <code>データフォルダを開く</code> ボタンからも開けます。</p>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>ファイルまたはフォルダ</th><th>内容</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>【図書館名】library_data.xlsx</code></td><td>貸出状況、予約状況、読書履歴、予約候補を保存するメインの Excel です。</td></tr>
-            <tr><td><code>config.json</code></td><td>図書館設定、ユーザー設定、メール設定を保存します。</td></tr>
-            <tr><td><code>.secret_key</code></td><td>パスワード暗号化に使う鍵です。設定をバックアップする場合は、このファイルも一緒に保管してください。</td></tr>
-            <tr><td><code>backups\</code></td><td>Excel の自動バックアップを保存します。</td></tr>
-            <tr><td><code>backups\【図書館名】library_data\history_backup.jsonl</code></td><td>読書履歴を追加保存する補助ログです。通常は開く必要はありません。</td></tr>
-            <tr><td><code>debug\debug.log</code></td><td>動作確認用のログです。トラブル調査で使います。</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="warn">Excel を開いたまま <code>今すぐ取得</code> や <code>予約する</code> を実行すると、Windows からアクセス拒否されることがあります。実行前に <code>library_data.xlsx</code> を閉じてください。</p>
-    </section>
-
-    <section id="candidate-generation">
-      <h2>予約候補の作られ方</h2>
-      <p><code>今すぐ取得</code> が終わると、予約候補シートが自動で更新されます。候補は、直近約 2 か月の読書履歴、現在借りている本、現在予約している本を組み合わせて作成します。</p>
-      <h3>基本ロジック</h3>
-      <ul>
-        <li>読書履歴からシリーズ名と巻数を読み取ります。</li>
-        <li>同じシリーズと判断できる行は 1 行にまとめます。</li>
-        <li>現在借りている本、現在予約している本も同じシリーズとして確認します。</li>
-        <li>確認できた中で一番大きい巻数を <code>最終確認巻</code> にします。</li>
-        <li><code>次に予約する巻</code> は、通常 <code>最終確認巻 + 1</code> です。</li>
-      </ul>
-      <p><code>最終確認巻</code> は「読んだ巻」だけではありません。予約中の巻や、現在借りている巻がある場合は、それらも含めて一番先に進んでいる巻を指します。</p>
-      <h3>予約中の巻がある場合</h3>
-      <p>最終確認巻が予約中で、予約状態が <code>待ち</code> の場合、次巻を予約すると順番が前後する可能性があります。そのため、状態は <code>予約待ちのため保留</code> になり、次巻予約の対象から外れます。</p>
-      <p>最終確認巻が <code>取置中</code> や確保済みと判断できる場合は、次の巻を予約しても順番が崩れにくいため、次巻予約の対象にできます。</p>
-      <h3>シリーズ認識と検索ワード</h3>
-      <p>タイトルには巻数、叢書名、著者名、出版社、副タイトルなどが混ざっています。MultiLibLink はこれらをできるだけ整理し、シリーズ名と巻数を抽出します。</p>
-      <ul>
-        <li><code>NARUTO 巻ノ70</code> のような巻表記を読み取ります。</li>
-        <li><code>VOLUME74</code>、<code>第10巻</code>、<code>22</code> などの表記も巻数として扱います。</li>
-        <li>副タイトルだけで検索結果が 1 冊に絞られすぎる場合は、検索ワードから外します。</li>
-        <li>同じシリーズでも、別シリーズと判断すべきものは分けます。例として <code>ジョジョの奇妙な冒険</code> と <code>ストーンオーシャン</code> は別シリーズとして扱います。</li>
-      </ul>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>例</th><th>推奨される検索ワード</th><th>理由</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>世界史探偵コナン</td><td><code>世界史探偵コナン</code> + <code>歴史まんが</code></td><td>副タイトルを入れると 1 冊に絞られすぎるため、シリーズ全体が出る語にします。</td></tr>
-            <tr><td>日本史探偵コナン</td><td><code>日本史探偵コナン</code> + <code>歴史まんが</code></td><td>世界史探偵コナンと同様に、シリーズ名と叢書の語で検索します。</td></tr>
-            <tr><td>名探偵コナン VOLUME74</td><td><code>名探偵コナン</code> + <code>少年サンデーコミックス</code>、しぼり込みに <code>VOLUME74</code></td><td>検索語は広めにし、巻数はしぼり込みで特定します。</td></tr>
-            <tr><td>Slam dunk 完全版</td><td><code>"Slam dunk"</code> + <code>完全版 デラックス</code></td><td>空白を含む語は引用符付きで扱い、重すぎる検索を避けます。</td></tr>
-            <tr><td>うまくなろうトランペット Band journal book</td><td><code>うまくなろうトランペット</code> + <code>Band journal book</code></td><td>タイトル本体と叢書名の 2 語に分けます。</td></tr>
-            <tr><td>かみさまのベビーシッター</td><td><code>かみさまのベビーシッター</code></td><td>余分な記号や重複語を外します。</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="warn">大阪市立図書館の検索では、検索結果が 1000 件を超えると検索条件を変更するよう求められます。この場合、状態は <code>検索語要確認（1000件超過）</code> になります。シリーズ名だけで広すぎる場合は、叢書名を検索ワード2に入れるなどして絞り込んでください。</p>
-    </section>
-
-    <section id="candidate-sheet">
-      <h2>予約候補シート</h2>
-      <figure>
-        <img src="help_assets/excel-yoyaku.png" alt="予約候補シート">
-        <figcaption>予約候補シート。予約したいシリーズの <code>予約する</code> にチェックを入れ、必要に応じて検索ワードや予約冊数を修正します。</figcaption>
-      </figure>
-      <h3>主な列</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>列</th><th>説明</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>予約する</td><td>予約実行の対象にする場合にチェックします。チェックは次回の <code>今すぐ取得</code> 後も、同じシリーズであれば引き継がれます。</td></tr>
-            <tr><td>状態</td><td>検索や予約の結果、保留理由を表示します。</td></tr>
-            <tr><td>シリーズ名</td><td>アプリが同じシリーズと判断した名前です。</td></tr>
-            <tr><td>最終確認巻</td><td>読書履歴、貸出中、予約中から確認できた最大の巻数です。</td></tr>
-            <tr><td>次に予約する巻</td><td>通常は <code>最終確認巻 + 1</code> です。予約実行ではこの巻を探します。</td></tr>
-            <tr><td>検索ワード1 / 検索ワード2</td><td>図書館 HP で検索する語です。検索しにくい場合はここを手動で修正します。</td></tr>
-            <tr><td>予約冊数</td><td>同じシリーズを複数巻まとめて予約したい場合に 2 以上を指定します。巻数の小さい順に受取順を指定します。</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="small">内部管理用に、図書館結果タイトル、実行ユーザー、最終処理日時、巻しぼり込み接頭辞、シリーズキーなどの列を持つ場合があります。通常は表示や編集の対象ではありません。</p>
-      <h3>状態列の意味</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>状態</th><th>意味</th><th>次にすること</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>未検索</td><td>まだ予約実行で検索していない候補です。</td><td>予約する場合はチェックして実行します。</td></tr>
-            <tr><td>検索語要確認</td><td>検索ワードや巻数が不足しています。</td><td>検索ワード1、検索ワード2、次に予約する巻を修正します。</td></tr>
-            <tr><td>検索語要確認（1000件超過）</td><td>検索結果が多すぎます。</td><td>検索ワード2を追加するなどして絞り込みます。</td></tr>
-            <tr><td>予約待ちのため保留</td><td>最終確認巻が予約待ちのため、次巻を先に予約しないよう保留しています。</td><td>その巻が取置中になった後、<code>今すぐ取得</code> で更新します。</td></tr>
-            <tr><td>検索結果なし</td><td>検索したが対象巻が見つかりませんでした。</td><td>検索ワードを見直します。図書館に所蔵がない場合もあります。</td></tr>
-            <tr><td>検索失敗（タイムアウト）</td><td>通信状況や図書館 HP の応答遅延で検索が完了しませんでした。</td><td>時間を置いて再実行します。必要に応じて検索ワードを軽くします。</td></tr>
-            <tr><td>予約済</td><td>今回の予約、または予約状況一覧での確認により予約成立を確認しました。</td><td>次に進むには <code>今すぐ取得</code> で候補を更新します。</td></tr>
-            <tr><td>予約済のため対象外</td><td>同じ巻が既に予約シートに存在するため、重複予約を避けました。</td><td>通常は何もしません。</td></tr>
-            <tr><td>一部予約済</td><td>複数巻まとめて予約したうち、一部だけ予約済みまたは対象外になっています。</td><td>予約候補と予約シートを確認します。</td></tr>
-            <tr><td>予約未成立（一覧未反映）</td><td>予約操作後、予約状況一覧で反映を確認できませんでした。</td><td>同日中の再実行は避けます。図書館 HP で実際の予約状況を確認します。</td></tr>
-            <tr><td>未処理（前候補未成立）</td><td>前の候補の成立が確認できず、安全のため後続処理を止めました。</td><td>予約状況を確認し、必要なら再実行します。</td></tr>
-            <tr><td>予約枠不足</td><td>登録ユーザーの予約枠が不足しました。</td><td>予約枠に空きができてから再実行します。</td></tr>
-            <tr><td>指定ユーザー予約枠不足</td><td>予約ユーザーを指定している候補で、そのユーザーの予約枠が足りません。</td><td>指定ユーザーを変更するか、予約枠が空いてから実行します。</td></tr>
-          </tbody>
-        </table>
+    <section class="block">
+      <h2>動作環境</h2>
+      <div class="note-card">
+        <ul>
+          <li>Windows 10 / 11 を想定しています（macOS・Linux・スマートフォンでは利用できません）。</li>
+          <li>必要なライブラリを同梱したexeとして配布予定です。別途 .NET ランタイムや Python をインストールする必要はありません。</li>
+          <li>図書館サイトの操作には Playwright Chromium を使用します。初回実行時に自動で準備され、インターネット接続が必要です。</li>
+        </ul>
       </div>
     </section>
 
-    <section id="reservation">
-      <h2>予約実行</h2>
-      <figure>
-        <img src="help_assets/yoyaku.png" alt="予約実行の確認画面">
-        <figcaption>予約実行前の確認画面。予約する本と、今回実行しない本の理由を確認してから実行します。</figcaption>
-      </figure>
-      <ol>
-        <li>予約候補シートで <code>予約する</code> にチェックします。</li>
-        <li>Excel を閉じます。</li>
-        <li>アプリの <code>予約する</code> を押します。</li>
-        <li>確認画面で対象を確認し、問題なければ実行します。</li>
-      </ol>
-      <h3>予約上限とユーザー切り替え</h3>
-      <p>大阪市立図書館では、登録ユーザー 1 人につき予約上限を 15 件として扱います。MultiLibLink は登録ユーザー一覧の上から順に処理します。</p>
-      <p>予約後に 15 件へ到達する割り当ては行わず、ひとつ手前で次のユーザーへ切り替えます。内部的には <code>15 - 現在予約数 - 1</code> を、そのユーザーで今回割り当て可能な冊数として扱います。たとえば現在 14 件のユーザーには 1 冊も追加せず、次のユーザーへ進みます。</p>
-      <p><code>今すぐ取得</code> から 10 分以内に予約処理を行う場合、直前取得で得た予約数を利用し、予約 15 件のユーザーは再確認せずにスキップします。</p>
-      <h3>複数巻をまとめて予約する場合</h3>
-      <p><code>予約冊数</code> を 2 以上にすると、次に予約する巻から連続する巻をまとめて予約します。図書館 HP のカートに追加し、巻数の小さい順に受取順を指定します。</p>
-      <p>ただし、対象巻の一部が見つからない場合や、予約枠に収まらない場合は、まとまりを分割せずに次のユーザーへ移るか、未処理として記録します。</p>
-    </section>
-
-    <section id="mail">
-      <h2>メール監視</h2>
-      <figure>
-        <img src="help_assets/mail-setting.png" alt="メール設定タブの画面">
-        <figcaption>メール設定タブ。Gmail のアプリパスワードを使って、図書館からの通知メールを監視します。</figcaption>
-      </figure>
-      <p>メール監視は任意機能です。通常の <code>今すぐ取得</code> と <code>予約する</code> だけなら設定しなくても使えます。</p>
-      <h3>何を監視するか</h3>
-      <p>図書館設定で有効にした図書館について、指定した件名キーワードを含むメールを監視します。たとえば <code>予約資料がご用意できました</code> のような取置通知を検知する想定です。</p>
-      <h3>通知メールを検知したとき</h3>
-      <ul>
-        <li>設定した待機時間があれば、その分だけ待ちます。</li>
-        <li>対象図書館の <code>今すぐ取得</code> 相当の処理を行い、予約状況や貸出状況を更新します。</li>
-        <li>結果通知を有効にしている場合、処理結果と <code>library_data.xlsx</code> を送信先アドレスへ送ります。</li>
-      </ul>
-      <h3>接続テストで失敗する場合</h3>
-      <p>Gmail の通常パスワードではなく、Google アカウントで発行したアプリパスワードを入力してください。メールアドレスに <code>@gmail.com</code> のドットが抜けていないか、IMAP が利用可能かも確認してください。</p>
-    </section>
-
-    <section id="backup">
-      <h2>バックアップと復元</h2>
-      <figure>
-        <img src="help_assets/backup.png" alt="バックアップフォルダの画面">
-        <figcaption>バックアップフォルダの例。日時付きの Excel バックアップと、読書履歴の補助ログが保存されます。</figcaption>
-      </figure>
-      <p>MultiLibLink は、Excel を保存する前に既存の <code>library_data.xlsx</code> をバックアップします。通常画面に復元ボタンは置いていません。誤操作を防ぐため、復元が必要なときだけ手順を確認しながら手動で戻します。</p>
-      <h3>バックアップの保存場所</h3>
-      <p><code>%LOCALAPPDATA%\MultiLibLink\backups\【図書館名】library_data\</code></p>
-      <h3>世代管理</h3>
-      <ul>
-        <li>直近 30 件のバックアップは保持します。</li>
-        <li>90 日以内の古いバックアップは、日ごとに 1 件を残します。</li>
-        <li>90 日より古いバックアップは、月ごとに 1 件を残します。</li>
-        <li>短時間でバックアップが増えすぎないよう、直近 10 分以内にバックアップがある場合は新規作成を抑制します。</li>
-      </ul>
-      <h3>Excel をバックアップから戻す手順</h3>
-      <ol>
-        <li>MultiLibLink と Excel を閉じます。</li>
-        <li><code>データフォルダを開く</code> でデータフォルダを開きます。</li>
-        <li>現在の <code>【図書館名】library_data.xlsx</code> を、念のため別名に変更します。</li>
-        <li><code>backups\【図書館名】library_data</code> から戻したい日時の Excel をコピーします。</li>
-        <li>コピーしたファイル名を <code>【図書館名】library_data.xlsx</code> に変更します。</li>
-        <li>MultiLibLink を起動し、Excel の内容を確認します。</li>
-      </ol>
-      <h3>history_backup.jsonl の使い方</h3>
-      <p><code>history_backup.jsonl</code> は、読書履歴を追加保存する補助ログです。Excel バックアップから戻せない場合に、読書履歴だけを復元するための材料として使います。通常は編集しないでください。</p>
-      <p class="warn">復元作業では、現在のファイルを上書きする前に必ず別名で残してください。迷う場合はファイルを削除せず、データフォルダ全体をコピーしてから作業すると安全です。</p>
-    </section>
-
-    <section id="trouble">
-      <h2>困ったとき</h2>
-      <h3>Excel への書き込みでアクセス拒否される</h3>
-      <p><code>library_data.xlsx</code> を Excel で開いたままにしている可能性があります。Excel を閉じてから、もう一度 <code>今すぐ取得</code> または <code>予約する</code> を実行してください。</p>
-      <h3>予約したはずなのに予約状況に出ない</h3>
-      <p>アプリは予約状況一覧で反映を確認できたものだけを <code>予約済</code> とします。確認できない場合は <code>予約未成立（一覧未反映）</code> として記録し、同日中の重複予約を避けます。図書館 HP で実際の予約状況を確認してください。</p>
-      <h3>検索が遅い、またはタイムアウトする</h3>
-      <p>検索語が広すぎる場合や、3 語以上の検索で図書館 HP が重くなる場合があります。検索ワード1と検索ワード2の 2 語程度に整理し、巻数はしぼり込みで指定する形にしてください。</p>
-      <h3>メール接続テストに失敗する</h3>
-      <p>メールアドレス、アプリパスワード、IMAP の有効化を確認してください。Gmail の場合、通常のログインパスワードではなくアプリパスワードが必要です。</p>
-      <h3>図書館に接続できない</h3>
-      <p>ログイン URL が正しいか確認してください。ブラウザでその URL を開き、ログイン画面が表示される URL を設定します。図書館側の画面構造が対応外の場合、接続確認や予約処理ができないことがあります。</p>
+    <section class="block">
+      <h2>もっと詳しく</h2>
+      <div class="note-card">
+        <p style="margin:0 0 14px; color:#334155;">セットアップ手順、ボタンの意味、予約候補の作られ方、メール監視やバックアップなどの詳細は、ヘルプページにまとめています。</p>
+        <a class="button" href="help/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          ヘルプページを開く
+        </a>
+      </div>
     </section>
   </main>
 
-  <footer>
-    MultiLibLink Help / 更新日: 2026-05-29
+  <footer class="footer">
+    <small>&copy; 2026 MasaTools. All rights reserved. &nbsp;|&nbsp; <a href="/">ツール一覧へ戻る</a></small>
   </footer>
 </body>
 </html>
