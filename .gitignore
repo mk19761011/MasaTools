@@ -8,3 +8,9 @@ Desktop.ini
 
 # Local tool output
 .DS_Store
+
+# IQ-Test: development-only materials (not for public deploy)
+IQ-Test/save/
+IQ-Test/apps-script.gs
+IQ-Test/design-samples.html
+IQ-Test/assets/hero-self-analysis-reference.png
