@@ -1,1 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index,follow">
+<title>プライバシーポリシー｜AI Talk Notes</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #ffffff;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 20px 64px; }
+  header { border-bottom: 2px solid #2a6df4; padding-bottom: 12px; margin-bottom: 24px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .app { color: #2a6df4; font-weight: 700; }
+  .meta { color: #666; font-size: 0.9rem; margin: 4px 0 0; }
+  h2 { font-size: 1.15rem; margin: 32px 0 8px; padding-left: 10px; border-left: 4px solid #2a6df4; }
+  ul { padding-left: 1.3em; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92rem; }
+  th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f2f6ff; }
+  .note { background: #f6f8fc; border: 1px solid #e2e8f5; border-radius: 8px; padding: 12px 16px; font-size: 0.92rem; }
+  a { color: #2a6df4; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; color: #666; font-size: 0.88rem; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e7e7e7; background: #16181d; }
+    .meta, footer { color: #9aa0aa; }
+    h2 { border-left-color: #6ea0ff; }
+    th { background: #20283a; }
+    th, td { border-color: #333a47; }
+    .note { background: #1c2230; border-color: #2b3343; }
+    a { color: #6ea0ff; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>プライバシーポリシー</h1>
+    <p class="app">AI Talk Notes</p>
+    <p class="meta">最終改定日: 2026年6月20日</p>
+  </header>
 
+  <p>
+    本ポリシーは、Androidアプリ「AI Talk Notes」（以下「本アプリ」）における情報の取り扱いについて説明します。
+    本アプリは、会話や音声・動画ファイルを文字起こしし、必要に応じて利用者ご自身のAPIキーで外部のAIサービスへ送信する機能を提供します。
+  </p>
+
+  <h2>1. 取得・保存する情報</h2>
+  <p>本アプリは、利用者の操作に応じて以下の情報を<strong>端末内</strong>に保存します。</p>
+  <ul>
+    <li>文字起こしログ（5分単位のテキスト）。音声の入力元は、マイク録音、または利用者が選んだ端末内の音声/動画ファイル（ファイル取り込み）です。</li>
+    <li>AI回答履歴（AIへ相談して得た回答）</li>
+    <li>1日ログアーカイブ（最大365日分の保管用テキスト）</li>
+    <li>設定情報（使用エンジン、プロバイダ、モデル、語彙、概算料金、画面ロックPINのハッシュ等）</li>
+    <li>APIキー（利用者が入力した場合。OpenAI および/または Google（Gemini））</li>
+    <li>一時音声チャンク（高精度文字起こし・ファイル取り込み使用時のみ。処理後すぐ削除、失敗分も48時間以内に削除）</li>
+  </ul>
+
+  <h2>2. 端末内での保存</h2>
+  <ul>
+    <li>上記の情報は、原則として端末内のアプリ専用領域に保存されます。</li>
+    <li>APIキー（OpenAI / Gemini）は Android Keystore による暗号化で保護し、保存後に実値を画面へ再表示しません（対応端末では StrongBox を利用）。</li>
+    <li>アプリのデータは Android の自動バックアップ対象から除外しています。</li>
+  </ul>
+
+  <h2>3. 外部（AIプロバイダ）へ送信される情報</h2>
+  <p>
+    利用者が明示的に操作した場合のみ、以下が利用者の選んだAIプロバイダ（<strong>OpenAI または Google の Gemini</strong>）へ送信されます（送信前に確認画面または料金確認を表示します）。
+  </p>
+  <ul>
+    <li>高精度文字起こし（録音）／ファイル取り込み: 発話を含む音声チャンク</li>
+    <li>AI相談: 選択したログ本文、相談条件</li>
+  </ul>
+  <p>
+    これらの送信には利用者ご自身のAPIキー（該当プロバイダ）を使用します。送信先各社（OpenAI / Google）におけるデータの取り扱いは、各社の利用規約・プライバシーポリシーに従います。
+    なお Gemini は有料（Paid Tier）での利用を前提としており、入力が学習に使われ得る無料枠の使用は本アプリでは推奨していません。
+  </p>
+
+  <h2>4. 開発者サーバーへ送信しない情報</h2>
+  <p>
+    本アプリは開発者の運営するサーバーを持ちません。文字起こしログ・APIキー・音声・AI回答などを開発者のサーバーへ送信することはありません。広告SDK・分析SDK・クラッシュ収集SDKも使用していません。
+  </p>
+  <p>
+    なお、アプリ内には任意のアンケート（Google フォーム）への外部リンクを設けています。回答は任意で、ボタンを押すと外部ブラウザで Google フォームが開きます。回答時に入力された内容は Google フォーム（Google LLC）に送信され、Google のポリシーに従って取り扱われます。本アンケートでは、個人を特定する情報（氏名・連絡先等）の入力は求めません。
+  </p>
+
+  <h2>5. 音声チャンクの削除方針</h2>
+  <ul>
+    <li>高精度文字起こし（録音）・ファイル取り込み使用時のみ、一時的に音声チャンクを保存します。</li>
+    <li>文字起こしに成功したチャンクは即時削除します。</li>
+    <li>失敗したチャンクは作成から48時間以内に自動削除します。</li>
+    <li>簡易文字起こし（Android音声認識）では音声ファイルを保存しません。</li>
+    <li>ファイル取り込みでは、利用者が選んだ元ファイル自体はコピー・保存しません（読み取って文字起こしし、生成した一時チャンクのみ上記方針で削除します）。</li>
+  </ul>
+
+  <h2>6. 取り扱うデータの一覧</h2>
+  <p>「送信先」は利用者が設定で選んだプロバイダ（OpenAI または Google / Gemini）です。</p>
+  <table>
+    <thead>
+      <tr><th>データ種別</th><th>端末内保存</th><th>外部送信</th><th>送信条件</th><th>削除</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>文字起こしテキスト（5分ログ／1日ログ）</td><td>あり</td><td>あり（本文）</td><td>AI相談を実行した時のみ</td><td>可</td></tr>
+      <tr><td>音声（一時チャンク／マイクまたは取り込みファイル由来）</td><td>一時的にあり</td><td>あり</td><td>高精度文字起こし・ファイル取り込み使用時のみ</td><td>可（自動削除）</td></tr>
+      <tr><td>AI回答履歴</td><td>あり</td><td>なし</td><td>—</td><td>可</td></tr>
+      <tr><td>設定情報（エンジン／モデル／語彙／概算料金／PINハッシュ）</td><td>あり</td><td>なし</td><td>—</td><td>可（アンインストール）</td></tr>
+      <tr><td>APIキー（OpenAI / Gemini）</td><td>あり（暗号化）</td><td>あり（認証ヘッダ）</td><td>該当APIへの通信時のみ</td><td>可（キー削除）</td></tr>
+    </tbody>
+  </table>
+  <p class="note">転送中の通信はすべて暗号化（HTTPS）されます。平文（HTTP）通信は行いません。</p>
+
+  <h2>7. 文字起こしログの保存・削除</h2>
+  <ul>
+    <li>5分ログはゴミ箱方式（削除 → ゴミ箱 → 完全削除）です。</li>
+    <li>1日ログアーカイブは最大365日保持し、超過分は削除されます。</li>
+    <li>利用者はアプリ内でログを削除できます。アプリをアンインストールすると端末内データは削除されます。</li>
+  </ul>
+
+  <h2>8. バックアップ機能の対象</h2>
+  <ul>
+    <li>バックアップ（JSON）には 5分ログ・1日ログ・立場・相談目的・語彙設定が含まれます。</li>
+    <li>バックアップに <strong>APIキーは含めません</strong>。</li>
+  </ul>
+
+  <h2>9. 第三者の会話・機密情報について</h2>
+  <p>
+    本アプリは会話を文字起こしし、必要に応じて外部AIへ送信します。第三者の会話、個人情報、機密情報を扱う場合は、録音・送信してよいかを利用者ご自身でご判断・ご確認ください。録音に関する法令・規則の遵守は利用者の責任となります。
+  </p>
+
+  <h2>10. ユーザーによる削除方法</h2>
+  <ul>
+    <li>アプリ内でログ・AI回答履歴・APIキーを個別に削除できます。</li>
+    <li>アプリをアンインストールすると、端末内に保存されたデータは削除されます。</li>
+    <li>送信先のAIプロバイダ（OpenAI / Google）側に送信されたデータについては、各社のポリシーに従って管理されます。</li>
+  </ul>
+
+  <h2>11. 子どもの利用について</h2>
+  <p>本アプリは子ども向けに設計されたものではありません。</p>
+
+  <h2>12. お問い合わせ</h2>
+  <p>本ポリシーや本アプリに関するお問い合わせは、以下までご連絡ください。</p>
+  <ul>
+    <li>運営者: MasaTools</li>
+    <li>連絡先: <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a></li>
+  </ul>
+
+  <h2>13. 改定</h2>
+  <p>本ポリシーは予告なく改定される場合があります。改定した場合は、本ページ冒頭の改定日を更新します。</p>
+
+  <footer>
+    AI Talk Notes — プライバシーポリシー / 最終改定日 2026年6月20日
+  </footer>
+</div>
+</body>
+</html>
