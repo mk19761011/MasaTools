@@ -1,224 +1,104 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Talk Notes | MasaTools</title>
-  <meta name="description" content="AI Talk Notesは、会話を文字起こしして必要なログだけをAIに相談できるAndroidアプリです。高精度文字起こしはご自身のOpenAI APIキーで利用できます。" />
-  <style>
-    :root {
-      --bg: #f3f7fb;
-      --bg-soft: #edf4f6;
-      --text: #1f2937;
-      --muted: #5f6f82;
-      --line: rgba(30, 41, 59, 0.12);
-      --green: #15803d;
-      --green-light: #22c55e;
-      --shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
-      --radius: 22px;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 12% 8%, rgba(34, 197, 94, 0.12), transparent 30%),
-        radial-gradient(circle at 88% 0%, rgba(20, 184, 166, 0.14), transparent 28%),
-        linear-gradient(135deg, var(--bg), var(--bg-soft));
-      min-height: 100vh;
-      line-height: 1.8;
-      font-size: 17px;
-    }
-    a { color: inherit; text-decoration: none; }
-
-    .site-header {
-      position: sticky; top: 0; z-index: 10;
-      backdrop-filter: blur(18px);
-      background: rgba(245, 248, 251, 0.82);
-      border-bottom: 1px solid var(--line);
-    }
-    .header-inner {
-      max-width: 980px; margin: 0 auto; padding: 13px 22px;
-      display: flex; align-items: center; justify-content: space-between; gap: 18px;
-    }
-    .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.02em; }
-    .logo-mark { width: 32px; height: 32px; border-radius: 11px; background: linear-gradient(135deg, #2563eb, #14b8a6); }
-    .back { color: var(--muted); font-size: 15px; display: inline-flex; align-items: center; gap: 6px; }
-    .back:hover { color: var(--green); }
-    .back svg { width: 15px; height: 15px; }
-
-    main { max-width: 980px; margin: 0 auto; padding: 44px 22px 60px; }
-
-    .hero {
-      display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-    .hero-icon {
-      width: 92px; height: 92px; border-radius: 22px; flex: 0 0 auto;
-      box-shadow: 0 14px 32px rgba(21, 128, 61, 0.22);
-    }
-    .hero-text h1 { margin: 0 0 6px; font-size: 36px; letter-spacing: -0.02em; line-height: 1.2; }
-    .hero-label {
-      display: inline-flex; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700;
-      background: rgba(34, 197, 94, 0.15); color: var(--green); margin-bottom: 10px;
-    }
-    .hero-text p { margin: 0; color: var(--muted); font-size: 17px; max-width: 620px; }
-
-    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 24px 0 8px; }
-    .button {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      min-height: 50px; padding: 0 24px; border-radius: 13px; font-weight: 700; font-size: 16px;
-      color: #fff; border: 0; background: linear-gradient(135deg, #22c55e, #15803d);
-      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
-    }
-    .button.secondary { color: var(--text); background: rgba(255,255,255,0.9); border: 1px solid var(--line); }
-    .button svg { width: 17px; height: 17px; }
-    .button:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16); opacity: 0.97; }
-    .status-note { font-size: 14px; color: var(--muted); }
-
-    section.block { margin-top: 44px; }
-    h2 { font-size: 24px; margin: 0 0 16px; letter-spacing: -0.02em; }
-
-    .grid {
-      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px;
-    }
-    .feature {
-      background: rgba(255, 255, 255, 0.82); border: 1px solid var(--line);
-      border-radius: 16px; padding: 20px 22px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
-    }
-    .feature h3 { margin: 0 0 6px; font-size: 18px; display: flex; align-items: center; gap: 9px; }
-    .feature h3 svg { width: 19px; height: 19px; color: var(--green); flex: 0 0 auto; }
-    .feature p { margin: 0; color: #475569; font-size: 15px; line-height: 1.7; }
-
-    .mode {
-      background: rgba(255, 255, 255, 0.82); border: 1px solid var(--line);
-      border-radius: 16px; padding: 20px 22px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
-    }
-    .mode .tag { display: inline-flex; padding: 3px 11px; border-radius: 999px; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
-    .mode.free .tag { background: rgba(100, 116, 139, 0.14); color: #475569; }
-    .mode.hq .tag { background: rgba(34, 197, 94, 0.15); color: var(--green); }
-    .mode h3 { margin: 0 0 6px; font-size: 18px; }
-    .mode p { margin: 0; color: #475569; font-size: 15px; line-height: 1.7; }
-
-    .note-card {
-      background: rgba(255, 255, 255, 0.82); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 22px 26px; box-shadow: var(--shadow);
-    }
-    .note-card ul { margin: 0; padding-left: 1.2em; color: #334155; }
-    .note-card li { margin: 7px 0; font-size: 15px; }
-    .note-card strong { color: var(--text); }
-
-    .footer {
-      border-top: 1px solid var(--line); padding: 24px 22px; margin-top: 52px;
-      color: var(--muted); text-align: center; font-size: 15px;
-    }
-
-    @media (max-width: 760px) {
-      .grid { grid-template-columns: 1fr; }
-      .hero-text h1 { font-size: 28px; }
-      .hero-icon { width: 76px; height: 76px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Talk Notes</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #ffffff;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { border-bottom: 2px solid #2a6df4; padding-bottom: 16px; margin-bottom: 24px; }
+  h1 { font-size: 1.8rem; margin: 0; }
+  .tag { color: #2a6df4; font-weight: 700; margin-top: 4px; }
+  p { margin: 12px 0; }
+  h2 { font-size: 1.15rem; margin: 28px 0 8px; padding-left: 10px; border-left: 4px solid #2a6df4; }
+  ul { padding-left: 1.3em; }
+  li { margin: 4px 0; }
+  .links a {
+    display: inline-block;
+    margin: 6px 12px 6px 0;
+    padding: 10px 18px;
+    background: #2a6df4;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .links a.secondary { background: transparent; color: #2a6df4; border: 1px solid #2a6df4; }
+  a { color: #2a6df4; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; color: #666; font-size: 0.88rem; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e7e7e7; background: #16181d; }
+    footer { color: #9aa0aa; }
+    h2 { border-left-color: #6ea0ff; }
+    a { color: #6ea0ff; }
+    .links a { background: #2a6df4; color: #fff; }
+    .links a.secondary { background: transparent; color: #6ea0ff; border-color: #6ea0ff; }
+  }
+</style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="logo" href="/" aria-label="MasaTools トップへ">
-        <span class="logo-mark" aria-hidden="true"></span>
-        <span>MasaTools</span>
-      </a>
-      <a class="back" href="/">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
-        ツール一覧へ戻る
-      </a>
-    </div>
+<div class="wrap">
+  <header>
+    <h1>AI Talk Notes</h1>
+    <p class="tag">会話・音声/動画ファイルを文字起こしして、必要なログだけAIに相談</p>
   </header>
 
-  <main>
-    <section class="hero">
-      <img class="hero-icon" src="assets/icon-512.png" alt="AI Talk Notes アプリアイコン" />
-      <div class="hero-text">
-        <span class="hero-label">Androidアプリ</span>
-        <h1>AI Talk Notes</h1>
-        <p>会話を文字起こしし、必要なログだけをAIに相談できるアプリ。会議・面談・打ち合わせのメモ作成や、論点整理・抜け漏れチェック・質問案出しに使えます。</p>
-      </div>
-    </section>
+  <p>
+    AI Talk Notes は、会議・面談・打ち合わせの会話を文字起こしし、必要なログだけをAIに相談できるAndroidアプリです。
+    マイク録音に加えて、端末内の音声・動画ファイル（m4a / mp3 / wav / MP4 など）からも文字起こしできます。
+  </p>
 
-    <div class="cta-row">
-      <a class="button" href="download/">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        APKをダウンロード
-      </a>
-    </div>
-    <p class="status-note">無料アプリ（広告なし・アプリ内課金なし・サブスクなし）。Android 8.0 以降対応。Google Play での公開も準備中です。</p>
+  <h2>主な機能</h2>
+  <ul>
+    <li>会話の文字起こし（音声は保存せず、テキストのみ保存）</li>
+    <li>端末内の音声/動画ファイルから文字起こし（長尺対応）</li>
+    <li>選択したログをAIに相談（議事録作成・抜け漏れチェック・質問案出しなど）</li>
+    <li>ログ検索・エクスポート・バックアップ</li>
+  </ul>
 
-    <section class="block">
-      <h2>主な機能</h2>
-      <div class="grid">
-        <div class="feature">
-          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10a7 7 0 0 1-14 0M12 17v4"/></svg>会話の文字起こし</h3>
-          <p>5分単位でテキストログを保存。音声データは保存せず、テキストだけが残ります。リアルタイムでの文字起こし表示にも対応。</p>
-        </div>
-        <div class="feature">
-          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AIへの相談</h3>
-          <p>立場や相談目的を選び、必要なログだけをAIへ。論点整理や抜け漏れチェック、質問案出しに使えます。送信前には必ず確認画面を表示します。</p>
-        </div>
-        <div class="feature">
-          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>ログ検索・履歴</h3>
-          <p>本文や日付でログを全文検索。AI回答は自動で履歴に保存され、あとから一覧・コピー・共有できます。</p>
-        </div>
-        <div class="feature">
-          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>エクスポート・バックアップ</h3>
-          <p>ログをJSONでバックアップ・復元、テキストで書き出し。画面を消灯しても文字起こしを継続するフォアグラウンド動作にも対応。</p>
-        </div>
-      </div>
-    </section>
+  <h2>料金</h2>
+  <p>
+    アプリ自体は無料です（広告・アプリ内課金・サブスクなし）。高精度文字起こしやAI相談には、利用者ご自身のAPIキー（OpenAI または Google の Gemini）が必要で、API利用料金は利用者ご自身のアカウントに発生します。
+  </p>
 
-    <section class="block">
-      <h2>2つの文字起こしモード</h2>
-      <div class="grid">
-        <div class="mode free">
-          <span class="tag">簡易・無料</span>
-          <h3>Android音声認識</h3>
-          <p>端末の音声認識を使う無料モード。手軽に使えますが、会議・面談・長い会話、複数人、遠い声では精度が下がる場合があります。</p>
-        </div>
-        <div class="mode hq">
-          <span class="tag">高精度・推奨</span>
-          <h3>OpenAI高精度文字起こし</h3>
-          <p>会議用途に強い高精度モード。ご自身のOpenAI APIキーが必要です。複数話者や部屋の反響にも簡易モードより大幅に強くなります。</p>
-        </div>
-      </div>
-    </section>
+  <h2>ダウンロード（Android）</h2>
+  <p>
+    本アプリは Google Play ではなく、このサイトから直接配布しています（無料）。下のボタンからAPKをダウンロードしてインストールしてください。
+  </p>
+  <p class="links">
+    <a href="AITalkNotes-1.0.0.apk">APKをダウンロード（v1.0.0）</a>
+  </p>
+  <p style="font-size:0.9rem;color:#666">対象: Android 8.0 以降。</p>
 
-    <section class="block">
-      <h2>料金について</h2>
-      <div class="note-card">
-        <ul>
-          <li>アプリ自体は<strong>無料</strong>です（広告なし・アプリ内課金なし・サブスクなし）。</li>
-          <li>OpenAI高精度文字起こしやAI相談を使う場合は、<strong>利用者ご自身のOpenAI APIキー</strong>が必要です。</li>
-          <li>OpenAIの利用料金は利用者ご自身のOpenAIアカウントに発生します。開発者がAPI料金を代行請求することはありません。</li>
-          <li>アプリ内に料金の安全上限（1日の送信回数・概算料金・文字起こし分数の上限）を備えています。</li>
-        </ul>
-      </div>
-    </section>
+  <h2>インストール方法</h2>
+  <ol>
+    <li>上のボタンからAPKをダウンロードします。</li>
+    <li>ダウンロードしたファイルを開きます。</li>
+    <li>初回は「不明なアプリのインストール」を求められるので、ブラウザ／ファイルアプリに対して許可します（設定 → アプリ → 特別なアプリアクセス → 不明なアプリのインストール）。</li>
+    <li>画面の案内に従ってインストールします。</li>
+  </ol>
+  <p style="font-size:0.9rem;color:#666">
+    ※Google Play を経由しないため、インストール時に警告が表示される場合があります。提供元がこのサイト（masatools.pages.dev）であることをご確認のうえお進みください。
+  </p>
 
-    <section class="block">
-      <h2>データの取り扱い</h2>
-      <div class="note-card">
-        <ul>
-          <li>APIキーは端末内に暗号化保存され、開発者サーバーには送信しません。</li>
-          <li>高精度文字起こしでは、発話を含む音声チャンクがOpenAIへ送信されます（成功後にすぐ削除）。</li>
-          <li>AI相談では、選択したログ本文がOpenAIへ送信されます。送信前には必ず確認画面を表示します。</li>
-          <li>第三者の会話・個人情報・機密情報を扱う場合は、録音・送信してよいかを利用者ご自身でご判断ください。</li>
-        </ul>
-      </div>
-    </section>
-  </main>
+  <h2>リンク</h2>
+  <p class="links">
+    <a class="secondary" href="privacy/">プライバシーポリシー</a>
+    <a class="secondary" href="mailto:masatools.info@gmail.com">お問い合わせ</a>
+  </p>
 
-  <footer class="footer">
-    <small>&copy; 2026 MasaTools. All rights reserved. &nbsp;|&nbsp; <a href="/">ツール一覧へ戻る</a></small>
+  <footer>
+    運営者: MasaTools / お問い合わせ: <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a>
   </footer>
+</div>
 </body>
 </html>
