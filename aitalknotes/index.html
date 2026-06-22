@@ -75,7 +75,8 @@
     本アプリは Google Play ではなく、このサイトから直接配布しています（無料）。下のボタンからAPKをダウンロードしてインストールしてください。
   </p>
   <p class="links">
-    <a href="AITalkNotes-1.0.0.apk">APKをダウンロード（v1.0.0）</a>
+    <a id="dlBtn" href="download/">APKをダウンロード（最新版）</a>
+    <a class="secondary" href="download/">すべてのバージョン →</a>
   </p>
   <p style="font-size:0.9rem;color:#666">対象: Android 8.0 以降。</p>
 
@@ -100,5 +101,29 @@
     運営者: MasaTools / お問い合わせ: <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a>
   </footer>
 </div>
+
+<script>
+  // ダウンロードボタンを「配布フォルダ内の最新APK」に自動で向ける。
+  // 新しいAPKを aitalknotes/download/ に置くだけで反映され、このHTMLの編集は不要。
+  // 取得できない場合は、既定のリンク（ダウンロードページ）のままにする。
+  (function(){
+    const OWNER="mk19761011", REPO="MasaTools", DIR="aitalknotes/download";
+    fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${DIR}`, { headers:{ "Accept":"application/vnd.github+json" } })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(items => {
+        const apks = items
+          .filter(f => f.type === "file" && /\.apk$/i.test(f.name))
+          .map(f => { const m = f.name.match(/(\d+)\.(\d+)\.(\d+)/); return m ? { name:f.name, ver:[+m[1],+m[2],+m[3]] } : null; })
+          .filter(Boolean)
+          .sort((a,b)=>{ for(let i=0;i<3;i++){ if(a.ver[i]!==b.ver[i]) return b.ver[i]-a.ver[i]; } return 0; });
+        if(apks.length){
+          const l = apks[0], btn = document.getElementById("dlBtn");
+          btn.href = "download/" + encodeURIComponent(l.name);
+          btn.textContent = "APKをダウンロード（v" + l.ver.join(".") + "）";
+        }
+      })
+      .catch(()=>{});
+  })();
+</script>
 </body>
 </html>
