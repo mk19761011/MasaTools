@@ -1,129 +1,138 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Talk Notes ダウンロード | MasaTools</title>
-  <meta name="description" content="AI Talk Notes（Androidアプリ）のAPKダウンロードページ。無料アプリです。インストール手順もご案内します。" />
-  <style>
-    :root {
-      --bg: #f3f7fb;
-      --bg-soft: #edf4f6;
-      --text: #1f2937;
-      --muted: #5f6f82;
-      --line: rgba(30, 41, 59, 0.12);
-      --green: #15803d;
-      --shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
-      --radius: 22px;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 12% 8%, rgba(34, 197, 94, 0.12), transparent 30%),
-        radial-gradient(circle at 88% 0%, rgba(20, 184, 166, 0.14), transparent 28%),
-        linear-gradient(135deg, var(--bg), var(--bg-soft));
-      min-height: 100vh; line-height: 1.8; font-size: 17px;
-    }
-    a { color: inherit; text-decoration: none; }
-    .site-header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(18px); background: rgba(245, 248, 251, 0.82); border-bottom: 1px solid var(--line); }
-    .header-inner { max-width: 860px; margin: 0 auto; padding: 13px 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
-    .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; }
-    .logo-mark { width: 32px; height: 32px; border-radius: 11px; background: linear-gradient(135deg, #2563eb, #14b8a6); }
-    .back { color: var(--muted); font-size: 15px; display: inline-flex; align-items: center; gap: 6px; }
-    .back:hover { color: var(--green); }
-    .back svg { width: 15px; height: 15px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ダウンロード｜AI Talk Notes</title>
+<style>
+  :root { color-scheme: light dark; --accent:#2a6df4; --bg:#ffffff; --fg:#1a1a1a; --muted:#666; --card:#f6f8fc; --border:#e2e8f5; }
+  @media (prefers-color-scheme: dark){ :root{ --bg:#16181d; --fg:#e7e7e7; --muted:#9aa0aa; --card:#1c2230; --border:#2b3343; --accent:#6ea0ff; } }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif; line-height:1.8; color:var(--fg); background:var(--bg); }
+  .wrap{ max-width:760px; margin:0 auto; padding:28px 20px 64px; }
+  header{ border-bottom:2px solid var(--accent); padding-bottom:14px; margin-bottom:24px; }
+  h1{ font-size:1.7rem; margin:0; }
+  .tag{ color:var(--accent); font-weight:700; margin-top:4px; }
+  h2{ font-size:1.1rem; margin:30px 0 10px; padding-left:10px; border-left:4px solid var(--accent); }
+  a{ color:var(--accent); }
+  .muted{ color:var(--muted); font-size:.9rem; }
 
-    main { max-width: 860px; margin: 0 auto; padding: 44px 22px 60px; }
+  /* 最新版ヒーローカード */
+  .latest{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; margin-top:8px; }
+  .latest .ver{ display:inline-block; background:var(--accent); color:#fff; font-weight:700; border-radius:999px; padding:3px 12px; font-size:.85rem; }
+  .latest .name{ font-size:1.15rem; font-weight:700; margin:10px 0 2px; word-break:break-all; }
+  .dlbtn{ display:inline-block; margin-top:14px; padding:14px 26px; background:var(--accent); color:#fff !important; border-radius:10px; text-decoration:none; font-weight:700; font-size:1.05rem; }
+  .dlbtn:active{ opacity:.85; }
 
-    .dl-head { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 28px; }
-    .dl-icon { width: 80px; height: 80px; border-radius: 20px; flex: 0 0 auto; box-shadow: 0 14px 32px rgba(21, 128, 61, 0.22); }
-    .dl-head h1 { margin: 0; font-size: 30px; letter-spacing: -0.02em; }
-    .dl-head .meta { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+  /* 一覧 */
+  ul.versions{ list-style:none; padding:0; margin:8px 0 0; }
+  ul.versions li{ display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border); border-radius:12px; margin-bottom:8px; }
+  ul.versions li .v{ font-weight:700; }
+  ul.versions li .sz{ color:var(--muted); font-size:.85rem; margin-left:auto; white-space:nowrap; }
+  ul.versions li a.get{ text-decoration:none; font-weight:700; border:1px solid var(--accent); color:var(--accent); border-radius:8px; padding:6px 14px; white-space:nowrap; }
 
-    .dl-card {
-      background: rgba(255, 255, 255, 0.86); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 26px 28px; box-shadow: var(--shadow); margin-bottom: 28px;
-    }
-    .download-button {
-      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-      min-height: 56px; padding: 0 28px; border-radius: 14px; font-weight: 700; font-size: 17px;
-      color: #fff; border: 0; background: linear-gradient(135deg, #22c55e, #15803d);
-      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
-    }
-    .download-button:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16); opacity: 0.97; }
-    .download-button svg { width: 19px; height: 19px; }
-    .file-meta { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
-
-    h2 { font-size: 22px; margin: 0 0 14px; letter-spacing: -0.02em; }
-    .steps { background: rgba(255, 255, 255, 0.82); border: 1px solid var(--line); border-radius: 16px; padding: 8px 26px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06); }
-    .steps ol { margin: 16px 0; padding-left: 1.3em; }
-    .steps li { margin: 9px 0; color: #334155; font-size: 15px; }
-
-    .note { margin-top: 24px; background: rgba(255,247,237,0.7); border: 1px solid rgba(180,83,9,0.22); border-radius: 16px; padding: 16px 22px; }
-    .note p { margin: 6px 0; font-size: 14.5px; color: #7c2d12; }
-    .note strong { color: #7c2d12; }
-
-    .footer { border-top: 1px solid var(--line); padding: 24px 22px; margin-top: 48px; color: var(--muted); text-align: center; font-size: 15px; }
-
-    @media (max-width: 640px) { .dl-head h1 { font-size: 25px; } }
-  </style>
+  ol{ padding-left:1.3em; }
+  details{ margin-top:8px; }
+  summary{ cursor:pointer; font-weight:700; }
+  .state{ padding:18px; text-align:center; color:var(--muted); }
+  footer{ margin-top:40px; padding-top:16px; border-top:1px solid var(--border); color:var(--muted); font-size:.88rem; }
+</style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="logo" href="/" aria-label="MasaTools トップへ">
-        <span class="logo-mark" aria-hidden="true"></span>
-        <span>MasaTools</span>
-      </a>
-      <a class="back" href="/aitalknotes/">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
-        AI Talk Notes の紹介へ
-      </a>
-    </div>
+<div class="wrap">
+  <header>
+    <h1>AI Talk Notes</h1>
+    <p class="tag">ダウンロード（Android）</p>
   </header>
 
-  <main>
-    <div class="dl-head">
-      <img class="dl-icon" src="../assets/icon-512.png" alt="AI Talk Notes アプリアイコン" />
-      <div>
-        <h1>AI Talk Notes ダウンロード</h1>
-        <p class="meta">Androidアプリ / 無料（広告なし・アプリ内課金なし）</p>
-      </div>
-    </div>
+  <p>
+    本アプリは Google Play ではなく、このサイトから直接配布しています（無料）。最新版をダウンロードしてインストールしてください。対象は Android 8.0 以降です。
+  </p>
 
-    <div class="dl-card">
-      <a class="download-button" href="AITalkNotes-0.3.1.apk" download>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        APKをダウンロード（v0.3.1）
-      </a>
-      <p class="file-meta">ファイル: AITalkNotes-0.3.1.apk / 約13MB / Android 8.0 以降</p>
-    </div>
+  <h2>最新版</h2>
+  <div id="latest" class="latest">
+    <div class="state" id="latestState">読み込み中…</div>
+  </div>
 
-    <section>
-      <h2>インストール手順</h2>
-      <div class="steps">
-        <ol>
-          <li>上のボタンから APK ファイルをAndroidスマートフォンへダウンロードまたはPCから転送します。</li>
-          <li>ファイルアプリなどから APK を開きます。Google Play 以外からのインストールのため、初回は「このアプリのインストールを許可」を求められます。</li>
-          <li>表示にしたがって「提供元不明のアプリ（このソースを許可）」をオンにし、インストールを進めます。</li>
-          <li>インストール後、初回起動時にマイク権限を許可すると文字起こしを開始できます。</li>
-        </ol>
-      </div>
+  <h2>インストール方法</h2>
+  <ol>
+    <li>「ダウンロード」ボタンからAPKを保存します。</li>
+    <li>ダウンロードしたファイルを開きます。</li>
+    <li>初回は「不明なアプリのインストール」を求められるので、ブラウザ／ファイルアプリに対して許可します（設定 → アプリ → 特別なアプリアクセス → 不明なアプリのインストール）。</li>
+    <li>画面の案内に従ってインストールします。</li>
+  </ol>
+  <p class="muted">※Google Play を経由しないため、インストール時に警告が表示される場合があります。提供元がこのサイト（masatools.pages.dev）であることをご確認のうえお進みください。</p>
+  <p class="muted">※すでにインストール済みの場合は、新しいバージョンを開くと上書き更新されます（旧版の削除は不要）。</p>
 
-      <div class="note">
-        <p><strong>ご利用にあたって</strong></p>
-        <p>・アプリ自体は無料です。OpenAI高精度文字起こし・AI相談を使う場合のみ、ご自身のOpenAI APIキーが必要で、API料金はご自身のOpenAIアカウントに発生します。</p>
-        <p>・旧バージョン（com.example系）を入れている場合は別アプリ扱いになります。必要なログは設定 &gt; エクスポート / バックアップ で保存してから入れ替えてください。</p>
-        <p>・第三者の会話・個人情報を扱う場合は、録音・送信してよいかをご自身でご判断ください。</p>
-      </div>
-    </section>
-  </main>
+  <details id="olderWrap" style="display:none">
+    <summary>以前のバージョン</summary>
+    <ul class="versions" id="older"></ul>
+  </details>
 
-  <footer class="footer">
-    <small>&copy; 2026 MasaTools. All rights reserved. &nbsp;|&nbsp; <a href="/aitalknotes/">AI Talk Notes の紹介へ</a> &nbsp;|&nbsp; <a href="/">ツール一覧へ戻る</a></small>
+  <p style="margin-top:24px"><a href="../">← AI Talk Notes トップへ</a></p>
+
+  <footer>
+    運営者: MasaTools / お問い合わせ: <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a> / <a href="../privacy/">プライバシーポリシー</a>
   </footer>
+</div>
+
+<script>
+  // GitHub上の配布フォルダを読み取り、APKをバージョン降順で自動表示する。
+  // 新しいAPKをこのフォルダ(aitalknotes/download/)に置く（コミットする）だけで、HTMLを編集せずに最新版が反映される。
+  // ※公開リポジトリであることが前提（GitHub Contents APIを未認証で読むため）。
+  const OWNER = "mk19761011";
+  const REPO  = "MasaTools";
+  const DIR   = "aitalknotes/download";
+  const API   = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${DIR}`;
+
+  function parseVer(name){
+    const m = name.match(/(\d+)\.(\d+)\.(\d+)/);
+    return m ? [ +m[1], +m[2], +m[3] ] : null;
+  }
+  function cmpDesc(a, b){
+    for (let i=0;i<3;i++){ if (a.ver[i] !== b.ver[i]) return b.ver[i]-a.ver[i]; }
+    return 0;
+  }
+  function mb(bytes){ return (bytes/1048576).toFixed(1) + " MB"; }
+  function verStr(v){ return v.join("."); }
+
+  async function load(){
+    try{
+      const res = await fetch(API, { headers:{ "Accept":"application/vnd.github+json" } });
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const items = await res.json();
+      const apks = items
+        .filter(f => f.type === "file" && /\.apk$/i.test(f.name))
+        .map(f => ({ name:f.name, size:f.size, ver:parseVer(f.name) }))
+        .filter(f => f.ver)
+        .sort(cmpDesc);
+      if(apks.length === 0) throw new Error("no apk");
+      render(apks);
+    }catch(e){
+      document.getElementById("latestState").innerHTML =
+        'ダウンロード一覧を取得できませんでした。<br><a href="https://github.com/'+OWNER+'/'+REPO+'/tree/main/'+DIR+'">GitHubの配布フォルダ</a>からご確認ください。';
+    }
+  }
+
+  function render(apks){
+    const latest = apks[0];
+    document.getElementById("latest").innerHTML =
+      '<span class="ver">最新版 v'+verStr(latest.ver)+'</span>' +
+      '<div class="name">'+latest.name+'</div>' +
+      '<div class="muted">'+mb(latest.size)+' ・ Android 8.0 以降</div>' +
+      '<a class="dlbtn" href="./'+encodeURIComponent(latest.name)+'">APKをダウンロード（v'+verStr(latest.ver)+'）</a>';
+
+    const older = apks.slice(1);
+    if(older.length){
+      document.getElementById("olderWrap").style.display = "";
+      document.getElementById("older").innerHTML = older.map(f =>
+        '<li><span class="v">v'+verStr(f.ver)+'</span><span class="sz">'+mb(f.size)+'</span>' +
+        '<a class="get" href="./'+encodeURIComponent(f.name)+'">取得</a></li>'
+      ).join("");
+    }
+  }
+
+  load();
+</script>
 </body>
 </html>
