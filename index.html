@@ -91,7 +91,46 @@
       padding: 40px 22px 56px;
     }
 
-    .intro { margin-bottom: 30px; }
+    .intro {
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .intro-text { flex: 1 1 360px; }
+
+    .qr-card {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .qr-card #qr {
+      width: 128px;
+      height: 128px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-card #qr img,
+    .qr-card #qr canvas {
+      display: block;
+      width: 128px !important;
+      height: 128px !important;
+    }
+    .qr-card .qr-caption {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+      text-align: center;
+    }
 
     .badge {
       display: inline-flex;
@@ -291,9 +330,15 @@
 
   <main id="top">
     <section class="intro" id="products">
-      <div class="badge">公開ツール・サービス</div>
-      <h1>公開しているツール一覧</h1>
-      <p>MasaToolsで公開しているWindowsアプリ・Webサービス・Androidアプリです。気になるものを選んでご利用ください。</p>
+      <div class="intro-text">
+        <div class="badge">公開ツール・サービス</div>
+        <h1>公開しているツール一覧</h1>
+        <p>MasaToolsで公開しているWindowsアプリ・Webサービス・Androidアプリです。気になるものを選んでご利用ください。</p>
+      </div>
+      <div class="qr-card">
+        <div id="qr" aria-label="このページのQRコード"></div>
+        <div class="qr-caption">このページのQRコード</div>
+      </div>
     </section>
 
     <div class="cards">
@@ -406,5 +451,22 @@
   <footer class="footer">
     <small>&copy; 2026 MasaTools. All rights reserved.</small>
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script>
+    (function () {
+      var el = document.getElementById('qr');
+      if (!el || typeof QRCode === 'undefined') return;
+      var url = window.location.origin + window.location.pathname;
+      new QRCode(el, {
+        text: url,
+        width: 128,
+        height: 128,
+        colorDark: '#1f2937',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    })();
+  </script>
 </body>
 </html>
