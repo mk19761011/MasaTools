@@ -101,6 +101,33 @@
     .note-card strong { color: var(--text); }
     .note-card code { background: rgba(37,99,235,0.08); border-radius: 5px; padding: 1px 6px; font-size: 14px; }
 
+    /* 情報提供のお願いセクション用 */
+    .help-card {
+      background:
+        radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.10), transparent 45%),
+        rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow);
+    }
+    .help-card .lead { margin: 0 0 18px; color: #334155; font-size: 15.5px; }
+    .help-card .lead strong { color: var(--accent-dark); }
+    .ask-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    .ask-list li {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 13px 16px; border-radius: 13px;
+      background: rgba(37, 99, 235, 0.05); border: 1px solid rgba(37, 99, 235, 0.10);
+      font-size: 15px; color: #334155;
+    }
+    .ask-list li .ask-ic {
+      flex: 0 0 auto; width: 22px; height: 22px; margin-top: 2px; color: var(--accent);
+    }
+    .ask-list li .ask-ic svg { width: 22px; height: 22px; }
+    .ask-list li b { color: var(--text); }
+    .contact-row {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 20px;
+      padding-top: 18px; border-top: 1px solid var(--line);
+    }
+
     .footer {
       border-top: 1px solid var(--line); padding: 24px 22px; margin-top: 52px;
       color: var(--muted); text-align: center; font-size: 15px;
@@ -190,12 +217,53 @@
     </section>
 
     <section class="block">
+      <h2>動作報告・情報提供のお願い</h2>
+      <div class="help-card">
+        <p class="lead">
+          現在、動作を確認できているのは<strong>大阪市立図書館のみ</strong>で、それ以外の図書館で正しく動くかどうかはまだ分かっていません。
+          もしお住まいの地域の図書館で試していただける方がいらっしゃいましたら、ぜひ下記の情報をお寄せいただけると嬉しいです。
+          いただいた内容は、対応図書館を増やしたり不具合を直したりするために活用させていただきます。
+        </p>
+        <ul class="ask-list">
+          <li>
+            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+            <span><b>図書館の所在地</b> — 都道府県・市区町村（例：兵庫県西宮市）</span>
+          </li>
+          <li>
+            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+            <span><b>図書館名</b> — 利用された図書館の名称（例：西宮市立図書館。蔵書検索・予約システムのURLが分かれば、なお助かります）</span>
+          </li>
+          <li>
+            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+            <span><b>使用の可否</b> — 情報取得や予約ができたか、それとも途中でエラーになったか</span>
+          </li>
+          <li>
+            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+            <span><b>使用した環境</b> — Windows のバージョン（10 / 11）など</span>
+          </li>
+          <li>
+            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+            <span><b>うまくいかなかった場合</b> — 表示されたエラーメッセージや、止まってしまった操作の状況。あわせて<b>ログの送付</b>もお願いできると助かります（画面上に表示された文字をコピーして貼り付けていただければ大丈夫です）</span>
+          </li>
+        </ul>
+        <div class="contact-row">
+          <!-- ↓↓ ご自身の連絡先メールアドレスに置き換えてください（例：mk@example.com） ↓↓ -->
+          <a class="button" href="mailto:your-address@example.com?subject=MultiLibLink%20%E5%8B%95%E4%BD%9C%E5%A0%B1%E5%91%8A">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            メールで動作報告を送る
+          </a>
+          <span class="status-note">件名はそのままで大丈夫です。お名前の記載は不要で、匿名でのご連絡で構いません。分かる範囲のご記入で結構です。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
       <h2>動作環境</h2>
       <div class="note-card">
         <ul>
-          <li>Windows 10 / 11 を想定しています（macOS・Linux・スマートフォンでは利用できません）。</li>
-          <li>必要なライブラリを同梱したexeとして配布予定です。別途 .NET ランタイムや Python をインストールする必要はありません。</li>
-          <li>図書館サイトの操作には Playwright Chromium を使用します。初回実行時に自動で準備され、インターネット接続が必要です。</li>
+          <li>Windows 10 / 11 を想定しています。</li>
+          <li>必要なライブラリを同梱したexeとして配布しますので、別途 .NET ランタイムや Python をインストールする必要はありません。</li>
+          <li>図書館サイトへの接続および情報の取得にはインターネット接続が必要です。</li>
         </ul>
       </div>
     </section>
