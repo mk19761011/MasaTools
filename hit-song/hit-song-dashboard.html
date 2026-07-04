@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -137,12 +137,13 @@ header {
     display: grid;
     grid-template-columns: 1fr 1fr 1.5fr;
     gap: 20px;
-    height: 300px;
+    align-items: stretch;
 }
 
 .chart-panel {
     display: flex;
     flex-direction: column;
+    min-height: 320px;
 }
 
 .chart-panel h3 {
@@ -162,8 +163,15 @@ header {
 .search-panel {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    justify-content: center;
+    gap: 16px;
+    justify-content: flex-start;
+    min-height: 320px;
+}
+
+.filter-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .search-box {
@@ -263,7 +271,23 @@ option {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
     margin-bottom: 20px;
+}
+
+.list-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.playback-action {
+    min-height: 34px;
+    padding: 7px 10px;
+    font-size: 0.86rem;
 }
 
 .count-badge {
@@ -1174,6 +1198,12 @@ tbody tr {
             <div class="list-header">
                 <h2>Song List <span class="count-badge" id="songCount">0</span><span id="filteredCount"
                         style="margin-left: 10px; font-size: 0.9rem; color: var(--text-muted);"></span></h2>
+                <div class="list-actions" aria-label="再生開始">
+                    <button class="action-btn playback-action" id="playFromTopBtn" type="button">表示順から再生</button>
+                    <button class="action-btn playback-action" id="resumePlaybackBtn" type="button">前回の続きから再生</button>
+                    <button class="action-btn playback-action" id="playRandomPositionBtn" type="button">乱数位置から再生</button>
+                    <button class="action-btn playback-action" id="shufflePlaybackBtn" type="button">ランダム再生</button>
+                </div>
             </div>
             <div class="table-wrapper">
                 <table id="dataTable">
@@ -6201,6 +6231,7 @@ const FIELD = {
 
 const DATA_STORAGE_KEY = 'hit_song_dashboard_data_v2';
 const LEGACY_EDITS_KEY = 'hit_song_edits';
+const LAST_PLAYED_STORAGE_KEY = 'hit_song_last_played_id';
 const RECOMMENDED_MARK = '◯';
 const RANK_OPTIONS = ['', 'S', 'A', 'B', 'C'];
 
@@ -6216,6 +6247,7 @@ let currentPlayingUrl = null;
 let currentSongIndex = -1;
 let currentFilteredData = [];
 let autoPlayCheckInterval = null;
+let playbackMode = 'ordered';
 
 document.addEventListener('DOMContentLoaded', () => {
     loadYouTubeApi();
@@ -6345,6 +6377,10 @@ function setupControls() {
     document.getElementById('exportExcelBtn')?.addEventListener('click', exportExcel);
     document.getElementById('exportJsonBtn')?.addEventListener('click', exportJson);
     document.getElementById('resetDataBtn')?.addEventListener('click', resetToOriginalData);
+    document.getElementById('playFromTopBtn')?.addEventListener('click', playFromDisplayedTop);
+    document.getElementById('resumePlaybackBtn')?.addEventListener('click', resumePlayback);
+    document.getElementById('playRandomPositionBtn')?.addEventListener('click', playFromRandomPosition);
+    document.getElementById('shufflePlaybackBtn')?.addEventListener('click', startShufflePlayback);
     importInput?.addEventListener('change', event => {
         const file = event.target.files?.[0];
         if (file) importSongsFromFile(file);
@@ -6916,6 +6952,18 @@ function getYouTubeID(url) {
 }
 
 function playSong(item, rowElement = null) {
+    if (!item?.[FIELD.url]) {
+        updateSaveStatus('URLがありません', 'error');
+        return;
+    }
+
+    currentSongIndex = currentFilteredData.findIndex(song => song._id === item._id);
+    try {
+        localStorage.setItem(LAST_PLAYED_STORAGE_KEY, item._id);
+    } catch (_error) {
+        // Playback should continue even if browser storage is unavailable.
+    }
+
     rowElement?.classList.add('played');
     document.querySelector(`tr[data-song-id="${escapeCssValue(item._id)}"]`)?.classList.add('played');
     openVideoModal(item[FIELD.url]);
@@ -7056,11 +7104,55 @@ function playPrevSong() {
 }
 
 function playNextSong() {
+    if (playbackMode === 'random') {
+        playRandomSong();
+        return;
+    }
     playRelativeSong(1);
 }
 
+function playFromDisplayedTop() {
+    playbackMode = 'ordered';
+    playSongAtIndex(0);
+}
+
+function resumePlayback() {
+    playbackMode = 'ordered';
+    const playlist = getPlayablePlaylist();
+    if (playlist.length === 0) {
+        updateSaveStatus('再生できる曲がありません', 'error');
+        return;
+    }
+
+    let lastPlayedId = '';
+    try {
+        lastPlayedId = localStorage.getItem(LAST_PLAYED_STORAGE_KEY) || '';
+    } catch (_error) {
+        lastPlayedId = '';
+    }
+
+    const lastIndex = playlist.findIndex(item => item._id === lastPlayedId);
+    const startIndex = lastIndex >= 0 ? (lastIndex + 1) % playlist.length : 0;
+    playSongAtIndex(startIndex, playlist);
+}
+
+function playFromRandomPosition() {
+    playbackMode = 'ordered';
+    const playlist = getPlayablePlaylist();
+    if (playlist.length === 0) {
+        updateSaveStatus('再生できる曲がありません', 'error');
+        return;
+    }
+    playSongAtIndex(Math.floor(Math.random() * playlist.length), playlist);
+}
+
+function startShufflePlayback() {
+    playbackMode = 'random';
+    playRandomSong();
+}
+
 function playRelativeSong(direction) {
-    const workingPlaylist = getWorkingPlaylist();
+    const workingPlaylist = getPlayablePlaylist();
     if (workingPlaylist.length === 0) return;
 
     let workingIndex = -1;
@@ -7078,12 +7170,25 @@ function playRelativeSong(direction) {
 }
 
 function playRandomSong() {
-    const workingPlaylist = getWorkingPlaylist().filter(item => item[FIELD.url]);
+    const workingPlaylist = getPlayablePlaylist();
     if (workingPlaylist.length === 0) return;
 
     const song = workingPlaylist[Math.floor(Math.random() * workingPlaylist.length)];
-    currentSongIndex = currentFilteredData.findIndex(item => item._id === song._id);
     playSong(song);
+}
+
+function getPlayablePlaylist() {
+    return getWorkingPlaylist().filter(item => item[FIELD.url]);
+}
+
+function playSongAtIndex(index, playlist = getPlayablePlaylist()) {
+    if (playlist.length === 0) {
+        updateSaveStatus('再生できる曲がありません', 'error');
+        return;
+    }
+
+    const normalizedIndex = ((index % playlist.length) + playlist.length) % playlist.length;
+    playSong(playlist[normalizedIndex]);
 }
 
 function startAutoPlayMonitoring() {
