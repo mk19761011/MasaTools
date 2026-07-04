@@ -47,17 +47,16 @@
     }
 
     .brand {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(220px, 330px) 1fr;
       gap: 22px;
       align-items: center;
     }
 
-    .brand-name {
-      color: #0f2f5f;
-      font-size: 34px;
-      font-weight: 800;
-      line-height: 1;
-      white-space: nowrap;
+    .brand-logo {
+      display: block;
+      width: 100%;
+      height: auto;
     }
 
     h1 {
@@ -251,8 +250,7 @@
 
     @media (max-width: 720px) {
       .brand {
-        align-items: flex-start;
-        flex-direction: column;
+        grid-template-columns: 1fr;
       }
 
       h1 {
@@ -275,7 +273,7 @@
   <header>
     <div class="wrap">
       <div class="brand">
-        <div class="brand-name" aria-label="MultiLibLink">MultiLibLink</div>
+        <img class="brand-logo" src="help_assets/MultiLibLink_header.png" alt="MultiLibLink">
         <div>
           <h1>MultiLibLink ヘルプ</h1>
           <p class="lead">図書館の貸出状況・予約状況・読書履歴を取得し、次に予約したい本を Excel で選んで予約まで支援する Windows 用ツールです。</p>
@@ -322,7 +320,7 @@
             </tr>
             <tr>
               <th>ダウンロード</th>
-              <td>配布ページは <a href="https://masatools.netlify.app/">MasaTools</a> です。最新版のインストーラーが公開されている場合は、このページから入手してください。</td>
+              <td>配布ページは <a href="https://masatools.netlify.app/">MasaTools</a> を想定しています。最新版のインストーラーがある場合は、そちらから入手してください。</td>
             </tr>
           </tbody>
         </table>
@@ -350,7 +348,7 @@
       </div>
       <p class="ok">初めて使う場合は、まず予約操作をせずに <code>今すぐ取得</code> だけを実行してください。取得が終わったら Excel を開き、予約中の本、借りている本、読書履歴が表示されていることを確認します。ここまで確認できてから、予約候補のチェックと予約実行に進むのが安全です。</p>
       <figure>
-        <img src="../help_assets/main.png" alt="実行タブの画面">
+        <img src="help_assets/main.png" alt="実行タブの画面">
         <figcaption>実行タブ。通常の流れは「今すぐ取得」で最新状態を取得し、Excel で予約候補を選び、「予約する」で実行します。</figcaption>
       </figure>
       <h3>ボタンの意味</h3>
@@ -379,14 +377,13 @@
           </tbody>
         </table>
       </div>
-      <p>通信遅延や図書館 HP の画面遷移失敗などで特定ユーザーだけ取得に失敗した場合は、そのユーザーだけを一度だけ自動で再処理します。再処理でも失敗したユーザーはその回の Excel 更新には含まれません。処理の最後には、実行ログに成功人数、失敗人数、再処理人数が要約されます。</p>
       <p>定期的に自動取得するスケジュール実行は、現在の基本機能には含めていません。取得は <code>今すぐ取得</code> で手動実行します。メール監視を有効にした場合のみ、図書館からの通知メールをきっかけに取得処理を行います。</p>
     </section>
 
     <section id="settings">
       <h2>図書館設定</h2>
       <figure>
-        <img src="../help_assets/library-setting.png" alt="図書館設定タブの画面">
+        <img src="help_assets/library-setting.png" alt="図書館設定タブの画面">
         <figcaption>図書館設定タブ。図書館プロファイル、ログイン URL、登録ユーザー、メール監視の対象を設定します。</figcaption>
       </figure>
       <ol>
@@ -404,7 +401,6 @@
       <p>取得データや設定は、通常は次のフォルダに保存されます。</p>
       <p><code>%LOCALAPPDATA%\MultiLibLink\</code></p>
       <p>エクスプローラーでは、アドレスバーに上記を貼り付けて Enter を押すと開けます。アプリの <code>データフォルダを開く</code> ボタンからも開けます。</p>
-      <p>読書履歴は <code>今すぐ取得</code> の処理単位で下へ追加されます。返却日は見比べやすいように <code>yyyy-mm-dd</code> 形式で保存します。</p>
       <div class="table-wrap">
         <table>
           <thead>
@@ -413,7 +409,7 @@
           <tbody>
             <tr><td><code>【図書館名】library_data.xlsx</code></td><td>貸出状況、予約状況、読書履歴、予約候補を保存するメインの Excel です。</td></tr>
             <tr><td><code>config.json</code></td><td>図書館設定、ユーザー設定、メール設定を保存します。</td></tr>
-            <tr><td><code>.secret_key</code></td><td>パスワード暗号化に使う鍵です。設定をバックアップする場合は、このファイルも <code>config.json</code> と一緒に保管してください。他人に渡さないでください。紛失すると、保存済みパスワードを復号できなくなる場合があります。</td></tr>
+            <tr><td><code>.secret_key</code></td><td>パスワード暗号化に使う鍵です。設定をバックアップする場合は、このファイルも一緒に保管してください。</td></tr>
             <tr><td><code>backups\</code></td><td>Excel の自動バックアップを保存します。</td></tr>
             <tr><td><code>backups\【図書館名】library_data\history_backup.jsonl</code></td><td>読書履歴を追加保存する補助ログです。通常は開く必要はありません。</td></tr>
             <tr><td><code>debug\debug.log</code></td><td>動作確認用のログです。トラブル調査で使います。</td></tr>
@@ -426,7 +422,6 @@
     <section id="candidate-generation">
       <h2>予約候補の作られ方</h2>
       <p><code>今すぐ取得</code> が終わると、予約候補シートが自動で更新されます。候補は、直近約 2 か月の読書履歴、現在借りている本、現在予約している本を組み合わせて作成します。</p>
-      <p>読書履歴だけでなく、近日返却分や予約中の一覧にだけ出ている本も候補の判断材料にします。同じシリーズと判断できる複数行は、次に予約すべき巻を決めるために最終巻の 1 行へまとめます。</p>
       <h3>基本ロジック</h3>
       <ul>
         <li>読書履歴からシリーズ名と巻数を読み取ります。</li>
@@ -443,10 +438,8 @@
       <p>タイトルには巻数、叢書名、著者名、出版社、副タイトルなどが混ざっています。MultiLibLink はこれらをできるだけ整理し、シリーズ名と巻数を抽出します。</p>
       <ul>
         <li><code>NARUTO 巻ノ70</code> のような巻表記を読み取ります。</li>
-        <li><code>VOLUME74</code>、<code>Vol.49</code>、<code>第10巻</code>、<code>22</code> などの表記も巻数として扱います。</li>
-        <li><code>アイシールド21</code> の <code>21</code> のように作品名に含まれる数字は巻数として扱わず、別に出てくる巻数だけを読み取ります。</li>
+        <li><code>VOLUME74</code>、<code>第10巻</code>、<code>22</code> などの表記も巻数として扱います。</li>
         <li>副タイトルだけで検索結果が 1 冊に絞られすぎる場合は、検索ワードから外します。</li>
-        <li><code>Cheese!フラワーコミックス</code> のように細かい叢書名で見つかりにくい場合は、<code>コミックス</code> へ軽くすることがあります。</li>
         <li>同じシリーズでも、別シリーズと判断すべきものは分けます。例として <code>ジョジョの奇妙な冒険</code> と <code>ストーンオーシャン</code> は別シリーズとして扱います。</li>
       </ul>
       <div class="table-wrap">
@@ -457,12 +450,10 @@
           <tbody>
             <tr><td>世界史探偵コナン</td><td><code>世界史探偵コナン</code> + <code>歴史まんが</code></td><td>副タイトルを入れると 1 冊に絞られすぎるため、シリーズ全体が出る語にします。</td></tr>
             <tr><td>日本史探偵コナン</td><td><code>日本史探偵コナン</code> + <code>歴史まんが</code></td><td>世界史探偵コナンと同様に、シリーズ名と叢書の語で検索します。</td></tr>
-            <tr><td>名探偵コナン VOLUME74</td><td><code>名探偵コナン VOLUME74</code></td><td>この形で 1 冊に絞り込めるため、巻数のしぼり込み操作を省けます。</td></tr>
-            <tr><td>ネコまる Vol.49</td><td><code>ネコまる Vol.50</code></td><td>雑誌系の Vol. 番号を巻数として扱い、次号の Vol. まで検索語に含めます。</td></tr>
-            <tr><td>アイシールド21 26巻</td><td><code>アイシールド21</code> + <code>ジャンプ・コミックス</code></td><td><code>21</code> は作品名の一部として扱い、後ろの数字を巻数として読み取ります。</td></tr>
+            <tr><td>名探偵コナン VOLUME74</td><td><code>名探偵コナン</code> + <code>少年サンデーコミックス</code>、しぼり込みに <code>VOLUME74</code></td><td>検索語は広めにし、巻数はしぼり込みで特定します。</td></tr>
             <tr><td>Slam dunk 完全版</td><td><code>"Slam dunk"</code> + <code>完全版 デラックス</code></td><td>空白を含む語は引用符付きで扱い、重すぎる検索を避けます。</td></tr>
-            <tr><td>うまくなろうトランペット Band journal book</td><td><code>うまくなろうトランペット</code> + <code>"Band journal book"</code></td><td>叢書名を引用符付きのひとまとまりとして検索します。</td></tr>
-            <tr><td>ぴんとこな Cheese!フラワーコミックス</td><td><code>ぴんとこな</code> + <code>コミックス</code></td><td>細かい叢書名では見つかりにくい場合があるため、検索語を軽くします。</td></tr>
+            <tr><td>うまくなろうトランペット Band journal book</td><td><code>うまくなろうトランペット</code> + <code>Band journal book</code></td><td>タイトル本体と叢書名の 2 語に分けます。</td></tr>
+            <tr><td>かみさまのベビーシッター</td><td><code>かみさまのベビーシッター</code></td><td>余分な記号や重複語を外します。</td></tr>
           </tbody>
         </table>
       </div>
@@ -472,7 +463,7 @@
     <section id="candidate-sheet">
       <h2>予約候補シート</h2>
       <figure>
-        <img src="../help_assets/excel-yoyaku.png" alt="予約候補シート">
+        <img src="help_assets/excel-yoyaku.png" alt="予約候補シート">
         <figcaption>予約候補シート。予約したいシリーズの <code>予約する</code> にチェックを入れ、必要に応じて検索ワードや予約冊数を修正します。</figcaption>
       </figure>
       <h3>主な列</h3>
@@ -488,7 +479,7 @@
             <tr><td>最終確認巻</td><td>読書履歴、貸出中、予約中から確認できた最大の巻数です。</td></tr>
             <tr><td>次に予約する巻</td><td>通常は <code>最終確認巻 + 1</code> です。予約実行ではこの巻を探します。</td></tr>
             <tr><td>検索ワード1 / 検索ワード2</td><td>図書館 HP で検索する語です。検索しにくい場合はここを手動で修正します。</td></tr>
-            <tr><td>予約冊数</td><td>通常は <code>1</code> です。2 以上は手動順番予約候補として扱い、安全のため自動検索・カート追加・申込みは行いません。</td></tr>
+            <tr><td>予約冊数</td><td>同じシリーズを複数巻まとめて予約したい場合に 2 以上を指定します。巻数の小さい順に受取順を指定します。</td></tr>
           </tbody>
         </table>
       </div>
@@ -521,7 +512,7 @@
     <section id="reservation">
       <h2>予約実行</h2>
       <figure>
-        <img src="../help_assets/yoyaku.png" alt="予約実行の確認画面">
+        <img src="help_assets/yoyaku.png" alt="予約実行の確認画面">
         <figcaption>予約実行前の確認画面。予約する本と、今回実行しない本の理由を確認してから実行します。</figcaption>
       </figure>
       <ol>
@@ -534,52 +525,34 @@
       <p>大阪市立図書館では、登録ユーザー 1 人につき予約上限を 15 件として扱います。MultiLibLink は登録ユーザー一覧の上から順に処理します。</p>
       <p>予約後に 15 件へ到達する割り当ては行わず、ひとつ手前で次のユーザーへ切り替えます。内部的には <code>15 - 現在予約数 - 1</code> を、そのユーザーで今回割り当て可能な冊数として扱います。たとえば現在 14 件のユーザーには 1 冊も追加せず、次のユーザーへ進みます。</p>
       <p><code>今すぐ取得</code> から 10 分以内に予約処理を行う場合、直前取得で得た予約数を利用し、予約 15 件のユーザーは再確認せずにスキップします。</p>
-      <h3>複数巻をまとめて予約したい場合</h3>
-      <p><code>予約冊数</code> を 2 以上にすると、確認画面では <code>手動順番予約</code> として表示します。現在の v1.0 では安全のため、複数巻候補の自動検索・カート追加・申込みは行いません。</p>
-      <p>受取順を指定して予約したい場合は、予約候補シートで対象巻を確認し、図書館 HP から手動で順番予約してください。単巻候補だけは通常どおり自動予約の対象になります。</p>
-      <h3>詳細ページで予約する場合</h3>
-      <p><code>名探偵コナン VOLUME77</code> のように検索ワードだけで 1 冊へ絞れる候補では、検索結果から書誌詳細ページへ進むことがあります。詳細ページ全体のタイトルが対象巻と一致する場合は、ページ内の <code>いますぐ予約する</code> ボタンが表示されるまで待ってから予約します。</p>
-      <p>ボタンが表示されない場合や、図書館 HP 側の読み込みが途中で止まった場合は、状態が <code>予約ボタン未検出</code> などになります。時間を置いて再実行するか、予約候補シートの検索ワードを確認してください。</p>
-      <p>予約処理が終わると、実行ログに今回予約できた本、予約できなかった本、未処理になった本が要約されます。詳しい状態は予約候補シートにも記録されます。</p>
+      <h3>複数巻をまとめて予約する場合</h3>
+      <p><code>予約冊数</code> を 2 以上にすると、次に予約する巻から連続する巻をまとめて予約します。図書館 HP のカートに追加し、巻数の小さい順に受取順を指定します。</p>
+      <p>ただし、対象巻の一部が見つからない場合や、予約枠に収まらない場合は、まとまりを分割せずに次のユーザーへ移るか、未処理として記録します。</p>
     </section>
 
     <section id="mail">
       <h2>メール監視</h2>
       <figure>
-        <img src="../help_assets/mail-setting.png" alt="メール設定タブの画面">
-        <figcaption>メール設定タブ。メールサービスで発行したアプリパスワードを使って、図書館からの通知メールを監視します。</figcaption>
+        <img src="help_assets/mail-setting.png" alt="メール設定タブの画面">
+        <figcaption>メール設定タブ。Gmail のアプリパスワードを使って、図書館からの通知メールを監視します。</figcaption>
       </figure>
       <p>メール監視は任意機能です。通常の <code>今すぐ取得</code> と <code>予約する</code> だけなら設定しなくても使えます。</p>
       <h3>何を監視するか</h3>
       <p>図書館設定で有効にした図書館について、指定した件名キーワードを含むメールを監視します。たとえば <code>予約資料がご用意できました</code> のような取置通知を検知する想定です。</p>
-      <p>件名キーワードは、図書館設定タブの <code>4. この図書館のメール監視を有効にする</code> をオンにしたうえで、<code>検知する件名</code> に入力します。現在は 1 図書館につき 1 つのキーワードを指定する方式で、複数キーワードの OR 指定には対応していません。</p>
       <h3>通知メールを検知したとき</h3>
       <ul>
         <li>設定した待機時間があれば、その分だけ待ちます。</li>
         <li>対象図書館の <code>今すぐ取得</code> 相当の処理を行い、予約状況や貸出状況を更新します。</li>
         <li>結果通知を有効にしている場合、処理結果と <code>library_data.xlsx</code> を送信先アドレスへ送ります。</li>
       </ul>
-      <p>結果通知はメール設定タブの <code>結果通知</code> で <code>メール送信有効</code> をオンにし、<code>送信先アドレス</code> を入力すると有効になります。取得処理または予約処理が終わったあとに送信します。</p>
-      <h3 id="gmail-app-password">Gmail のアプリパスワードを取得する</h3>
-      <p>Gmail を使う場合は、Google アカウントの通常のログインパスワードではなく、Google が発行する 16 桁のアプリパスワードを MultiLibLink に入力します。Google 公式ヘルプでは、アプリパスワードの作成には 2 段階認証プロセスが必要と案内されています。</p>
-      <ol>
-        <li>ブラウザで <a href="https://accounts.google.com/" target="_blank" rel="noopener">Google アカウントのログイン画面</a> を開き、MultiLibLink で使う Gmail アカウントにログインします。</li>
-        <li>ログイン後、<a href="https://myaccount.google.com/security" target="_blank" rel="noopener">Google アカウントの「セキュリティ」</a> を開きます。</li>
-        <li><code>2 段階認証プロセス</code> が未設定の場合は、画面の案内に従って有効にします。</li>
-        <li><a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">アプリ パスワード</a> を開きます。再ログインを求められる場合があります。</li>
-        <li>名前を入力できる画面では <code>MultiLibLink</code> など分かりやすい名前を入力し、作成します。</li>
-        <li>表示された 16 桁のパスワードをコピーし、MultiLibLink のメール設定タブにある <code>アプリパスワード</code> 欄へ貼り付けます。空白は入れないでください。</li>
-        <li><code>接続テスト</code> を押し、成功したら設定を保存します。</li>
-      </ol>
-      <p class="warn">Google アカウントの種類や保護設定によっては、アプリパスワードの項目が表示されない場合があります。職場・学校のアカウントでは管理者の設定が必要なことがあります。</p>
       <h3>接続テストで失敗する場合</h3>
-      <p>通常のログインパスワードではなく、利用中のメールサービスで発行したアプリパスワードを入力してください。メールアドレスに入力ミスがないか、IMAP が利用可能かも確認してください。</p>
+      <p>Gmail の通常パスワードではなく、Google アカウントで発行したアプリパスワードを入力してください。メールアドレスに <code>@gmail.com</code> のドットが抜けていないか、IMAP が利用可能かも確認してください。</p>
     </section>
 
     <section id="backup">
       <h2>バックアップと復元</h2>
       <figure>
-        <img src="../help_assets/backup.png" alt="バックアップフォルダの画面">
+        <img src="help_assets/backup.png" alt="バックアップフォルダの画面">
         <figcaption>バックアップフォルダの例。日時付きの Excel バックアップと、読書履歴の補助ログが保存されます。</figcaption>
       </figure>
       <p>MultiLibLink は、Excel を保存する前に既存の <code>library_data.xlsx</code> をバックアップします。通常画面に復元ボタンは置いていません。誤操作を防ぐため、復元が必要なときだけ手順を確認しながら手動で戻します。</p>
@@ -615,14 +588,14 @@
       <h3>検索が遅い、またはタイムアウトする</h3>
       <p>検索語が広すぎる場合や、3 語以上の検索で図書館 HP が重くなる場合があります。検索ワード1と検索ワード2の 2 語程度に整理し、巻数はしぼり込みで指定する形にしてください。</p>
       <h3>メール接続テストに失敗する</h3>
-      <p>メールアドレス、アプリパスワード、IMAP の有効化を確認してください。通常のログインパスワードではなく、メールサービスで発行したアプリパスワードが必要です。</p>
+      <p>メールアドレス、アプリパスワード、IMAP の有効化を確認してください。Gmail の場合、通常のログインパスワードではなくアプリパスワードが必要です。</p>
       <h3>図書館に接続できない</h3>
       <p>ログイン URL が正しいか確認してください。ブラウザでその URL を開き、ログイン画面が表示される URL を設定します。図書館側の画面構造が対応外の場合、接続確認や予約処理ができないことがあります。</p>
     </section>
   </main>
 
   <footer>
-    MultiLibLink Help / 更新日: 2026-06-01
+    MultiLibLink Help / 更新日: 2026-05-29
   </footer>
 </body>
 </html>
