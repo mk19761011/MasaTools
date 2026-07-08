@@ -1,6 +1,6 @@
 # 医療用語辞書ページ 公開手順
 
-このフォルダの内容は、`mk19761011/MasaTools` リポジトリのルートへ上書き配置する構成です。
+このフォルダの内容は、MasaTools（本サイト）リポジトリのルートへ上書き配置する構成です。
 
 ## 含まれるページ
 
@@ -27,7 +27,7 @@ medicaldict/download/medical_dict_android_v2026.7.5.apk
 公開前にSHA-256を確認してください。
 
 ```text
-b4b3fb68bfe70597db895c3f612caf316e8ced19adfa4b1bd1d0b73007a88463
+78e307d97aa2b7b4bd4dd48cbcfacb7d4a9bdd480bf4a499a47a3cc739a1df3d
 ```
 
 APKが未配置の間、紹介ページには「APK公開準備中」と表示されます。
