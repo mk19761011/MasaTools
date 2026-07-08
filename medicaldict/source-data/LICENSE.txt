@@ -1,0 +1,19 @@
+This software is licensed under the GNU General Public License, version 2 (GPL-2.0).
+
+Full license text:
+  https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+Japanese translation (reference):
+  https://www.ipa.go.jp/seeds/public_comment/gpl2-jp.html
+
+Base data: ORCA Medical Dictionary (Japan Medical Association)
+  https://github.com/sukuna-i/DMiME-macos
+
+Under GPL-2.0, you are free to use, modify, and redistribute this
+software, provided that:
+
+  1. Source code (including medical_dict_phase1.json) is made available.
+  2. The GPL-2.0 license notice is preserved.
+  3. Modifications are clearly documented.
+  4. Derivative works are distributed under the same GPL-2.0 license.
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
