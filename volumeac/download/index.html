@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ダウンロード｜Volume Area Controller</title>
+<style>
+  :root { color-scheme: light dark; --accent:#15803d; --bg:#ffffff; --fg:#1a1a1a; --muted:#666; --card:#f4f9f5; --border:#d3e8d8; }
+  @media (prefers-color-scheme: dark){ :root{ --bg:#16181d; --fg:#e7e7e7; --muted:#9aa0aa; --card:#1c2620; --border:#2b4433; --accent:#4ade80; } }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif; line-height:1.8; color:var(--fg); background:var(--bg); }
+  .wrap{ max-width:760px; margin:0 auto; padding:28px 20px 64px; }
+  header{ border-bottom:2px solid var(--accent); padding-bottom:14px; margin-bottom:24px; }
+  h1{ font-size:1.7rem; margin:0; }
+  .tag{ color:var(--accent); font-weight:700; margin-top:4px; }
+  h2{ font-size:1.1rem; margin:30px 0 10px; padding-left:10px; border-left:4px solid var(--accent); }
+  a{ color:var(--accent); }
+  .muted{ color:var(--muted); font-size:.9rem; }
+
+  /* 最新版ヒーローカード */
+  .latest{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; margin-top:8px; }
+  .latest .ver{ display:inline-block; background:var(--accent); color:#fff; font-weight:700; border-radius:999px; padding:3px 12px; font-size:.85rem; }
+  .latest .name{ font-size:1.15rem; font-weight:700; margin:10px 0 2px; word-break:break-all; }
+  .dlbtn{ display:inline-block; margin-top:14px; padding:14px 26px; background:var(--accent); color:#fff !important; border-radius:10px; text-decoration:none; font-weight:700; font-size:1.05rem; }
+  .dlbtn:active{ opacity:.85; }
+
+  /* 一覧 */
+  ul.versions{ list-style:none; padding:0; margin:8px 0 0; }
+  ul.versions li{ display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border); border-radius:12px; margin-bottom:8px; }
+  ul.versions li .v{ font-weight:700; }
+  ul.versions li .sz{ color:var(--muted); font-size:.85rem; margin-left:auto; white-space:nowrap; }
+  ul.versions li a.get{ text-decoration:none; font-weight:700; border:1px solid var(--accent); color:var(--accent); border-radius:8px; padding:6px 14px; white-space:nowrap; }
+
+  ol{ padding-left:1.3em; }
+  details{ margin-top:8px; }
+  summary{ cursor:pointer; font-weight:700; }
+  .state{ padding:18px; text-align:center; color:var(--muted); }
+  footer{ margin-top:40px; padding-top:16px; border-top:1px solid var(--border); color:var(--muted); font-size:.88rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Volume Area Controller</h1>
+    <p class="tag">ダウンロード（Android）</p>
+  </header>
+
+  <p>
+    本アプリは Google Play ではなく、このサイトから直接配布しています（無料）。最新版をダウンロードしてインストールしてください。対象は Android 10 以降です。
+  </p>
+
+  <h2>最新版</h2>
+  <div id="latest" class="latest">
+    <div class="state" id="latestState">読み込み中…</div>
+  </div>
+
+  <h2>インストール方法</h2>
+  <ol>
+    <li>「ダウンロード」ボタンからAPKを保存します。</li>
+    <li>ダウンロードしたファイルを開きます。</li>
+    <li>初回は「不明なアプリのインストール」を求められるので、ブラウザ／ファイルアプリに対して許可します（設定 → アプリ → 特別なアプリアクセス → 不明なアプリのインストール）。</li>
+    <li>画面の案内に従ってインストールします。</li>
+  </ol>
+  <p class="muted">※Google Play を経由しないため、インストール時に警告が表示される場合があります。提供元がこのサイト（masatools.pages.dev）であることをご確認のうえお進みください。</p>
+  <p class="muted">※すでにインストール済みの場合は、新しいバージョンを開くと上書き更新されます（旧版の削除は不要）。</p>
+
+  <details id="olderWrap" open style="display:none">
+    <summary>以前のバージョン（すべて表示）</summary>
+    <ul class="versions" id="older"></ul>
+  </details>
+
+  <p style="margin-top:24px"><a href="../">← Volume Area Controller トップへ</a></p>
+
+  <footer>
+    運営者: MasaTools / お問い合わせ: <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a> / <a href="../privacy/">プライバシーポリシー</a>
+  </footer>
+</div>
+
+<script>
+  // GitHub上の配布フォルダを読み取り、APKをバージョン降順で自動表示する。
+  // 新しいAPKをこのフォルダ(volumeac/download/)に置く（コミットする）だけで、HTMLを編集せずに最新版が反映される。
+  // ※公開リポジトリであることが前提（GitHub Contents APIを未認証で読むため）。
+  const OWNER = "mk19761011";
+  const REPO  = "MasaTools";
+  const DIR   = "volumeac/download";
+  const API   = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${DIR}`;
+
+  function parseVer(name){
+    const m = name.match(/(\d+)\.(\d+)\.(\d+)/);
+    return m ? [ +m[1], +m[2], +m[3] ] : null;
+  }
+  function cmpDesc(a, b){
+    for (let i=0;i<3;i++){ if (a.ver[i] !== b.ver[i]) return b.ver[i]-a.ver[i]; }
+    return 0;
+  }
+  function mb(bytes){ return (bytes/1048576).toFixed(1) + " MB"; }
+  function verStr(v){ return v.join("."); }
+
+  async function load(){
+    try{
+      const res = await fetch(API, { headers:{ "Accept":"application/vnd.github+json" } });
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const items = await res.json();
+      const apks = items
+        .filter(f => f.type === "file" && /\.apk$/i.test(f.name))
+        .map(f => ({ name:f.name, size:f.size, ver:parseVer(f.name) }))
+        .filter(f => f.ver)
+        .sort(cmpDesc);
+      if(apks.length === 0) throw new Error("no apk");
+      render(apks);
+    }catch(e){
+      document.getElementById("latestState").innerHTML =
+        'ダウンロード一覧を取得できませんでした。<br><a href="https://github.com/'+OWNER+'/'+REPO+'/tree/main/'+DIR+'">GitHubの配布フォルダ</a>からご確認ください。';
+    }
+  }
+
+  function render(apks){
+    const latest = apks[0];
+    document.getElementById("latest").innerHTML =
+      '<span class="ver">最新版 v'+verStr(latest.ver)+'</span>' +
+      '<div class="name">'+latest.name+'</div>' +
+      '<div class="muted">'+mb(latest.size)+' ・ Android 10 以降</div>' +
+      '<a class="dlbtn" href="./'+encodeURIComponent(latest.name)+'">APKをダウンロード（v'+verStr(latest.ver)+'）</a>';
+
+    const older = apks.slice(1);
+    if(older.length){
+      document.getElementById("olderWrap").style.display = "";
+      document.getElementById("older").innerHTML = older.map(f =>
+        '<li><span class="v">v'+verStr(f.ver)+'</span><span class="sz">'+mb(f.size)+'</span>' +
+        '<a class="get" href="./'+encodeURIComponent(f.name)+'">取得</a></li>'
+      ).join("");
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>

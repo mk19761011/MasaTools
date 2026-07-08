@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volume Area Controller</title>
+<meta name="description" content="現在地に応じて着信・通知・アラーム・メディア音量を自動で切り替えるAndroidアプリ。会社や病院では音を抑え、自宅では朝のアラームが鳴る状態に自動で戻します。無料・広告なし・APIキー不要。">
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #ffffff;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { border-bottom: 2px solid #15803d; padding-bottom: 16px; margin-bottom: 24px; }
+  h1 { font-size: 1.8rem; margin: 0; }
+  .tag { color: #15803d; font-weight: 700; margin-top: 4px; }
+  p { margin: 12px 0; }
+  h2 { font-size: 1.15rem; margin: 28px 0 8px; padding-left: 10px; border-left: 4px solid #15803d; }
+  ul, ol { padding-left: 1.3em; }
+  li { margin: 4px 0; }
+  .links a {
+    display: inline-block;
+    margin: 6px 12px 6px 0;
+    padding: 10px 18px;
+    background: #15803d;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .links a.secondary { background: transparent; color: #15803d; border: 1px solid #15803d; }
+  a { color: #15803d; }
+  .note { background: #f4f9f5; border: 1px solid #d3e8d8; border-radius: 8px; padding: 12px 16px; font-size: 0.92rem; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; color: #666; font-size: 0.88rem; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e7e7e7; background: #16181d; }
+    footer { color: #9aa0aa; }
+    h2 { border-left-color: #4ade80; }
+    a { color: #4ade80; }
+    .tag { color: #4ade80; }
+    .links a { background: #15803d; color: #fff; }
+    .links a.secondary { background: transparent; color: #4ade80; border-color: #4ade80; }
+    .note { background: #1c2620; border-color: #2b4433; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Volume Area Controller</h1>
+    <p class="tag">現在地に応じて、スマホの音量を自動で切り替える</p>
+  </header>
+
+  <p>
+    Volume Area Controller（音量エリアコントローラー）は、現在地に応じて着信音量・通知音量・アラーム音量・メディア音量を自動で切り替えるAndroidアプリです。
+    会社・病院・図書館・学校などでは音量を抑え、自宅や宿泊先では朝のアラームが鳴る状態に自動で戻します。
+  </p>
+
+  <h2>主な機能</h2>
+  <ul>
+    <li>場所（緯度・経度・半径）ごとに音量プロファイルを割り当て、入退場を自動検知して音量を適用</li>
+    <li>同じ音量プロファイルを複数の場所で使い回せる「場所ルール × 音量プロファイル」方式</li>
+    <li>未登録エリアでの動作を選べるデフォルトルール（鳴らす／鳴らさない／バイブのみ／直前維持など）</li>
+    <li>宿泊先モード・一時停止・「明朝だけアラーム」の一時例外</li>
+    <li>手で音量を変えたら同じ場所にいる間は自動で上書きしない「手動変更ガード」</li>
+    <li>場所ごとにWi-Fiを指定できる「Wi-Fi切替アシスト」（違うWi-Fi接続中なら通知でお知らせ）</li>
+    <li>移動しなくても動作確認できる「テスト入場」「テスト退場」ボタン</li>
+    <li>場所登録はOpenStreetMapの地図から。現在地取得・住所検索・地図タップ・緯度経度入力に対応</li>
+  </ul>
+
+  <h2>料金</h2>
+  <p>
+    完全無料です（広告・アプリ内課金・サブスクなし）。地図はOpenStreetMapを使用しているため、<strong>APIキーの取得や登録は一切不要</strong>で、追加費用もかかりません。
+  </p>
+
+  <h2>ダウンロード（Android）</h2>
+  <p>
+    本アプリは Google Play ではなく、このサイトから直接配布しています（無料）。下のボタンからAPKをダウンロードしてインストールしてください。
+  </p>
+  <p class="links">
+    <a id="dlBtn" href="download/">APKをダウンロード（最新版）</a>
+    <a class="secondary" href="download/">すべてのバージョン →</a>
+  </p>
+  <p style="font-size:0.9rem;color:#666">対象: Android 10 以降（ジオフェンス検知に Google Play 開発者サービスが必要です）。</p>
+
+  <h2>インストール方法</h2>
+  <ol>
+    <li>上のボタンからAPKをダウンロードします。</li>
+    <li>ダウンロードしたファイルを開きます。</li>
+    <li>初回は「不明なアプリのインストール」を求められるので、ブラウザ／ファイルアプリに対して許可します（設定 → アプリ → 特別なアプリアクセス → 不明なアプリのインストール）。</li>
+    <li>画面の案内に従ってインストールします。</li>
+  </ol>
+  <p style="font-size:0.9rem;color:#666">
+    ※Google Play を経由しないため、インストール時に警告が表示される場合があります。提供元がこのサイト（masatools.pages.dev）であることをご確認のうえお進みください。
+  </p>
+
+  <h2>必要な権限</h2>
+  <ul>
+    <li><strong>位置情報（バックグラウンド含む）</strong> — 登録した場所への入退場を検知するために使用します。</li>
+    <li><strong>通知</strong> — 音量の切り替えやWi-Fi切替アシストのお知らせに使用します。</li>
+    <li><strong>サイレントモード（Do Not Disturb）へのアクセス</strong> — 「鳴らさない」設定を確実に適用するために使用します（未許可の場合は通常の音量変更のみ行います）。</li>
+  </ul>
+  <div class="note">
+    位置情報・場所ルール・音量プロファイルなどのデータはすべて端末内にのみ保存され、外部サーバーへの送信はありません（地図表示時のOpenStreetMapタイル取得のみ通信します）。詳しくは<a href="privacy/">プライバシーポリシー</a>をご覧ください。
+  </div>
+
+  <h2>ご利用上の注意</h2>
+  <ul>
+    <li>端末やメーカーの設定によって、通知音量と着信音量が連動する場合があります。</li>
+    <li>省電力設定やメーカー独自のバックグラウンド制限により、入退場の検知が遅れることがあります。アプリ起動時・画面復帰時・約15分ごとのバックグラウンドチェックで自動補正します。</li>
+    <li>判定半径は20〜5000mの範囲で、場所の広さに合わせて調整できます（自宅は20〜50m、広い施設は300m以上が目安）。</li>
+    <li>地図タイルの表示にはネットワーク接続が必要です。登録後の入退場判定はオフラインでも動作します。</li>
+  </ul>
+
+  <h2>リンク</h2>
+  <p class="links">
+    <a class="secondary" href="privacy/">プライバシーポリシー</a>
+    <a class="secondary" href="mailto:masatools.info@gmail.com?subject=Volume%20Area%20Controller%20%E3%81%AE%E3%81%94%E6%84%8F%E8%A6%8B">お問い合わせ</a>
+  </p>
+
+  <footer>
+    運営者: MasaTools / お問い合わせ: <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a>
+  </footer>
+</div>
+
+<script>
+  // ダウンロードボタンを「配布フォルダ内の最新APK」に自動で向ける。
+  // 新しいAPKを volumeac/download/ に置くだけで反映され、このHTMLの編集は不要。
+  // 取得できない場合は、既定のリンク（ダウンロードページ）のままにする。
+  (function(){
+    const OWNER="mk19761011", REPO="MasaTools", DIR="volumeac/download";
+    fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${DIR}`, { headers:{ "Accept":"application/vnd.github+json" } })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(items => {
+        const apks = items
+          .filter(f => f.type === "file" && /\.apk$/i.test(f.name))
+          .map(f => { const m = f.name.match(/(\d+)\.(\d+)\.(\d+)/); return m ? { name:f.name, ver:[+m[1],+m[2],+m[3]] } : null; })
+          .filter(Boolean)
+          .sort((a,b)=>{ for(let i=0;i<3;i++){ if(a.ver[i]!==b.ver[i]) return b.ver[i]-a.ver[i]; } return 0; });
+        if(apks.length){
+          const l = apks[0], btn = document.getElementById("dlBtn");
+          btn.href = "download/" + encodeURIComponent(l.name);
+          btn.textContent = "APKをダウンロード（v" + l.ver.join(".") + "）";
+        }
+      })
+      .catch(()=>{});
+  })();
+</script>
+</body>
+</html>

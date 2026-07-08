@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index,follow">
+<title>プライバシーポリシー｜Volume Area Controller</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #ffffff;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 20px 64px; }
+  header { border-bottom: 2px solid #15803d; padding-bottom: 12px; margin-bottom: 24px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .app { color: #15803d; font-weight: 700; }
+  .meta { color: #666; font-size: 0.9rem; margin: 4px 0 0; }
+  h2 { font-size: 1.15rem; margin: 32px 0 8px; padding-left: 10px; border-left: 4px solid #15803d; }
+  ul { padding-left: 1.3em; }
+  li { margin: 4px 0; }
+  .note { background: #f4f9f5; border: 1px solid #d3e8d8; border-radius: 8px; padding: 12px 16px; font-size: 0.92rem; }
+  a { color: #15803d; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; color: #666; font-size: 0.88rem; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e7e7e7; background: #16181d; }
+    .meta, footer { color: #9aa0aa; }
+    h2 { border-left-color: #4ade80; }
+    .note { background: #1c2620; border-color: #2b4433; }
+    a { color: #4ade80; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>プライバシーポリシー</h1>
+    <p class="app">Volume Area Controller</p>
+    <p class="meta">最終改定日: 2026年7月8日</p>
+  </header>
+
+  <p>
+    本ポリシーは、Androidアプリ「Volume Area Controller（音量エリアコントローラー）」（以下「本アプリ」）における情報の取り扱いについて説明します。
+    本アプリは、利用者が登録した場所への入退場を検知し、端末の音量設定を自動で切り替える機能を提供します。
+  </p>
+
+  <h2>1. 取得・保存する情報</h2>
+  <p>本アプリは、利用者の操作に応じて以下の情報を<strong>端末内</strong>に保存します。</p>
+  <ul>
+    <li>場所ルール（利用者が登録した場所の名前・緯度・経度・判定半径・優先度など）</li>
+    <li>音量プロファイル（着信・通知・アラーム・メディアの音量設定）</li>
+    <li>デフォルトルール・一時例外（宿泊先モード等）の設定</li>
+    <li>Wi-Fi切替アシスト用に指定したWi-Fi名（SSID）</li>
+    <li>音量の適用履歴（最大100件）</li>
+  </ul>
+
+  <h2>2. 位置情報の利用</h2>
+  <ul>
+    <li>位置情報（バックグラウンド含む）は、登録した場所への入退場を検知するためだけに使用します。</li>
+    <li>入退場の検知には、Android のジオフェンス機能（Google Play 開発者サービス）を利用します。</li>
+    <li>位置情報の履歴を収集・蓄積したり、外部へ送信したりすることはありません。</li>
+  </ul>
+
+  <h2>3. 外部へ送信される情報</h2>
+  <ul>
+    <li>本アプリは開発者の運営するサーバーを持ちません。登録した場所・音量プロファイル・履歴などを開発者のサーバーへ送信することはありません。</li>
+    <li>広告SDK・分析SDK・クラッシュ収集SDKは使用していません。</li>
+    <li>唯一の通信は、場所の登録・編集画面で地図を表示する際の OpenStreetMap タイルサーバーからの地図画像の取得です。この際、一般的なWeb通信と同様に、IPアドレス等がタイルサーバー（OpenStreetMap Foundation）へ送られます。登録後の入退場判定はオフラインでも動作し、通信を行いません。</li>
+  </ul>
+  <p class="note">位置情報を扱うアプリであるため、Android の自動バックアップ（クラウドへのバックアップ）は無効化しています。データが端末の外へコピーされることはありません。</p>
+
+  <h2>4. 必要な権限</h2>
+  <ul>
+    <li><strong>位置情報・バックグラウンド位置情報</strong> — 場所の登録と入退場の検知に使用します。</li>
+    <li><strong>通知</strong> — 音量切り替えやWi-Fi切替アシストのお知らせに使用します。</li>
+    <li><strong>サイレントモード（Do Not Disturb）へのアクセス</strong> — 「鳴らさない」設定の適用に使用します。未許可の場合は通常の音量変更のみ行います。</li>
+  </ul>
+
+  <h2>5. ユーザーによる削除方法</h2>
+  <ul>
+    <li>場所ルール・音量プロファイル・履歴は、アプリ内で個別に削除できます。</li>
+    <li>アプリをアンインストールすると、端末内に保存されたデータはすべて削除されます。</li>
+  </ul>
+
+  <h2>6. 子どもの利用について</h2>
+  <p>本アプリは子ども向けに設計されたものではありません。</p>
+
+  <h2>7. お問い合わせ</h2>
+  <p>本ポリシーや本アプリに関するお問い合わせは、以下までご連絡ください。</p>
+  <ul>
+    <li>運営者: MasaTools</li>
+    <li>連絡先: <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a></li>
+  </ul>
+
+  <h2>8. 改定</h2>
+  <p>本ポリシーは予告なく改定される場合があります。改定した場合は、本ページ冒頭の改定日を更新します。</p>
+
+  <footer>
+    Volume Area Controller — プライバシーポリシー / 最終改定日 2026年7月8日
+  </footer>
+</div>
+</body>
+</html>

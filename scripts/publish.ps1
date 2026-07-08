@@ -59,5 +59,5 @@ Run-Git @("commit", "-m", $Message)
 Run-Git @("push", "origin", "main")
 
 Write-Host ""
-Write-Host "Published. Netlify will deploy from GitHub main automatically." -ForegroundColor Green
-Write-Host "Site: https://masatools.netlify.app/" -ForegroundColor Green
+Write-Host "Published. Cloudflare Pages will deploy from GitHub main automatically." -ForegroundColor Green
+Write-Host "Site: https://masatools.pages.dev/" -ForegroundColor Green
