@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>辞書データの出典・加工内容・ライセンス | MasaTools</title>
+  <meta name="description" content="医療用語辞書の元データ、加工内容、品質確認、ライセンスについて説明します。" />
+  <style>
+    :root{--text:#1f2937;--muted:#64748b;--line:#dbe3ea;--blue:#2563eb;--green:#15803d;--bg:#f5f8fa}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;line-height:1.85;font-size:16px}a{color:var(--blue)}
+    header{background:white;border-bottom:1px solid var(--line)}.head{max-width:860px;margin:auto;padding:15px 20px;display:flex;justify-content:space-between;gap:16px}.brand{font-weight:800;color:var(--text);text-decoration:none}
+    main{max-width:860px;margin:auto;padding:36px 20px 64px}.hero,.card{background:white;border:1px solid var(--line);border-radius:18px;padding:28px;margin-bottom:20px;box-shadow:0 12px 35px rgba(15,23,42,.06)}h1{margin:0 0 10px;font-size:32px;line-height:1.35}h2{margin:0 0 12px;font-size:23px;border-left:5px solid var(--green);padding-left:12px}h3{margin:22px 0 7px;font-size:18px}.lead{color:#475569}.tag{display:inline-block;padding:4px 10px;border-radius:999px;background:#eaf7ee;color:var(--green);font-weight:700;font-size:13px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:11px 12px;border:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f1f5f9;width:30%}.note{background:#fff8e7;border:1px solid #efd392;border-radius:13px;padding:14px 16px}.small{font-size:14px;color:var(--muted)}code{word-break:break-all}footer{text-align:center;color:var(--muted);padding:10px 20px 40px;font-size:14px}
+    @media(max-width:600px){h1{font-size:27px}.hero,.card{padding:21px}.head{align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <header><div class="head"><a class="brand" href="/">MasaTools</a><a href="../">← 医療用語辞書へ戻る</a></div></header>
+  <main>
+    <section class="hero">
+      <span class="tag">辞書データ 2026.7.5版</span>
+      <h1>辞書データの出典・加工内容・ライセンス</h1>
+      <p class="lead">本ページでは、Android・Gboard向け医療用語辞書に収録したデータの由来と、配布用データへ変換するまでに行った整理・修正内容を公開しています。</p>
+    </section>
+
+    <section class="card">
+      <h2>元データについて</h2>
+      <table>
+        <tr><th>基礎となった辞書</th><td>DMiMEおよびORCA医療辞書を基礎とした医療用語データ</td></tr>
+        <tr><th>関連プロジェクト</th><td><a href="https://www.orca.med.or.jp/" target="_blank" rel="noopener noreferrer">ORCA Project（日本医師会ORCA管理機構）</a></td></tr>
+        <tr><th>本アプリの辞書版</th><td>2026.7.5版</td></tr>
+        <tr><th>最終収録数</th><td>42,460エントリ</td></tr>
+        <tr><th>形式</th><td>Gboard単語リスト形式（よみ・単語・言語コードをタブ区切り、UTF-8）</td></tr>
+        <tr><th>ライセンス</th><td>元データの表示に基づき GNU General Public License version 2（GPL v2）として取り扱います。<br><a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank" rel="noopener noreferrer">GPL v2ライセンス本文</a></td></tr>
+      </table>
+      <p class="small">本アプリは、日本医師会、日本医師会ORCA管理機構、Google LLCの公式アプリではありません。MasaToolsによる個人開発です。</p>
+    </section>
+
+    <section class="card">
+      <h2>主な加工内容</h2>
+      <ul>
+        <li>AndroidのGboardで読み込めるZIP・タブ区切り形式へ変換しました。</li>
+        <li>同じ読みに複数の医療用語がある場合、同音異義語を失わないよう「よみ＋単語」の組み合わせで保持しました。</li>
+        <li>誤って除外されていた医療略語、検査名、腫瘍マーカー、遺伝子名、薬剤名等を復元しました。</li>
+        <li>2件のデータが1行に融合していた破損行25件を検出し、誤生成された候補を除去して正しい用語を復元しました。</li>
+        <li>Ubuntuコードネーム等、明確な非医療語6件を除外しました。</li>
+        <li>出典や用途を確認できなかった候補、読みと単語の対応が確認できなかった候補は正式版から保留・除外しました。</li>
+        <li>制御文字1件を除去し、アクセント記号やハイフンを含む正式表記を可能な範囲で復元しました。</li>
+        <li>完全重複、列異常、空欄、制御文字が残っていないことを自動検証しました。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>監査結果</h2>
+      <div class="table-wrap">
+        <table>
+          <tr><th>修正前</th><td>42,190件</td></tr>
+          <tr><th>追加・復元</th><td>299件</td></tr>
+          <tr><th>削除・置換</th><td>29件</td></tr>
+          <tr><th>正式版</th><td><strong>42,460件</strong></td></tr>
+          <tr><th>監査式</th><td>42,190 + 299 − 29 = 42,460</td></tr>
+          <tr><th>完全重複</th><td>0件</td></tr>
+          <tr><th>列異常</th><td>0件</td></tr>
+          <tr><th>制御文字</th><td>0件</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>利用上の注意</h2>
+      <div class="note">
+        <p>この辞書は入力を補助するためのものです。医学的な正確性、診断、処方、指示内容を保証するものではありません。患者名・薬剤名・用量・単位・左右・日時などは、送信前に必ず利用者自身で確認してください。</p>
+      </div>
+      <p>また、Gboard側の登録上限や端末環境により、42,460件すべてが登録されない場合があります。実機テストでは39,358件が登録された例を確認しています。</p>
+    </section>
+
+    <section class="card">
+      <h2>再配布・改変について</h2>
+      <p>辞書データの利用・改変・再配布を行う場合は、元データに適用されるGPL v2の条件と、各配布物に含まれる著作権・ライセンス表示をご確認ください。</p>
+      <p>アプリの画面、説明文、ロゴ等は、辞書データとは別の著作物です。辞書データのライセンスが、それらすべてへ自動的に適用されることを意味するものではありません。</p>
+      <p class="small">ライセンス表記や元データに関する誤りを見つけた場合は、<a href="mailto:masatools.info@gmail.com?subject=%E5%8C%BB%E7%99%82%E7%94%A8%E8%AA%9E%E8%BE%9E%E6%9B%B8%E3%81%AE%E5%87%BA%E5%85%B8%E3%83%BB%E3%83%A9%E3%82%A4%E3%82%BB%E3%83%B3%E3%82%B9">masatools.info@gmail.com</a>までお知らせください。</p>
+    </section>
+  </main>
+  <footer>&copy; 2026 MasaTools</footer>
+</body>
+</html>
