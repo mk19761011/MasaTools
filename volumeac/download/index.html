@@ -10,6 +10,10 @@
   *{ box-sizing:border-box; }
   body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif; line-height:1.8; color:var(--fg); background:var(--bg); }
   .wrap{ max-width:760px; margin:0 auto; padding:28px 20px 64px; }
+  .mt-bar{ position:sticky; top:0; z-index:10; background:var(--bg); opacity:.97; border-bottom:1px solid var(--border); }
+  .mt-bar-inner{ max-width:760px; margin:0 auto; padding:12px 20px; }
+  .mt-logo{ display:inline-flex; align-items:center; gap:9px; font-weight:800; color:var(--fg); text-decoration:none; font-size:15px; }
+  .mt-logo-mark{ width:26px; height:26px; border-radius:9px; background:linear-gradient(135deg,#2563eb,#14b8a6); flex:0 0 auto; }
   header{ border-bottom:2px solid var(--accent); padding-bottom:14px; margin-bottom:24px; }
   h1{ font-size:1.7rem; margin:0; }
   .tag{ color:var(--accent); font-weight:700; margin-top:4px; }
@@ -39,6 +43,7 @@
 </style>
 </head>
 <body>
+<div class="mt-bar"><div class="mt-bar-inner"><a class="mt-logo" href="/"><span class="mt-logo-mark" aria-hidden="true"></span>MasaTools</a></div></div>
 <div class="wrap">
   <header>
     <h1>Volume Area Controller</h1>
