@@ -1,0 +1,20 @@
+{
+  "appName": "ヒット曲ダッシュボード",
+  "canonicalPath": "/hit-song/hit-song-dashboard",
+  "entryFile": "/hit-song/hit-song-dashboard.html",
+  "compatiblePaths": [
+    "/hit-song-dashboard",
+    "/hit-song-dashboard/",
+    "/hit-song-dashboard.html",
+    "/hit-song/hit-song-dashboard/",
+    "/hit-song/hit-song-dashboard.html"
+  ],
+  "hostPolicy": "Do not hard-code the hosting origin. Use relative links, or build absolute URLs from location.origin at runtime.",
+  "topCard": {
+    "label": "Webダッシュボード",
+    "title": "ヒット曲ダッシュボード",
+    "description": "ヒット曲リストを検索、評価、再生できる個人用ダッシュボード。おすすめ、ヒット度、評価を整理しながら、YouTube再生にも使えます。",
+    "href": "/hit-song/hit-song-dashboard",
+    "buttonText": "ダッシュボードを開く"
+  }
+}

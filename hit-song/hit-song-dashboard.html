@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>最強ヒット曲ダッシュボード</title>
+    <link rel="canonical" href="/hit-song/hit-song-dashboard">
     <style>
 :root {
     --bg-dark: #0f172a;
@@ -130,6 +131,46 @@ header {
     border-color: var(--accent);
     background: rgba(56, 189, 248, 0.1);
     color: var(--accent);
+}
+
+.startup-message {
+    max-width: 760px;
+    margin: 20px auto 0;
+    padding: 18px 20px;
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    border-radius: 8px;
+    background: rgba(127, 29, 29, 0.35);
+    color: var(--text-main);
+    line-height: 1.7;
+}
+
+.startup-message.hidden,
+.startup-message[hidden] {
+    display: none;
+}
+
+.startup-message h2 {
+    margin-bottom: 8px;
+    font-size: 1.15rem;
+}
+
+.startup-message p {
+    margin-bottom: 10px;
+    color: var(--text-muted);
+}
+
+.startup-message a {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.startup-message pre {
+    max-height: 120px;
+    margin-top: 10px;
+    overflow: auto;
+    color: #fecaca;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 /* Dashboard Grid */
@@ -1138,6 +1179,21 @@ tbody tr {
 
 <body>
     <div class="background-glow"></div>
+
+    <noscript>
+        <div class="startup-message" role="alert">
+            <h2>JavaScript が無効です</h2>
+            <p>ヒット曲ダッシュボードは曲一覧、検索、再生操作に JavaScript を使用します。ブラウザ設定で JavaScript を有効にしてから再読み込みしてください。</p>
+            <p>正式パス: <a href="/hit-song/hit-song-dashboard">/hit-song/hit-song-dashboard</a></p>
+        </div>
+    </noscript>
+
+    <div id="startupError" class="startup-message hidden" role="alert" aria-live="assertive" hidden>
+        <h2>ダッシュボードを読み込めませんでした</h2>
+        <p>ブラウザのキャッシュ、拡張機能、または外部ライブラリの読み込み制限が原因の可能性があります。</p>
+        <p><a id="startupReloadLink" href="">このページを再読み込み</a> / <a id="startupCanonicalLink" href="/hit-song/hit-song-dashboard">正式URLを開く</a></p>
+        <pre id="startupErrorDetail"></pre>
+    </div>
 
     <div class="app-container">
         <!-- Header -->
@@ -6255,6 +6311,15 @@ const LEGACY_EDITS_KEY = 'hit_song_edits';
 const LAST_PLAYED_STORAGE_KEY = 'hit_song_last_played_id';
 const RECOMMENDED_MARK = '◯';
 const RANK_OPTIONS = ['', 'S', 'A', 'B', 'C'];
+const PUBLIC_APP_CONFIG = Object.freeze({
+    appName: '最強ヒット曲ダッシュボード',
+    canonicalPath: '/hit-song/hit-song-dashboard',
+    compatiblePaths: [
+        '/hit-song-dashboard',
+        '/hit-song-dashboard.html',
+        '/hit-song/hit-song-dashboard.html'
+    ]
+});
 
 const baseData = typeof initialData !== 'undefined'
     ? initialData
@@ -6269,13 +6334,31 @@ let currentSongIndex = -1;
 let currentFilteredData = [];
 let autoPlayCheckInterval = null;
 let playbackMode = 'ordered';
+let dashboardInitialized = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadYouTubeApi();
-    setupControls();
-    setupSearchSort();
-    setupModalEvents();
-    refreshView();
+    try {
+        configurePublicMetadata();
+        loadYouTubeApi();
+        setupControls();
+        setupSearchSort();
+        setupModalEvents();
+        refreshView();
+        dashboardInitialized = true;
+        hideStartupError();
+    } catch (error) {
+        showStartupError(error);
+    }
+});
+
+window.addEventListener('error', event => {
+    if (dashboardInitialized) return;
+    showStartupError(event.error || event.message);
+});
+
+window.addEventListener('unhandledrejection', event => {
+    if (dashboardInitialized) return;
+    showStartupError(event.reason);
 });
 
 function cloneData(data) {
@@ -6329,8 +6412,75 @@ function createNewSongId() {
     return `song-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function configurePublicMetadata() {
+    document.documentElement.dataset.publicPath = PUBLIC_APP_CONFIG.canonicalPath;
+    const canonicalHref = getPublicAppUrl(PUBLIC_APP_CONFIG.canonicalPath);
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.rel = 'canonical';
+        document.head.appendChild(canonical);
+    }
+    canonical.href = canonicalHref;
+
+    const canonicalLink = document.getElementById('startupCanonicalLink');
+    if (canonicalLink) canonicalLink.href = canonicalHref;
+}
+
+function getPublicAppUrl(path = PUBLIC_APP_CONFIG.canonicalPath) {
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    if (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null') {
+        return normalizedPath;
+    }
+    return `${window.location.origin}${normalizedPath}`;
+}
+
+function showStartupError(error) {
+    const panel = document.getElementById('startupError');
+    if (!panel) return;
+
+    console.error('Dashboard startup error:', error);
+    const reloadLink = document.getElementById('startupReloadLink');
+    const canonicalLink = document.getElementById('startupCanonicalLink');
+    const detail = document.getElementById('startupErrorDetail');
+    if (reloadLink) reloadLink.href = window.location.href;
+    if (canonicalLink) canonicalLink.href = getPublicAppUrl();
+    if (detail) {
+        detail.textContent = error instanceof Error
+            ? `${error.name}: ${error.message}`
+            : String(error || 'Unknown error');
+    }
+
+    panel.hidden = false;
+    panel.classList.remove('hidden');
+}
+
+function hideStartupError() {
+    const panel = document.getElementById('startupError');
+    if (!panel) return;
+    panel.hidden = true;
+    panel.classList.add('hidden');
+}
+
+function safeGetStorageItem(key) {
+    try {
+        return localStorage.getItem(key);
+    } catch (error) {
+        console.warn(`Browser storage could not be read for ${key}:`, error);
+        return null;
+    }
+}
+
+function safeRemoveStorageItem(key) {
+    try {
+        localStorage.removeItem(key);
+    } catch (error) {
+        console.warn(`Browser storage could not be cleared for ${key}:`, error);
+    }
+}
+
 function loadStoredSongs() {
-    const saved = localStorage.getItem(DATA_STORAGE_KEY);
+    const saved = safeGetStorageItem(DATA_STORAGE_KEY);
     if (saved) {
         try {
             const parsed = JSON.parse(saved);
@@ -6348,7 +6498,7 @@ function loadStoredSongs() {
 }
 
 function migrateLegacyEdits(data) {
-    const saved = localStorage.getItem(LEGACY_EDITS_KEY);
+    const saved = safeGetStorageItem(LEGACY_EDITS_KEY);
     if (!saved) return data;
 
     try {
@@ -6976,8 +7126,8 @@ function hasFiles(event) {
 
 function resetToOriginalData() {
     if (!confirm('初期データに戻しますか？現在の編集内容はブラウザ保存から削除されます。')) return;
-    localStorage.removeItem(DATA_STORAGE_KEY);
-    localStorage.removeItem(LEGACY_EDITS_KEY);
+    safeRemoveStorageItem(DATA_STORAGE_KEY);
+    safeRemoveStorageItem(LEGACY_EDITS_KEY);
     songsData = normalizeSongs(cloneData(originalData));
     updateSaveStatus('初期化しました', 'saved');
     refreshView();

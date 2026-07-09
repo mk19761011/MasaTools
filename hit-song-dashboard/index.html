@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="0; url=../hit-song/hit-song-dashboard">
+  <title>Opening Hit Song Dashboard</title>
+  <script>
+    (function () {
+      var target = new URL('../hit-song/hit-song-dashboard', window.location.href);
+      target.search = window.location.search;
+      target.hash = window.location.hash;
+      window.location.replace(target.href);
+    }());
+  </script>
+</head>
+<body>
+  <p><a href="../hit-song/hit-song-dashboard">Open Hit Song Dashboard</a></p>
+</body>
+</html>
