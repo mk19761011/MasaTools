@@ -1,6 +1,6 @@
 # Hit Song Dashboard public route contract.
 # Keep the app host-independent: change the hosting origin outside this file.
-/hit-song/hit-song-dashboard /hit-song/hit-song-dashboard/index.html 200
+/hit-song/hit-song-dashboard /hit-song/hit-song-dashboard/ 301
 /hit-song/hit-song-dashboard/ /hit-song/hit-song-dashboard/index.html 200
 /hit-song/hit-song-dashboard.html /hit-song/hit-song-dashboard 301
 /hit-song-dashboard /hit-song/hit-song-dashboard 301
