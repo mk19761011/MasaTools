@@ -85,12 +85,11 @@
       align-items: center;
     }
 
-    .brand-name {
-      color: #0f2f5f;
-      font-size: 34px;
-      font-weight: 800;
-      line-height: 1;
-      white-space: nowrap;
+    .brand-logo {
+      width: 108px;
+      height: 108px;
+      flex: 0 0 auto;
+      display: block;
     }
 
     h1 {
@@ -309,7 +308,7 @@
   <header>
     <div class="wrap">
       <div class="brand">
-        <div class="brand-name" aria-label="MultiLibLink">MultiLibLink</div>
+        <img class="brand-logo" src="../help_assets/icon-192.png" alt="MultiLibLink" width="108" height="108" />
         <div>
           <h1>MultiLibLink ヘルプ</h1>
           <p class="lead">図書館の貸出状況・予約状況・読書履歴を取得し、次に予約したい本を Excel で選んで予約まで支援する Windows 用ツールです。</p>
@@ -496,7 +495,7 @@
             <tr><td>アイシールド21 26巻</td><td><code>アイシールド21</code> + <code>ジャンプ・コミックス</code></td><td><code>21</code> は作品名の一部として扱い、後ろの数字を巻数として読み取ります。</td></tr>
             <tr><td>Slam dunk 完全版</td><td><code>"Slam dunk"</code> + <code>完全版 デラックス</code></td><td>空白を含む語は引用符付きで扱い、重すぎる検索を避けます。</td></tr>
             <tr><td>うまくなろうトランペット Band journal book</td><td><code>うまくなろうトランペット</code> + <code>"Band journal book"</code></td><td>叢書名を引用符付きのひとまとまりとして検索します。</td></tr>
-            <tr><td>ぴんとこな Cheese!フラワーコミックス</td><td><code>ぴんとこな</code> + <code>コミックス</code></td><td>細かい叢書名では見つかりにくい場合があるため、検索語を軽くします。</td></tr>
+            <tr><td>電車で行こう 文庫</td><td><code>電車で行こう</code> + <code>文庫</code></td><td>細かい叢書名では見つかりにくい場合があるため、検索語を軽くします。</td></tr>
           </tbody>
         </table>
       </div>
