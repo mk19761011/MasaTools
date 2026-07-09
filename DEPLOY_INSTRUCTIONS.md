@@ -27,7 +27,7 @@ medicaldict/download/medical_dict_android_v2026.7.5.apk
 公開前にSHA-256を確認してください。
 
 ```text
-78e307d97aa2b7b4bd4dd48cbcfacb7d4a9bdd480bf4a499a47a3cc739a1df3d
+6b857804cb419ebaa6171bcbac0deba05ac28260037134e44664e4b0be7954a9
 ```
 
 APKが未配置の間、紹介ページには「APK公開準備中」と表示されます。

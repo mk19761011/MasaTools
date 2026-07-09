@@ -32,6 +32,7 @@ FORBIDDEN = {
     ("14.04", "TrustyTahr"), ("1404", "14.04LTSTrustyTahr"), ("1404", "TrustyTahr"),
     ("おぞかりなーぜ", "レボフロキサシン"),
     ("Guillan-Barreしょうこうぐん", "GVHDこつずいいしょくご"),
+    ("へんかんほうこくする", "https://goo.gl/forms/HEcNmMh837sgaDsx2"),
 }
 
 

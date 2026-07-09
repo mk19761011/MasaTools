@@ -28,7 +28,7 @@
         <tr><th>基礎となった辞書</th><td>DMiMEおよびORCA医療辞書を基礎とした医療用語データ</td></tr>
         <tr><th>関連プロジェクト</th><td><a href="https://www.orca.med.or.jp/" target="_blank" rel="noopener noreferrer">ORCA Project（日本医師会ORCA管理機構）</a></td></tr>
         <tr><th>本アプリの辞書版</th><td>2026.7.5版</td></tr>
-        <tr><th>最終収録数</th><td>42,460エントリ</td></tr>
+        <tr><th>最終収録数</th><td>42,436エントリ</td></tr>
         <tr><th>形式</th><td>Gboard単語リスト形式（よみ・単語・言語コードをタブ区切り、UTF-8）</td></tr>
         <tr><th>ライセンス</th><td>元データの表示に基づき GNU General Public License version 2（GPL v2）として取り扱います。<br><a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank" rel="noopener noreferrer">GPL v2ライセンス本文</a></td></tr>
       </table>
@@ -46,6 +46,8 @@
         <li>出典や用途を確認できなかった候補、読みと単語の対応が確認できなかった候補は正式版から保留・除外しました。</li>
         <li>制御文字1件を除去し、アクセント記号やハイフンを含む正式表記を可能な範囲で復元しました。</li>
         <li>完全重複、列異常、空欄、制御文字が残っていないことを自動検証しました。</li>
+        <li>医療用語でない混入エントリ（フィードバック用フォームのURL 1件）を除外しました。</li>
+        <li>読みが単語全体に対応していない不良エントリ（読みが途中で切れている、複合語の一部しか読みがない等）23件を除外しました。これらは正しい読みで入力しても表示されず、逆に一般的な読みの候補を妨げるためです。</li>
       </ul>
     </section>
 
@@ -56,8 +58,10 @@
           <tr><th>修正前</th><td>42,190件</td></tr>
           <tr><th>追加・復元</th><td>299件</td></tr>
           <tr><th>削除・置換</th><td>29件</td></tr>
-          <tr><th>正式版</th><td><strong>42,460件</strong></td></tr>
-          <tr><th>監査式</th><td>42,190 + 299 − 29 = 42,460</td></tr>
+          <tr><th>v2026.7.5 精査版</th><td>42,460件</td></tr>
+          <tr><th>追加クリーンアップ<br>（URL 1・読み不良 23）</th><td>−24件</td></tr>
+          <tr><th>正式版</th><td><strong>42,436件</strong></td></tr>
+          <tr><th>監査式</th><td>42,190 + 299 − 29 − 24 = 42,436</td></tr>
           <tr><th>完全重複</th><td>0件</td></tr>
           <tr><th>列異常</th><td>0件</td></tr>
           <tr><th>制御文字</th><td>0件</td></tr>
@@ -70,7 +74,7 @@
       <p>GPL v2に基づき、配布物に対応するソースを公開します。以下はすべて本サイトで実際に配布しているファイルへの直接リンクです。</p>
       <div class="table-wrap">
         <table>
-          <tr><th>加工後の辞書データ<br>（ソース形式・タブ区切り）</th><td><a href="../source-data/medical_dict_cleaned_v2026.7.5.txt">medical_dict_cleaned_v2026.7.5.txt</a>（UTF-8、42,460件）</td></tr>
+          <tr><th>加工後の辞書データ<br>（ソース形式・タブ区切り）</th><td><a href="../source-data/medical_dict_cleaned_v2026.7.5.txt">medical_dict_cleaned_v2026.7.5.txt</a>（UTF-8、42,436件）</td></tr>
           <tr><th>変換スクリプト</th><td><a href="../source-data/convert_to_gboard.py">convert_to_gboard.py</a>（辞書データ→Gboard用ZIP、検証付き）</td></tr>
           <tr><th>精査・監査スクリプト</th><td><a href="../source-data/curate_dictionary.py">curate_dictionary.py</a>（破損修正・分類・自動検証）</td></tr>
           <tr><th>変更履歴（改変の記録）</th><td><a href="../source-data/CHANGELOG_DICTIONARY.md">CHANGELOG_DICTIONARY.md</a></td></tr>
@@ -87,7 +91,7 @@
       <div class="note">
         <p>この辞書は入力を補助するためのものです。医学的な正確性、診断、処方、指示内容を保証するものではありません。患者名・薬剤名・用量・単位・左右・日時などは、送信前に必ず利用者自身で確認してください。</p>
       </div>
-      <p>また、Gboard側の登録上限や端末環境により、42,460件すべてが登録されない場合があります。実機テストでは39,358件が登録された例を確認しています。</p>
+      <p>また、Gboard側の登録上限や端末環境により、42,436件すべてが登録されない場合があります。登録されない語が一定数生じることを実機で確認しています。</p>
     </section>
 
     <section class="card">
