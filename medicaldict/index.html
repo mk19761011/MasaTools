@@ -84,6 +84,33 @@
     </section>
 
     <section class="section-card">
+      <span class="eyebrow" style="background:rgba(37,99,235,.13);color:var(--blue)">Mac / iPhone向け（試験版）</span>
+      <h2 style="margin-top:12px">Mac・iPhoneでも使いたい方へ</h2>
+      <p>AndroidのGboardとは別に、<strong>macOSの「ユーザ辞書」に取り込む形式</strong>も用意しました。Macで取り込むと、<strong>iCloud経由でiPhone・iPadにも同期</strong>され、標準キーボードで医療用語が変換候補に出ます。App Storeアプリではなく辞書ファイルを取り込む方式のため、iPhone単体では取り込めませんが、<strong>Macをお持ちの方はiPhoneでも利用できます。</strong></p>
+      <div class="actions">
+        <a class="btn primary" href="download/medical_dict_apple_v2026.7.5.plist" download>ユーザ辞書ファイル（.plist）をダウンロード</a>
+      </div>
+      <h3>取り込み手順（Mac）</h3>
+      <ol>
+        <li>Macで上のファイル（<code>medical_dict_apple_v2026.7.5.plist</code>）をダウンロードします。</li>
+        <li>「システム設定」→「キーボード」→「テキスト変換（ユーザ辞書）」を開きます。</li>
+        <li>ダウンロードした .plist を一覧へドラッグ＆ドロップします。</li>
+        <li>iCloud（同じApple ID）がオンなら、iPhone・iPadの「設定 → 一般 → キーボード → ユーザ辞書」へ自動同期されます。</li>
+        <li>「よみ」を入力すると、医療用語が変換候補に表示されます。</li>
+      </ol>
+      <div class="note">
+        <strong>試験版です（動作は未検証・フィードバック募集）。</strong>
+        <ul>
+          <li>開発側にmac環境がなく、<strong>実機での動作確認ができていません。</strong>ご利用の結果を <a href="mailto:masatools.info@gmail.com?subject=Mac%2FiPhone%E7%89%88%E3%81%AE%E5%8B%95%E4%BD%9C%E5%A0%B1%E5%91%8A">メール</a> でお知らせいただけると助かります。</li>
+          <li>取り込みには<strong>Macが必要</strong>です。iPhone単体では一括取り込みができません。</li>
+          <li>iOSのユーザ辞書は登録数が多いと同期が不安定になる場合があり、<strong>約42,000語すべてが同期・表示されるとは限りません。</strong></li>
+          <li>ユーザ辞書は「よみ」で引く方式のため、<strong>同じ読みに複数の医療用語がある場合、一部しか表示されないことがあります。</strong></li>
+          <li>読みは（ほぼ）最後まで入力する必要があります。一度使った語は学習され、次回から出やすくなります。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section-card">
       <h2>バージョン情報</h2>
       <p>辞書データ版：<strong>2026.7.5</strong> ／ 収録数：<strong>42,436語</strong></p>
       <p class="meta">配布予定ファイル：medical_dict_android_v2026.7.5.apk<br>APK SHA-256：6b857804cb419ebaa6171bcbac0deba05ac28260037134e44664e4b0be7954a9</p>
