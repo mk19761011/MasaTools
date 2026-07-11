@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WinTimeLock | MasaTools</title>
+  <meta name="description" content="WinTimeLockは、Windows PCの利用時間を曜日・祝日・時間帯ごとに制限できる無料ソフトです。最新版v1.5をダウンロードできます。" />
+  <style>
+    :root {
+      --bg:#f3f7fb; --bg-soft:#edf4f6; --text:#1f2937; --muted:#5f6f82;
+      --line:rgba(30,41,59,.12); --accent:#2563eb; --accent-dark:#1d4ed8;
+      --teal:#0f766e; --shadow:0 18px 50px rgba(15,23,42,.10); --radius:22px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:var(--text);background:radial-gradient(circle at 12% 8%,rgba(37,99,235,.13),transparent 30%),radial-gradient(circle at 88% 0%,rgba(20,184,166,.14),transparent 28%),linear-gradient(135deg,var(--bg),var(--bg-soft));min-height:100vh;line-height:1.8;font-size:17px}
+    a{color:inherit;text-decoration:none}
+    .site-header{position:sticky;top:0;z-index:10;backdrop-filter:blur(18px);background:rgba(245,248,251,.86);border-bottom:1px solid var(--line)}
+    .header-inner{max-width:980px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .logo{display:inline-flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em}.logo-mark{width:32px;height:32px;border-radius:11px;background:linear-gradient(135deg,#2563eb,#14b8a6)}
+    .back{color:var(--muted);font-size:15px}.back:hover{color:var(--accent)}
+    main{max-width:980px;margin:0 auto;padding:44px 22px 60px}
+    .hero{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:20px}
+    .hero-icon{width:92px;height:92px;border-radius:22px;box-shadow:0 14px 32px rgba(37,99,235,.22)}
+    .hero-text{flex:1 1 420px}.label{display:inline-flex;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700;background:rgba(37,99,235,.12);color:var(--accent-dark);margin-bottom:10px}
+    h1{margin:0 0 8px;font-size:36px;line-height:1.2;letter-spacing:-.02em}.lead{margin:0;color:#334155;font-size:17px;max-width:720px}
+    .cta-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:24px 0 10px}
+    .button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:13px;font-weight:700;font-size:16px;color:#fff;background:linear-gradient(135deg,#2563eb,#1d4ed8);transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease}
+    .button.secondary{color:var(--text);background:rgba(255,255,255,.92);border:1px solid var(--line)}.button svg{width:17px;height:17px}.button:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(15,23,42,.16);opacity:.97}
+    .status-note{font-size:14px;color:var(--muted);margin:0}
+    section.block{margin-top:42px}h2{font-size:24px;margin:0 0 16px;letter-spacing:-.02em}
+    .shot{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.7);box-shadow:var(--shadow)}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:10px 16px;font-size:14px;color:var(--muted);border-top:1px solid var(--line)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.feature,.note-card{background:rgba(255,255,255,.84);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:0 10px 28px rgba(15,23,42,.06)}
+    .feature h3{margin:0 0 6px;font-size:18px}.feature p,.note-card p,.note-card li{color:#475569;font-size:15px}.feature p{margin:0;line-height:1.7}.note-card{border-radius:var(--radius);box-shadow:var(--shadow)}.note-card ul{margin:0;padding-left:1.2em}.note-card li{margin:7px 0}.note-card code{word-break:break-all;background:rgba(37,99,235,.08);border-radius:5px;padding:1px 6px;font-size:14px}
+    .footer{border-top:1px solid var(--line);padding:24px 22px;margin-top:52px;color:var(--muted);text-align:center;font-size:15px}
+    @media(max-width:760px){.grid{grid-template-columns:1fr}h1{font-size:28px}.hero-icon{width:76px;height:76px}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="/" aria-label="MasaTools トップへ"><span class="logo-mark" aria-hidden="true"></span><span>MasaTools</span></a>
+      <a class="back" href="/">ツール一覧へ戻る</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <img class="hero-icon" src="assets/icon.png" alt="WinTimeLock アプリアイコン" />
+      <div class="hero-text">
+        <span class="label">Windowsアプリ・無料</span>
+        <h1>WinTimeLock</h1>
+        <p class="lead">曜日・祝日・時間帯ごとにWindows PCの利用を制限できる時間管理ツールです。お子様の深夜利用防止だけでなく、自分の集中時間を守る用途にも使えます。</p>
+      </div>
+    </section>
+
+    <div class="cta-row">
+      <a class="button" href="download/WinTimeLock_Setup_v1.5.exe">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        最新版 v1.5 をダウンロード
+      </a>
+      <a class="button secondary" href="download/Readme_v1.5.txt">README</a>
+      <a class="button secondary" href="https://www.vector.co.jp/soft/winnt/util/se528180.html" target="_blank" rel="noopener noreferrer">
+        Vector公開ページ
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>
+      </a>
+    </div>
+    <p class="status-note">WinTimeLock_Setup_v1.5.exe / 34,661,799 bytes / SHA-256: <code>A70A4C6B28D32E3E4678635934CF89CD9351B4D1CA3574FC32056782F9C8E545</code></p>
+
+    <section class="block">
+      <figure class="shot">
+        <img src="assets/basic-settings.png" alt="WinTimeLock v1.5 の基本設定画面" />
+        <figcaption>v1.5では、カウントダウン秒数を1〜300秒で設定でき、制限時間内ログイン時の猶予期間も追加しました。</figcaption>
+      </figure>
+    </section>
+
+    <section class="block">
+      <h2>v1.5 の主な変更点</h2>
+      <div class="grid">
+        <div class="feature"><h3>300秒カウントダウン</h3><p>制限時間になったときの動作前カウントダウンを、従来より長い1〜300秒で設定できます。</p></div>
+        <div class="feature"><h3>ログイン時の猶予期間</h3><p>制限時間内にログインした場合だけ、通常のカウントダウン開始前に指定秒数の猶予を設けられます。</p></div>
+        <div class="feature"><h3>解除・延長の改善</h3><p>カウントダウン中に「6時間延長」や「この制限を今日だけ解除」を選べるよう改善しています。</p></div>
+        <div class="feature"><h3>監視と表示の改善</h3><p>監視安定性、解除後の再監視、祝日表示、今日の判定表示などを見直しました。</p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>ご利用前に</h2>
+      <div class="note-card">
+        <ul>
+          <li>本ソフトは強固なセキュリティ製品ではなく、家庭内での利用時間をゆるやかに管理する補助ツールです。</li>
+          <li>Windows 10 / 11 を想定しています。インストーラー形式で、Pythonなどを別途インストールする必要はありません。</li>
+          <li>既存のVectorページも引き続き参照できます。最新版の直接配布はこのMasaToolsページから行います。</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><small>&copy; 2026 MasaTools. All rights reserved. &nbsp;|&nbsp; <a href="/">ツール一覧へ戻る</a></small></footer>
+</body>
+</html>
