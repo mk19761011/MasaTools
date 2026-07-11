@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenAI APIキーの取得・設定方法｜AI Talk Notes</title>
+<style>
+  :root { color-scheme: light dark; --accent:#2a6df4; --bg:#ffffff; --fg:#1a1a1a; --muted:#666; --card:#f6f8fc; --border:#e2e8f5; --warnbg:#fdf3e7; --warnborder:#f0c896; --warnfg:#7a4a00; }
+  @media (prefers-color-scheme: dark){ :root{ --bg:#16181d; --fg:#e7e7e7; --muted:#9aa0aa; --card:#1c2230; --border:#2b3343; --accent:#6ea0ff; --warnbg:#2e2415; --warnborder:#6e5220; --warnfg:#f0c27a; } }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif; line-height:1.9; color:var(--fg); background:var(--bg); }
+  .wrap{ max-width:760px; margin:0 auto; padding:28px 20px 64px; }
+  .mt-bar{ position:sticky; top:0; z-index:10; background:var(--bg); opacity:.97; border-bottom:1px solid var(--border); }
+  .mt-bar-inner{ max-width:760px; margin:0 auto; padding:12px 20px; }
+  .mt-logo{ display:inline-flex; align-items:center; gap:9px; font-weight:800; color:var(--fg); text-decoration:none; font-size:15px; }
+  .mt-logo-mark{ width:26px; height:26px; border-radius:9px; background:linear-gradient(135deg,#2563eb,#14b8a6); flex:0 0 auto; }
+  header{ border-bottom:2px solid var(--accent); padding-bottom:14px; margin-bottom:24px; }
+  h1{ font-size:1.6rem; margin:0; }
+  .tag{ color:var(--accent); font-weight:700; margin-top:4px; }
+  h2{ font-size:1.15rem; margin:34px 0 10px; padding-left:10px; border-left:4px solid var(--accent); }
+  h3{ font-size:1.0rem; margin:22px 0 6px; }
+  a{ color:var(--accent); }
+  p{ margin:10px 0; }
+  ol, ul{ padding-left:1.4em; }
+  li{ margin:6px 0; }
+  .muted{ color:var(--muted); font-size:.9rem; }
+  code{ background:var(--card); border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:.92em; word-break:break-all; }
+
+  /* 手順ステップカード */
+  .step{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin:14px 0; }
+  .step .num{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; font-weight:800; font-size:.95rem; margin-right:10px; flex:0 0 auto; }
+  .step .head{ display:flex; align-items:center; font-weight:700; font-size:1.05rem; margin-bottom:6px; }
+  .step img{ max-width:100%; border:1px solid var(--border); border-radius:10px; margin-top:10px; }
+
+  /* 注意ボックス */
+  .warn{ background:var(--warnbg); border:1px solid var(--warnborder); color:var(--warnfg); border-radius:12px; padding:12px 16px; margin:14px 0; }
+  .warn strong{ display:block; margin-bottom:4px; }
+
+  .btnlink{ display:inline-block; margin:6px 8px 6px 0; padding:10px 18px; background:var(--accent); color:#fff !important; border-radius:8px; text-decoration:none; font-weight:600; }
+  .btnlink.secondary{ background:transparent; color:var(--accent) !important; border:1px solid var(--accent); }
+
+  table{ border-collapse:collapse; width:100%; margin:10px 0; font-size:.95rem; }
+  th, td{ border:1px solid var(--border); padding:8px 10px; text-align:left; }
+  th{ background:var(--card); }
+
+  footer{ margin-top:40px; padding-top:16px; border-top:1px solid var(--border); color:var(--muted); font-size:.88rem; }
+</style>
+</head>
+<body>
+<div class="mt-bar"><div class="mt-bar-inner"><a class="mt-logo" href="/"><span class="mt-logo-mark" aria-hidden="true"></span>MasaTools</a></div></div>
+<div class="wrap">
+  <header>
+    <h1>OpenAI APIキーの取得・設定方法</h1>
+    <p class="tag">AI Talk Notes で高精度文字起こし・AI相談を使うための準備</p>
+  </header>
+
+  <p>
+    AI Talk Notes の「高精度文字起こし」と「AI相談」には、利用者ご自身の <strong>OpenAI APIキー</strong>が必要です。
+    このページでは、OpenAIのアカウント作成からアプリへの設定までを順番に説明します。所要時間はおよそ10分です。
+  </p>
+
+  <div class="warn">
+    <strong>はじめに知っておいてほしいこと</strong>
+    <ul style="margin:4px 0">
+      <li>アプリ自体は無料ですが、<strong>API利用料金（従量課金）はご自身のOpenAIアカウントに発生</strong>します。開発者が代行請求することはありません。</li>
+      <li>目安：高精度文字起こしは約0.5〜1.0円/分、AI相談は1回あたり数円程度です（モデル・利用量・為替で変動します）。</li>
+      <li>APIキーは「パスワードと同じくらい大切なもの」です。他人と共有しないでください。</li>
+    </ul>
+  </div>
+
+  <h2>手順1：OpenAIのアカウントを作る（すでにある場合はログイン）</h2>
+  <div class="step">
+    <div class="head"><span class="num">1</span>OpenAIの開発者向けサイトにアクセス</div>
+    <p>
+      <a href="https://platform.openai.com/" target="_blank" rel="noopener">platform.openai.com</a> を開き、「Sign up（新規登録）」または「Log in（ログイン）」します。
+      GoogleアカウントやApple IDでも登録できます。
+    </p>
+    <p class="muted">※ChatGPT（chatgpt.com）のアカウントと共通ですが、サイトは別です。ChatGPT Plusに加入していてもAPI料金は別枠なのでご注意ください。</p>
+  </div>
+
+  <h2>手順2：支払い方法（残高）を設定する</h2>
+  <div class="step">
+    <div class="head"><span class="num">2</span>Billing（支払い）でクレジットを追加</div>
+    <p>
+      画面右上の歯車（Settings）→「Billing」を開き、支払い方法を登録してクレジット（前払い残高）を追加します。
+      最低5ドル程度から追加できます。まずは5〜10ドルで十分です。
+    </p>
+    <p>
+      <a class="btnlink secondary" href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener">OpenAIのBilling（支払い）ページを開く</a>
+    </p>
+    <div class="warn">
+      <strong>ここを忘れると使えません</strong>
+      残高が0のままだと、アプリから送信したときに「quota（利用枠超過）」というエラーになります。キーを作る前でも後でも構いませんが、必ず残高を設定してください。
+    </div>
+    <p class="muted">おすすめ：Billingの「Limits」で月の利用上限（Budget）を設定しておくと、使いすぎを二重に防げます（アプリ側にも1日の上限機能があります）。</p>
+  </div>
+
+  <h2>手順3：APIキーを発行する</h2>
+  <div class="step">
+    <div class="head"><span class="num">3</span>API keysページでキーを作成</div>
+    <ol>
+      <li><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">API keys のページ</a>を開きます。</li>
+      <li>「<strong>Create new secret key</strong>」を押します。</li>
+      <li>名前は自由です（例：<code>AITalkNotes</code>）。他のアプリと分けるため、専用の名前をおすすめします。</li>
+      <li>「Create secret key」を押すと、<code>sk-...</code> で始まる長い文字列が表示されます。</li>
+    </ol>
+    <div class="warn">
+      <strong>キーが表示されるのはこの1回だけです</strong>
+      画面を閉じると二度と表示されません。「Copy」ボタンでコピーして、そのままアプリに貼り付けてください。コピーし忘れた場合は、キーを削除して作り直せば大丈夫です（無料）。
+    </div>
+  </div>
+
+  <h2>手順4：AI Talk Notes にキーを設定する</h2>
+  <div class="step">
+    <div class="head"><span class="num">4</span>アプリの設定画面で貼り付け→接続テスト</div>
+    <ol>
+      <li>AI Talk Notes を開き、「設定」→「<strong>API・文字起こし設定</strong>」を開きます。</li>
+      <li>「<strong>OpenAI の設定</strong>」欄の「APIキー」に、コピーしたキー（<code>sk-...</code>）を貼り付けます。</li>
+      <li>「<strong>APIキーの接続テスト（無料）</strong>」を押して、「有効」と表示されることを確認します。</li>
+      <li>画面下の<strong>保存</strong>ボタンで保存します。</li>
+    </ol>
+    <p class="muted">
+      キーは端末内に暗号化して保存され、保存後に実物の値が画面に再表示されることはありません。キーが使われるのはOpenAIとの通信のみで、開発者のサーバーに送信されることはありません。
+    </p>
+  </div>
+
+  <h2>安全に使うためのポイント</h2>
+  <ul>
+    <li><strong>AI Talk Notes 専用のキーを作る</strong>：他のアプリと分けておくと、万一のとき影響範囲が小さくなります。</li>
+    <li><strong>OpenAI側で月間予算（Budget）を設定する</strong>：想定外の課金を防げます。</li>
+    <li><strong>キーを他人と共有しない</strong>：スクリーンショットやメモからの流出にも注意してください。</li>
+    <li><strong>不審な利用に気づいたら</strong>：OpenAIのAPI keysページでそのキーを削除（Revoke）し、新しいキーを作り直してください。</li>
+  </ul>
+
+  <h2>よくあるつまずき</h2>
+  <table>
+    <tr><th>症状</th><th>原因と対処</th></tr>
+    <tr>
+      <td>「quota（利用枠超過）」エラー</td>
+      <td>残高がありません。手順2のBillingでクレジットを追加してください。</td>
+    </tr>
+    <tr>
+      <td>「認証エラー（401）」</td>
+      <td>キーの貼り付けミス、またはキーが削除済みです。作り直して設定し直してください。</td>
+    </tr>
+    <tr>
+      <td>接続テストは通るのに送信できない</td>
+      <td>アプリの「1日の使いすぎ防止」の上限に達している可能性があります。設定で上限を確認してください。</td>
+    </tr>
+  </table>
+
+  <h2>Gemini（Google）を使う場合</h2>
+  <p>
+    AI Talk Notes は OpenAI のほかに Google の Gemini にも対応しています。
+    Gemini のAPIキーの取得方法は、Google の公式ページをご覧ください。
+  </p>
+  <p>
+    <a class="btnlink secondary" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio（Gemini APIキーの取得ページ）→</a>
+  </p>
+
+  <p style="margin-top:32px"><a href="../">← AI Talk Notes トップへ</a></p>
+
+  <footer>
+    運営者: MasaTools / お問い合わせ: <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a> / <a href="../privacy/">プライバシーポリシー</a>
+  </footer>
+</div>
+</body>
+</html>
