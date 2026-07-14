@@ -48,6 +48,10 @@
   <header>
     <h1>AI Talk Notes</h1>
     <p class="tag">会話・音声/動画ファイルを文字起こしして、必要なログだけAIに相談</p>
+    <p class="links" style="margin-top:14px">
+      <a data-apk-btn href="download/">APKをダウンロード（最新版）</a>
+      <a class="secondary" href="https://forms.gle/BfZBZ8AEzBsSgcZC9" target="_blank" rel="noopener noreferrer">匿名アンケートに答える</a>
+    </p>
   </header>
 
   <p>
@@ -78,7 +82,7 @@
     本アプリは Google Play ではなく、このサイトから直接配布しています（無料）。下のボタンからAPKをダウンロードしてインストールしてください。
   </p>
   <p class="links">
-    <a id="dlBtn" href="download/">APKをダウンロード（最新版）</a>
+    <a id="dlBtn" data-apk-btn href="download/">APKをダウンロード（最新版）</a>
     <a class="secondary" href="download/">すべてのバージョン →</a>
   </p>
   <p style="font-size:0.9rem;color:#666">対象: Android 8.0 以降。</p>
@@ -121,9 +125,11 @@
           .filter(Boolean)
           .sort((a,b)=>{ for(let i=0;i<3;i++){ if(a.ver[i]!==b.ver[i]) return b.ver[i]-a.ver[i]; } return 0; });
         if(apks.length){
-          const l = apks[0], btn = document.getElementById("dlBtn");
-          btn.href = "download/" + encodeURIComponent(l.name);
-          btn.textContent = "APKをダウンロード（v" + l.ver.join(".") + "）";
+          const l = apks[0];
+          document.querySelectorAll("[data-apk-btn]").forEach(btn => {
+            btn.href = "download/" + encodeURIComponent(l.name);
+            btn.textContent = "APKをダウンロード（v" + l.ver.join(".") + "）";
+          });
         }
       })
       .catch(()=>{});
