@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Volume Area Controller</title>
 <meta name="description" content="現在地に応じて着信・通知・アラーム・メディア音量を自動で切り替えるAndroidアプリ。会社や病院では音を抑え、自宅では朝のアラームが鳴る状態に戻すなど、お好みの設定が可能です。無料・広告なし。">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 <style>
   :root { color-scheme: light; }
   * { box-sizing: border-box; }
@@ -21,7 +23,8 @@
   .mt-logo { display: inline-flex; align-items: center; gap: 9px; font-weight: 800; color: #1a1a1a; text-decoration: none; font-size: 15px; }
   .mt-logo-mark { width: 26px; height: 26px; border-radius: 9px; background: linear-gradient(135deg,#2563eb,#14b8a6); flex: 0 0 auto; }
   .mt-back { color: #15803d; text-decoration: none; font-size: 14px; white-space: nowrap; }
-  header { border-bottom: 2px solid #15803d; padding-bottom: 16px; margin-bottom: 24px; }
+  header { border-bottom: 2px solid #15803d; padding-bottom: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+  .app-icon { width: 68px; height: 68px; flex: 0 0 auto; border-radius: 16px; box-shadow: 0 8px 20px rgba(15,23,42,.18); }
   h1 { font-size: 1.8rem; margin: 0; }
   .tag { color: #15803d; font-weight: 700; margin-top: 4px; }
   p { margin: 12px 0; }
@@ -48,8 +51,11 @@
 <div class="mt-bar"><div class="mt-bar-inner"><a class="mt-logo" href="/"><span class="mt-logo-mark" aria-hidden="true"></span>MasaTools</a><a class="mt-back" href="/">← ツール一覧へ戻る</a></div></div>
 <div class="wrap">
   <header>
-    <h1>Volume Area Controller</h1>
-    <p class="tag">現在地に応じて、スマホの音量を自動で切り替える</p>
+    <img class="app-icon" src="icon.svg" alt="Volume Area Controller アイコン" width="68" height="68">
+    <div>
+      <h1>Volume Area Controller</h1>
+      <p class="tag">現在地に応じて、スマホの音量を自動で切り替える</p>
+    </div>
   </header>
 
   <p>
