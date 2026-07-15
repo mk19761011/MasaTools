@@ -9,17 +9,22 @@
     :root{--bg:#f4f8f5;--text:#1f2937;--muted:#5f6f82;--line:rgba(30,41,59,.12);--green:#15803d;--green2:#22c55e;--blue:#2563eb;--warn:#92400e;--shadow:0 18px 50px rgba(15,23,42,.10);--radius:22px}
     *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;color:var(--text);line-height:1.8;background:radial-gradient(circle at 90% 0,rgba(34,197,94,.16),transparent 30%),linear-gradient(145deg,#f5faf7,#eef5f8);font-size:17px}
     a{color:var(--blue)}.header{position:sticky;top:0;z-index:10;background:rgba(248,251,249,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}.header-inner{max-width:980px;margin:auto;padding:13px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{color:var(--text);text-decoration:none;font-weight:800}.back{font-size:14px;text-decoration:none}
-    main{max-width:980px;margin:auto;padding:42px 20px 64px}.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:24px;align-items:stretch}.panel{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px}.eyebrow{display:inline-flex;padding:5px 12px;border-radius:999px;background:rgba(34,197,94,.13);color:var(--green);font-weight:700;font-size:14px}h1{font-size:36px;line-height:1.28;margin:14px 0 12px;letter-spacing:-.03em}.lead{font-size:18px;color:#334155;margin:0}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}.stat{padding:18px;border-radius:16px;background:#f7faf8;border:1px solid var(--line)}.stat strong{display:block;font-size:25px;color:var(--green)}.stat span{font-size:13px;color:var(--muted)}
+    html{scroll-behavior:smooth}main{max-width:980px;margin:auto;padding:42px 20px 64px}.jump-nav{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px}.jump-nav a{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.88);border:1px solid rgba(37,99,235,.22);box-shadow:0 8px 22px rgba(15,23,42,.06);font-size:14px;font-weight:800;text-decoration:none}.jump-nav a:hover{background:#eff6ff}.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:24px;align-items:stretch}.panel{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px}.eyebrow{display:inline-flex;padding:5px 12px;border-radius:999px;background:rgba(34,197,94,.13);color:var(--green);font-weight:700;font-size:14px}h1{font-size:36px;line-height:1.28;margin:14px 0 12px;letter-spacing:-.03em}.lead{font-size:18px;color:#334155;margin:0}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}.stat{padding:18px;border-radius:16px;background:#f7faf8;border:1px solid var(--line)}.stat strong{display:block;font-size:25px;color:var(--green)}.stat span{font-size:13px;color:var(--muted)}
     .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}.btn{display:inline-flex;justify-content:center;align-items:center;min-height:50px;padding:0 22px;border-radius:13px;font-weight:800;text-decoration:none;border:0}.btn.primary{background:linear-gradient(135deg,var(--green2),var(--green));color:white}.btn.secondary{background:white;color:var(--green);border:1px solid rgba(21,128,61,.35)}.btn.disabled{background:#cbd5e1;color:#64748b;cursor:not-allowed}.status{margin:12px 0 0;font-size:14px;color:var(--muted)}
-    section{margin-top:28px}.section-card{background:rgba(255,255,255,.84);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}h2{margin:0 0 12px;font-size:26px}h3{margin:22px 0 8px;font-size:19px}ul,ol{padding-left:1.4em}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.step{padding:20px;border-radius:16px;background:#f8fafc;border:1px solid var(--line)}.step b{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:var(--green);color:white;margin-bottom:8px}.note{padding:16px 18px;border-radius:14px;background:#fff8e7;border:1px solid #f1d59c;color:#6b4b13}.ok{padding:16px 18px;border-radius:14px;background:#edf9f1;border:1px solid #b9e2c6;color:#14532d}.meta{font-size:14px;color:var(--muted)}code{word-break:break-all}
+    section{margin-top:28px;scroll-margin-top:82px}.hero{scroll-margin-top:82px}.section-card{background:rgba(255,255,255,.84);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}h2{margin:0 0 12px;font-size:26px}h3{margin:22px 0 8px;font-size:19px}ul,ol{padding-left:1.4em}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.step{padding:20px;border-radius:16px;background:#f8fafc;border:1px solid var(--line)}.step b{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:var(--green);color:white;margin-bottom:8px}.note{padding:16px 18px;border-radius:14px;background:#fff8e7;border:1px solid #f1d59c;color:#6b4b13}.ok{padding:16px 18px;border-radius:14px;background:#edf9f1;border:1px solid #b9e2c6;color:#14532d}.meta{font-size:14px;color:var(--muted)}code{word-break:break-all}
     footer{max-width:980px;margin:auto;padding:24px 20px 40px;color:var(--muted);font-size:14px;text-align:center}
-    @media(max-width:760px){.hero{grid-template-columns:1fr}.steps{grid-template-columns:1fr}h1{font-size:30px}.panel,.section-card{padding:22px}.header-inner{align-items:flex-start}}
+    @media(max-width:760px){main{padding-top:24px}.jump-nav a{flex:1 1 150px;justify-content:center}.hero{grid-template-columns:1fr}.steps{grid-template-columns:1fr}h1{font-size:30px}.panel,.section-card{padding:22px}.header-inner{align-items:flex-start}}
   </style>
 </head>
 <body>
   <header class="header"><div class="header-inner"><a class="brand" href="/">MasaTools</a><a class="back" href="/">← ツール一覧へ戻る</a></div></header>
   <main>
-    <div class="hero">
+    <nav class="jump-nav" aria-label="配布形式">
+      <a href="#android">Android向け</a>
+      <a href="#windows">Windows向け</a>
+      <a href="#apple">Mac / iPhone向け（試験版）</a>
+    </nav>
+    <div id="android" class="hero">
       <div class="panel">
         <span class="eyebrow">Androidアプリ・無料</span>
         <h1>医療用語辞書<br><small style="font-size:.55em;color:#475569">Android・Gboard向け</small></h1>
@@ -86,7 +91,7 @@
       </div>
     </section>
 
-    <section class="section-card">
+    <section id="windows" class="section-card">
       <span class="eyebrow">Windows向け</span>
       <h2 style="margin-top:12px">WindowsのMicrosoft IMEでも使えます</h2>
       <p>Windowsをお使いの方は、標準の<strong>Microsoft IME</strong>に取り込めます。取り込むと、Word・メール・ブラウザなど<strong>Windows全体の文字入力</strong>で医療用語が変換候補に出ます（Gboardのようにアプリは不要です）。</p>
@@ -110,7 +115,7 @@
       </div>
     </section>
 
-    <section class="section-card">
+    <section id="apple" class="section-card">
       <span class="eyebrow" style="background:rgba(37,99,235,.13);color:var(--blue)">Mac / iPhone向け（試験版）</span>
       <h2 style="margin-top:12px">Mac・iPhoneでも使いたい方へ</h2>
       <p>AndroidのGboardとは別に、<strong>macOSの「ユーザ辞書」に取り込む形式</strong>も用意しました。Macで取り込むと、<strong>iCloud経由でiPhone・iPadにも同期</strong>され、標準キーボードで医療用語が変換候補に出ます。App Storeアプリではなく辞書ファイルを取り込む方式のため、iPhone単体では取り込めませんが、<strong>Macをお持ちの方はiPhoneでも利用できます。</strong></p>
