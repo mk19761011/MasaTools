@@ -19,7 +19,7 @@
     <section class="hero">
       <span class="tag">辞書データ 2026.7.5版</span>
       <h1>辞書データの出典・加工内容・ライセンス</h1>
-      <p class="lead">本ページでは、Android・Gboard向け医療用語辞書に収録したデータの由来と、配布用データへ変換するまでに行った整理・修正内容を公開しています。</p>
+      <p class="lead">本ページでは、Android・Gboard、Windows Microsoft IME、Mac/iPhoneユーザ辞書向けに配布している医療用語辞書データの由来と、各形式へ変換するまでに行った整理・修正内容を公開しています。</p>
     </section>
 
     <section class="card">
@@ -27,18 +27,18 @@
       <table>
         <tr><th>基礎となった辞書</th><td>DMiMEおよびORCA医療辞書を基礎とした医療用語データ</td></tr>
         <tr><th>関連プロジェクト</th><td><a href="https://www.orca.med.or.jp/" target="_blank" rel="noopener noreferrer">ORCA Project（日本医師会ORCA管理機構）</a></td></tr>
-        <tr><th>本アプリの辞書版</th><td>2026.7.5版</td></tr>
+        <tr><th>辞書データ版</th><td>2026.7.5版</td></tr>
         <tr><th>最終収録数</th><td>42,436エントリ</td></tr>
-        <tr><th>形式</th><td>Gboard単語リスト形式（よみ・単語・言語コードをタブ区切り、UTF-8）</td></tr>
+        <tr><th>配布形式</th><td>Android/Gboard用ZIP、Windows Microsoft IME用テキスト、macOS/iOSユーザ辞書用plistへ変換して配布しています。基礎となる加工後データは、よみ・単語・品詞のタブ区切り形式（UTF-8）です。</td></tr>
         <tr><th>ライセンス</th><td>元データの表示に基づき GNU General Public License version 2（GPL v2）として取り扱います。<br><a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank" rel="noopener noreferrer">GPL v2ライセンス本文</a></td></tr>
       </table>
-      <p class="small">本アプリは、日本医師会、日本医師会ORCA管理機構、Google LLCの公式アプリではありません。MasaToolsによる個人開発です。</p>
+      <p class="small">本辞書および配布物は、日本医師会、日本医師会ORCA管理機構、Google LLC、Microsoft、Appleの公式アプリ・公式辞書ではありません。MasaToolsによる個人開発です。</p>
     </section>
 
     <section class="card">
       <h2>主な加工内容</h2>
       <ul>
-        <li>AndroidのGboardで読み込めるZIP・タブ区切り形式へ変換しました。</li>
+        <li>同じ加工後データから、AndroidのGboardで読み込めるZIP、WindowsのMicrosoft IMEで登録できるテキスト、macOS/iOSのユーザ辞書へ取り込むplistを生成しました。</li>
         <li>同じ読みに複数の医療用語がある場合、同音異義語を失わないよう「よみ＋単語」の組み合わせで保持しました。</li>
         <li>誤って除外されていた医療略語、検査名、腫瘍マーカー、遺伝子名、薬剤名等を復元しました。</li>
         <li>2件のデータが1行に融合していた破損行25件を検出し、誤生成された候補を除去して正しい用語を復元しました。</li>
@@ -84,7 +84,7 @@
           <tr><th>ライセンス</th><td><a href="../source-data/LICENSE.txt">ライセンス表示（LICENSE.txt）</a> ／ <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank" rel="noopener noreferrer">GNU General Public License v2 本文</a></td></tr>
         </table>
       </div>
-      <p>配布用Gboard ZIPは、公開している加工後辞書データと変換スクリプトから生成できます。通常のご利用にはAndroidアプリをご利用ください。</p>
+      <p>配布用のGboard ZIP、Microsoft IME用テキスト、macOS/iOSユーザ辞書用plistは、公開している加工後辞書データと各変換スクリプトから生成できます。通常のご利用には、利用するOSに対応した配布ファイルをご利用ください。</p>
       <p class="small">Androidアプリ本体の署名鍵・keystore・署名情報は、セキュリティ上ここには含めていません（GPL v2はこれらの開示を求めていません）。</p>
     </section>
 
@@ -93,7 +93,7 @@
       <div class="note">
         <p>この辞書は入力を補助するためのものです。医学的な正確性、診断、処方、指示内容を保証するものではありません。患者名・薬剤名・用量・単位・左右・日時などは、送信前に必ず利用者自身で確認してください。</p>
       </div>
-      <p>また、Gboard側の登録上限や端末環境により、42,436件すべてが登録されない場合があります。登録されない語が一定数生じることを実機で確認しています。</p>
+      <p>また、Gboard、Microsoft IME、macOS/iOSユーザ辞書など登録先の仕様や端末環境により、42,436件すべてが登録・同期・表示されない場合があります。Gboardでは登録されない語が一定数生じることを実機で確認しています。Mac/iPhone向けのplistは試験版で、実機検証は未実施です。</p>
     </section>
 
     <section class="card">
