@@ -75,8 +75,11 @@
     section.block { margin-top: 44px; }
     h2 { font-size: 24px; margin: 0 0 16px; letter-spacing: -0.02em; }
 
+    .shot-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px;
+    }
     .shot {
-      margin: 0 auto; max-width: 50%; border-radius: 16px; overflow: hidden;
+      margin: 0; border-radius: 16px; overflow: hidden;
       border: 1px solid var(--line); background: rgba(255,255,255,0.7);
       box-shadow: var(--shadow);
     }
@@ -134,8 +137,7 @@
     }
 
     @media (max-width: 760px) {
-      .grid { grid-template-columns: 1fr; }
-      .shot { max-width: 100%; }
+      .grid, .shot-grid { grid-template-columns: 1fr; }
       .hero-text h1 { font-size: 28px; }
       .hero-icon { width: 76px; height: 76px; }
     }
@@ -179,10 +181,24 @@
     <p class="status-note">Windows 10 / 11 対応。最新版 v1.0 をこのページからダウンロードできます。</p>
 
     <section class="block">
-      <figure class="shot">
-        <img src="help_assets/main.png" alt="MultiLibLink のメイン画面" />
-        <figcaption>メイン画面 — 「今すぐ取得」で図書館ページから最新状況を取得し、表計算ソフトで状況を確認できます。</figcaption>
-      </figure>
+      <div class="shot-grid">
+        <figure class="shot">
+          <img src="help_assets/main.png" alt="MultiLibLink のメイン画面" />
+          <figcaption>メイン画面 — 「今すぐ取得」で図書館ページから最新状況を取得し、表計算ソフトで状況を確認できます。</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="help_assets/library-setting.png" alt="MultiLibLink の図書館設定画面" />
+          <figcaption>図書館設定画面 — ログインURLやカード番号を登録し、複数の図書館プロファイルを管理できます。</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="help_assets/mail-setting.png" alt="MultiLibLink のメール設定画面" />
+          <figcaption>メール設定画面 — 取得結果の送信先やメール監視を設定し、処理完了時の通知に使えます。</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="help_assets/other.png" alt="MultiLibLink のその他画面" />
+          <figcaption>その他画面 — セットアップ、ヘルプ、アプリ情報、変更履歴を確認できます。</figcaption>
+        </figure>
+      </div>
     </section>
 
     <section class="block">
