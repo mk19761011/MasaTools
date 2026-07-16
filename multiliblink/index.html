@@ -76,7 +76,7 @@
     h2 { font-size: 24px; margin: 0 0 16px; letter-spacing: -0.02em; }
 
     .shot {
-      margin: 0; border-radius: 16px; overflow: hidden;
+      margin: 0 auto; max-width: 50%; border-radius: 16px; overflow: hidden;
       border: 1px solid var(--line); background: rgba(255,255,255,0.7);
       box-shadow: var(--shadow);
     }
@@ -135,6 +135,7 @@
 
     @media (max-width: 760px) {
       .grid { grid-template-columns: 1fr; }
+      .shot { max-width: 100%; }
       .hero-text h1 { font-size: 28px; }
       .hero-icon { width: 76px; height: 76px; }
     }
