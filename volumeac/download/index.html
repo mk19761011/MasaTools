@@ -126,19 +126,20 @@
       '<span class="ver">最新版 v'+verStr(latest.ver)+'</span>' +
       '<div class="name">'+latest.name+'</div>' +
       '<div class="muted">'+mb(latest.size)+' ・ Android 10 以降</div>' +
-      '<a class="dlbtn" href="./'+encodeURIComponent(latest.name)+'">APKをダウンロード（v'+verStr(latest.ver)+'）</a>';
+      '<a class="dlbtn" href="./'+encodeURIComponent(latest.name)+'" data-mt-download="volumeac">APKをダウンロード（v'+verStr(latest.ver)+'）</a>';
 
     const older = apks.slice(1);
     if(older.length){
       document.getElementById("olderWrap").style.display = "";
       document.getElementById("older").innerHTML = older.map(f =>
         '<li><span class="v">v'+verStr(f.ver)+'</span><span class="sz">'+mb(f.size)+'</span>' +
-        '<a class="get" href="./'+encodeURIComponent(f.name)+'">取得</a></li>'
+        '<a class="get" href="./'+encodeURIComponent(f.name)+'" data-mt-download="volumeac">取得</a></li>'
       ).join("");
     }
   }
 
   load();
 </script>
+<script src="/analytics/count.js" defer></script>
 </body>
 </html>

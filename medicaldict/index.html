@@ -98,7 +98,7 @@
       <h2 style="margin-top:12px">WindowsのMicrosoft IMEでも使えます</h2>
       <p>Windowsをお使いの方は、標準の<strong>Microsoft IME</strong>に取り込めます。取り込むと、Word・メール・ブラウザなど<strong>Windows全体の文字入力</strong>で医療用語が変換候補に出ます（Gboardのようにアプリは不要です）。</p>
       <div class="actions">
-        <a class="btn primary" href="download/medical_dict_msime_v2026.7.5.txt" download>MS-IME用辞書ファイルをダウンロード</a>
+        <a class="btn primary" href="download/medical_dict_msime_v2026.7.5.txt" download data-mt-download="medicaldict">MS-IME用辞書ファイルをダウンロード</a>
       </div>
       <h3>取り込み手順（Windows）</h3>
       <ol>
@@ -122,7 +122,7 @@
       <h2 style="margin-top:12px">Mac・iPhoneでも使いたい方へ</h2>
       <p>AndroidのGboardとは別に、<strong>macOSの「ユーザ辞書」に取り込む形式</strong>も用意しました。Macで取り込むと、<strong>iCloud経由でiPhone・iPadにも同期</strong>され、標準キーボードで医療用語が変換候補に出ます。App Storeアプリではなく辞書ファイルを取り込む方式のため、iPhone単体では取り込めませんが、<strong>Macをお持ちの方はiPhoneでも利用できます。</strong></p>
       <div class="actions">
-        <a class="btn primary" href="download/medical_dict_apple_v2026.7.5.plist" download>ユーザ辞書ファイル（.plist）をダウンロード</a>
+        <a class="btn primary" href="download/medical_dict_apple_v2026.7.5.plist" download data-mt-download="medicaldict">ユーザ辞書ファイル（.plist）をダウンロード</a>
       </div>
       <h3>取り込み手順（Mac）</h3>
       <ol>
@@ -164,10 +164,12 @@
       fetch(path,{method:'HEAD',cache:'no-store'}).then(function(r){
         if(!r.ok) throw new Error();
         btn.href=path; btn.className='btn primary'; btn.removeAttribute('aria-disabled');
+        btn.setAttribute('data-mt-download','medicaldict');
         btn.textContent='APKをダウンロード';
         status.textContent='提供元が masatools.pages.dev であることを確認してからインストールしてください。';
       }).catch(function(){});
     })();
   </script>
+  <script src="/analytics/count.js" defer></script>
 </body>
 </html>
