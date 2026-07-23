@@ -1,5 +1,5 @@
 /* ============================================================
- * MasaTools ダウンロード数 / 訪問数カウンター（クライアント側）
+ * MasaTools ダウンロード数 / 訪問数 / 滞在時間 カウンター（クライアント側）
  * ------------------------------------------------------------
  * 使い方:
  *   1. 各ページの </body> 直前に次の1行を追加:
@@ -7,13 +7,12 @@
  *   2. ダウンロードリンクに data-mt-download="アプリキー" を付けると
  *        クリック時に自動でカウントされる。
  *        例: <a href="..." data-mt-download="wintimelock">ダウンロード</a>
- *   3. 訪問数を数えたいページ（自己分析サイト）では、読み込み時に
- *        1回だけ MasaCount.visit("iq-test") が呼ばれるよう、body に
- *        data-mt-visit="iq-test" を付けるか、明示的に呼び出す。
+ *   3. 訪問・滞在時間を数えたいページ（自己分析サイト）では body に
+ *        data-mt-visit="iq-test" を付ける。
+ *        → 読み込み時に訪問を1回、離脱時に前面表示していた滞在秒数を送信。
  *
  *   ENDPOINT には Apps Script ウェブアプリの /exec URL を貼る。
- *   ※ 同一端末の重複は、集計側の「ユニーク」列で除外される。
- *      さらに短時間の二重クリックはこのスクリプトが抑制する。
+ *   ※ 同一端末の重複は集計側の「ユニーク」列で除外。短時間の二重クリックも抑制。
  * ============================================================ */
 (function () {
   "use strict";
@@ -22,8 +21,9 @@
   var ENDPOINT = "https://script.google.com/macros/s/AKfycby9Z7Kjh99UOXkbJ9mS13PyfRn7lv0Z3ieUqFtCdjoVp9NkONGXvBdRntAsCnBVJpQh/exec";
 
   var VID_KEY = "mt_vid";
-  var recent = {};            // 直近送信の抑制用
+  var recent = {};            // 直近送信の抑制用（download/visit のみ）
   var THROTTLE_MS = 4000;     // 同一(アプリ+種別)は4秒以内の再送を抑制
+  var MAX_DWELL = 7200;       // 滞在秒数の上限（異常値対策）
 
   function isConfigured() {
     return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(ENDPOINT);
@@ -44,21 +44,26 @@
     }
   }
 
-  function send(app, event) {
+  function send(app, event, value) {
     if (!app || !isConfigured()) return;
-    var key = app + "|" + event;
-    var now = Date.now();
-    if (recent[key] && now - recent[key] < THROTTLE_MS) return;
-    recent[key] = now;
+
+    // download / visit は二重クリック抑制。dwell は値を持つので抑制しない。
+    if (event !== "dwell") {
+      var key = app + "|" + event;
+      var now = Date.now();
+      if (recent[key] && now - recent[key] < THROTTLE_MS) return;
+      recent[key] = now;
+    }
 
     var payload = JSON.stringify({
       app: app,
       event: event,
       vid: visitorId(),
+      value: value || 0,
       t: new Date().toISOString()
     });
 
-    // sendBeacon 優先（ページ遷移/ダウンロードでも確実に飛ぶ）
+    // sendBeacon 優先（ページ遷移/ダウンロード/離脱でも確実に飛ぶ）
     try {
       if (navigator.sendBeacon) {
         var blob = new Blob([payload], { type: "text/plain;charset=utf-8" });
@@ -90,16 +95,44 @@
     if (el) send(el.getAttribute("data-mt-download"), "download");
   }, true);
 
-  // body[data-mt-visit] があれば読み込み時に訪問を1回計測
-  function autoVisit() {
-    var b = document.body;
-    if (b && b.getAttribute("data-mt-visit")) {
-      send(b.getAttribute("data-mt-visit"), "visit");
+  // ── 滞在時間（前面表示していた実時間を積算し、離脱時に送信） ──
+  var dwellKey = null;
+  var activeMs = 0;
+  var lastStart = 0;
+
+  function startTimer() {
+    if (dwellKey && lastStart === 0) lastStart = Date.now();
+  }
+  function stopTimer() {
+    if (lastStart !== 0) { activeMs += Date.now() - lastStart; lastStart = 0; }
+  }
+  function flushDwell() {
+    stopTimer();
+    var sec = Math.round(activeMs / 1000);
+    if (dwellKey && sec >= 1) {
+      send(dwellKey, "dwell", Math.min(sec, MAX_DWELL));
+      activeMs = 0; // 送信済み分はリセット（復帰後の二重計上を防ぐ）
     }
   }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") flushDwell();
+    else startTimer();
+  });
+  window.addEventListener("pagehide", flushDwell);
+
+  // body[data-mt-visit] があれば読み込み時に訪問を1回計測＋滞在計測を開始
+  function autoStart() {
+    var b = document.body;
+    var k = b && b.getAttribute("data-mt-visit");
+    if (!k) return;
+    send(k, "visit");
+    dwellKey = k;
+    if (document.visibilityState !== "hidden") startTimer();
+  }
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", autoVisit);
+    document.addEventListener("DOMContentLoaded", autoStart);
   } else {
-    autoVisit();
+    autoStart();
   }
 })();
