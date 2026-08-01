@@ -1,5 +1,19 @@
 # Hit Song Dashboard public route contract.
 # Keep the app host-independent: change the hosting origin outside this file.
+/aitalknotes/download/AITalkNotes-1.0.5-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/aitalknotes/download/AITalkNotes-1.0.6-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/aitalknotes/download/AITalkNotes-1.0.7-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/aitalknotes/download/AITalkNotes-1.1.1-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/aitalknotes/download/AITalkNotes-1.1.2-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/aitalknotes/download/AITalkNotes-1.1.3-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/aitalknotes/download/AITalkNotes-1.1.6-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/aitalknotes/download/AITalkNotes-1.1.7-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/aitalknotes/download/AITalkNotes-1.1.8-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/aitalknotes/download/AITalkNotes-1.2.0-release.apk /aitalknotes/download/AITalkNotes-1.2.1-release.apk 301
+/volumeac/download/VolumeAC-1.0.0-release.apk /volumeac/download/VolumeAC-1.3.1-release.apk 301
+/volumeac/download/VolumeAC-1.1.0-release.apk /volumeac/download/VolumeAC-1.3.1-release.apk 301
+/volumeac/download/VolumeAC-1.2.6-release.apk /volumeac/download/VolumeAC-1.3.1-release.apk 301
+/wintimelock/download/Readme_v1.5.txt /wintimelock/download/Readme_v1.5.1.txt 301
 /hit-song/hit-song-dashboard /hit-song/hit-song-dashboard/ 301
 /hit-song/hit-song-dashboard/ /hit-song/hit-song-dashboard/index.html 200
 /hit-song/hit-song-dashboard.html /hit-song/hit-song-dashboard 301
