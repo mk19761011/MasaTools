@@ -1,11 +1,11 @@
-ここに次の署名済みAPKを配置してください。
+次の署名済みAPKを公開しています。
 
 medical_dict_android_v2026.7.5.apk
 
 配置後の公開URL:
 https://masatools.pages.dev/medicaldict/download/medical_dict_android_v2026.7.5.apk
 
-公開前にSHA-256が次と一致することを確認してください。
-6b857804cb419ebaa6171bcbac0deba05ac28260037134e44664e4b0be7954a9
+SHA-256:
+3606a1a023bdc49fc7c0a07117833e89aa0e84eab45e23ab64cfcd0c16612576
 
-APKが存在すると、/medicaldict/ のダウンロードボタンが自動的に有効になります。
+/medicaldict/ のダウンロードボタンから取得できます。
