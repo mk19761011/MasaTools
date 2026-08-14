@@ -17,9 +17,10 @@
     footer{max-width:980px;margin:auto;padding:24px 20px 40px;color:var(--muted);font-size:14px;text-align:center}
     @media(max-width:760px){main{padding-top:24px}.jump-nav a{flex:1 1 150px;justify-content:center}.hero{grid-template-columns:1fr}.steps{grid-template-columns:1fr}h1{font-size:30px}.panel,.section-card{padding:22px}.header-inner{align-items:flex-start}}
   </style>
+  <link rel="stylesheet" href="/assets/masatools-site.css" />
 </head>
-<body>
-  <header class="header"><div class="header-inner"><a class="brand" href="/">MasaTools</a><a class="back" href="/">← ツール一覧へ戻る</a></div></header>
+<body class="mt-product-page mt-product-android">
+  <nav class="mt-sitebar" aria-label="MasaTools 共通メニュー"><div class="mt-sitebar__inner"><a class="mt-sitebar__brand" href="/"><span class="mt-sitebar__mark" aria-hidden="true"></span>MasaTools</a><a class="mt-sitebar__back" href="/">ツール一覧へ戻る</a></div></nav>
   <main>
     <nav class="jump-nav" aria-label="配布形式">
       <a href="#android">Android向け</a>
@@ -32,13 +33,13 @@
         <h1>医療用語辞書<br><small style="font-size:.55em;color:#475569">Android・Windows・Mac/iPhone向け</small></h1>
         <p class="lead">LINEやメールで看護師・スタッフへ指示を送るとき、医療用語や薬剤名がすぐ変換候補に出るようにするための辞書データです。AndroidはGboard用アプリ、WindowsはMicrosoft IME用ファイル、Mac/iPhoneはユーザ辞書用ファイルを用意しています。</p>
         <div class="actions">
-          <a id="apkButton" class="btn disabled" href="#download-status" aria-disabled="true">APK公開準備中</a>
-          <a class="btn secondary" href="source/">辞書の出典・加工内容</a>
+          <a id="apkButton" class="btn primary mt-primary-action" href="download/medical_dict_android_v2026.7.5.apk" download data-mt-download="medicaldict">Android版APKをダウンロード</a>
+          <a class="btn secondary mt-secondary-action" href="source/">辞書の出典・加工内容</a>
         </div>
         <div class="actions" style="margin-top:12px">
-          <a class="btn secondary" href="https://forms.gle/PbofB32hwDqfwGi18" target="_blank" rel="noopener noreferrer">匿名アンケートに答える</a>
+          <a class="btn secondary mt-secondary-action" href="https://forms.gle/PbofB32hwDqfwGi18" target="_blank" rel="noopener noreferrer">匿名アンケートに答える</a>
         </div>
-        <p id="download-status" class="status">APK本体が配布フォルダへ配置されると、ダウンロードボタンが自動で有効になります。</p>
+        <p id="download-status" class="status">提供元が masatools.pages.dev であることを確認してからインストールしてください。</p>
       </div>
       <div class="panel">
         <div class="stats">
@@ -98,7 +99,7 @@
       <h2 style="margin-top:12px">WindowsのMicrosoft IMEでも使えます</h2>
       <p>Windowsをお使いの方は、標準の<strong>Microsoft IME</strong>に取り込めます。取り込むと、Word・メール・ブラウザなど<strong>Windows全体の文字入力</strong>で医療用語が変換候補に出ます（Gboardのようにアプリは不要です）。</p>
       <div class="actions">
-        <a class="btn primary" href="download/medical_dict_msime_v2026.7.5.txt" download data-mt-download="medicaldict">MS-IME用辞書ファイルをダウンロード</a>
+        <a class="btn primary mt-primary-action" href="download/medical_dict_msime_v2026.7.5.txt" download data-mt-download="medicaldict">MS-IME用辞書ファイルをダウンロード</a>
       </div>
       <h3>取り込み手順（Windows）</h3>
       <ol>
@@ -122,7 +123,7 @@
       <h2 style="margin-top:12px">Mac・iPhoneでも使いたい方へ</h2>
       <p>AndroidのGboardとは別に、<strong>macOSの「ユーザ辞書」に取り込む形式</strong>も用意しました。Macで取り込むと、<strong>iCloud経由でiPhone・iPadにも同期</strong>され、標準キーボードで医療用語が変換候補に出ます。App Storeアプリではなく辞書ファイルを取り込む方式のため、iPhone単体では取り込めませんが、<strong>Macをお持ちの方はiPhoneでも利用できます。</strong></p>
       <div class="actions">
-        <a class="btn primary" href="download/medical_dict_apple_v2026.7.5.plist" download data-mt-download="medicaldict">ユーザ辞書ファイル（.plist）をダウンロード</a>
+        <a class="btn primary mt-primary-action" href="download/medical_dict_apple_v2026.7.5.plist" download data-mt-download="medicaldict">ユーザ辞書ファイル（.plist）をダウンロード</a>
       </div>
       <h3>取り込み手順（Mac）</h3>
       <ol>
@@ -149,27 +150,13 @@
       <p>辞書データ版：<strong>2026.7.5</strong> ／ 収録数：<strong>42,436語</strong></p>
       <p class="meta">配布ファイル：medical_dict_android_v2026.7.5.apk<br>アプリ版：2026.7.5（versionCode 4）<br>APK SHA-256：3606a1a023bdc49fc7c0a07117833e89aa0e84eab45e23ab64cfcd0c16612576</p>
       <p class="actions">
-        <a class="btn secondary" href="source/">出典・加工内容・ライセンス</a>
-        <a class="btn secondary" href="privacy/">プライバシーポリシー</a>
-        <a class="btn secondary" href="mailto:masatools.info@gmail.com?subject=%E5%8C%BB%E7%99%82%E7%94%A8%E8%AA%9E%E8%BE%9E%E6%9B%B8%E3%81%AE%E3%81%94%E6%84%8F%E8%A6%8B">不具合・ご意見</a>
+        <a class="btn secondary mt-secondary-action" href="source/">出典・加工内容・ライセンス</a>
+        <a class="btn secondary mt-secondary-action" href="privacy/">プライバシーポリシー</a>
+        <a class="btn secondary mt-secondary-action" href="mailto:masatools.info@gmail.com?subject=%E5%8C%BB%E7%99%82%E7%94%A8%E8%AA%9E%E8%BE%9E%E6%9B%B8%E3%81%AE%E3%81%94%E6%84%8F%E8%A6%8B">不具合・ご意見</a>
       </p>
     </section>
   </main>
   <footer>運営者：MasaTools ／ <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a></footer>
-  <script>
-    (function(){
-      const path='download/medical_dict_android_v2026.7.5.apk';
-      const btn=document.getElementById('apkButton');
-      const status=document.getElementById('download-status');
-      fetch(path,{method:'HEAD',cache:'no-store'}).then(function(r){
-        if(!r.ok) throw new Error();
-        btn.href=path; btn.className='btn primary'; btn.removeAttribute('aria-disabled');
-        btn.setAttribute('data-mt-download','medicaldict');
-        btn.textContent='APKをダウンロード';
-        status.textContent='提供元が masatools.pages.dev であることを確認してからインストールしてください。';
-      }).catch(function(){});
-    })();
-  </script>
   <script src="/analytics/count.js" defer></script>
 </body>
 </html>

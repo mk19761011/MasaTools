@@ -34,14 +34,10 @@
     .footer{border-top:1px solid var(--line);padding:24px 22px;margin-top:52px;color:var(--muted);text-align:center;font-size:15px}
     @media(max-width:760px){.grid{grid-template-columns:1fr}h1{font-size:28px}.hero-icon{width:76px;height:76px}}
   </style>
+  <link rel="stylesheet" href="/assets/masatools-site.css" />
 </head>
-<body>
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="logo" href="/" aria-label="MasaTools トップへ"><span class="logo-mark" aria-hidden="true"></span><span>MasaTools</span></a>
-      <a class="back" href="/">ツール一覧へ戻る</a>
-    </div>
-  </header>
+<body class="mt-product-page">
+  <nav class="mt-sitebar" aria-label="MasaTools 共通メニュー"><div class="mt-sitebar__inner"><a class="mt-sitebar__brand" href="/"><span class="mt-sitebar__mark" aria-hidden="true"></span>MasaTools</a><a class="mt-sitebar__back" href="/">ツール一覧へ戻る</a></div></nav>
 
   <main>
     <section class="hero">
@@ -54,16 +50,16 @@
     </section>
 
     <div class="cta-row">
-      <a class="button" href="/wintimelock/download/WinTimeLock_Setup.exe" download="WinTimeLock_Setup.exe" data-mt-download="wintimelock">
+      <a class="button mt-primary-action" href="/wintimelock/download/WinTimeLock_Setup.exe" download="WinTimeLock_Setup.exe" data-mt-download="wintimelock">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
         最新版 v1.6 をダウンロード
       </a>
-      <a class="button secondary" href="download/Readme_v1.6.txt">README</a>
-      <a class="button secondary" href="https://www.vector.co.jp/soft/winnt/util/se528180.html" target="_blank" rel="noopener noreferrer">
+      <a class="button secondary mt-secondary-action" href="download/Readme_v1.6.txt">README</a>
+      <a class="button secondary mt-secondary-action" href="https://www.vector.co.jp/soft/winnt/util/se528180.html" target="_blank" rel="noopener noreferrer">
         Vector公開ページ
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>
       </a>
-      <a class="button secondary" href="https://forms.gle/TQVGdfDHLKtSbZHZ8" target="_blank" rel="noopener noreferrer">匿名アンケートに答える</a>
+      <a class="button secondary mt-secondary-action" href="https://forms.gle/TQVGdfDHLKtSbZHZ8" target="_blank" rel="noopener noreferrer">匿名アンケートに答える</a>
     </div>
     <section class="block">
       <figure class="shot">
