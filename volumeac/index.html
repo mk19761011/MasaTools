@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Volume Area Controller | MasaTools</title>
 <meta name="description" content="現在地に応じて着信・通知・アラーム・メディア音量を自動で切り替えるAndroidアプリ。会社や病院では音を抑え、自宅では着信や通知音が鳴る状態に戻すなど、お好みの設定が可能です。無料・広告なし。">
+<link rel="canonical" href="https://masatools.pages.dev/volumeac/">
+<meta name="theme-color" content="#15803d">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MasaTools">
+<meta property="og:url" content="https://masatools.pages.dev/volumeac/">
+<meta property="og:title" content="Volume Area Controller｜現在地で音量を自動切替（無料Androidアプリ）">
+<meta property="og:description" content="会社・病院・図書館では音を抑え、自宅では鳴る状態に戻す。場所ごとに着信・通知・アラーム・メディア音量を自動で切り替えるAndroidアプリ。無料・広告なし・データは端末内のみ。">
+<meta name="twitter:card" content="summary">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon.svg">
 <style>
@@ -44,6 +52,18 @@
   .links a.secondary { background: transparent; color: #15803d; border: 1px solid #15803d; }
   a { color: #15803d; }
   .note { background: #f4f9f5; border: 1px solid #d3e8d8; border-radius: 8px; padding: 12px 16px; font-size: 0.92rem; }
+  .muted { font-size: 0.9rem; color: #666; }
+  .steps { counter-reset: step; list-style: none; padding-left: 0; }
+  .steps li { position: relative; padding-left: 40px; margin: 10px 0; }
+  .steps li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute; left: 0; top: 4px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #15803d; color: #fff;
+    font-size: 0.85rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
   footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; color: #666; font-size: 0.88rem; }
 </style>
 <link rel="stylesheet" href="/assets/masatools-site.css">
@@ -75,14 +95,26 @@
     <li>場所（緯度・経度・半径）ごとに音量プロファイルを割り当て、入退場を自動検知して音量を適用</li>
     <li>同じ音量プロファイルを複数の場所で使い回せる「場所ルール × 音量プロファイル」方式</li>
     <li>登録した場所以外にいるときの動作（指定プロファイルを適用／直前の音量を維持）</li>
+    <li>メディア音量は指定したときだけ変更。動画や音楽の再生中に勝手に変わりません</li>
+    <li><strong>朝のアラーム保護</strong> — 「自宅」に登録した場所や、アラーム保護をONにしたプロファイルでは、朝5〜9時にアラーム音量が下がっていても自動で引き上げます</li>
     <li>屋内などで測位が数十mずれても、近くに一定時間とどまれば正しい場所として自動補正（設定でOFFも可能）</li>
-    <li>場所ごとに複数のWi-Fi（SSID）を登録でき、接続中のWi-Fiで場所を確実に判別</li>
-    <li>宿泊先モード・一時停止・「明朝だけアラーム」の一時例外</li>
+    <li>場所ごとに複数のWi-Fi（SSID）を登録でき、接続中のWi-Fiで場所を確実に判別（2.4GHzと5GHzでSSIDが分かれる自宅などにも対応）</li>
     <li>手で音量を変えたら同じ場所にいる間は自動で上書きしない「手動変更ガード」</li>
     <li>場所ごとにWi-Fiを指定できる「Wi-Fi切替アシスト」（違うWi-Fi接続中なら通知でお知らせ）</li>
     <li>移動しなくても動作確認できる「テスト入場」「テスト退場」ボタン</li>
     <li>場所登録はOpenStreetMapの地図から。現在地取得・住所検索・地図タップ・緯度経度入力に対応</li>
+    <li>いつ・どこで・どのプロファイルに切り替わったかが分かる適用履歴（実際に音量が変わったときだけ記録／直近7日・最大300件）</li>
   </ul>
+
+  <h2>使いはじめの3ステップ</h2>
+  <ol class="steps">
+    <li><strong>権限を許可する</strong> — 「権限」タブの案内に沿って、位置情報を「常に許可」まで進めます（必須）。通知の許可と電池の最適化の除外も、ここから設定できます。</li>
+    <li><strong>音量プロファイルを選ぶ・作る</strong> — 「音量」タブに初期プロファイルが入っています。着信・通知・アラーム・メディアの音量やバイブを、必要に応じて編集します。</li>
+    <li><strong>場所を登録して割り当てる</strong> — 「場所」タブで地図から自宅や職場を登録し、判定半径とプロファイルを指定します。登録できたら「テスト入場」で、その場で動作を確認できます。</li>
+  </ol>
+  <p class="muted">
+    登録した場所の外にいるときの音量は、「音量」タブの一番上にある「デフォルト」で決めます（指定したプロファイルを適用／直前の音量を維持）。
+  </p>
 
   <h2>料金</h2>
   <p>
@@ -96,7 +128,9 @@
   <p class="links">
     <a id="dlBtn" class="mt-primary-action" data-mt-download="volumeac" href="download/VolumeAC-1.5.1-release.apk">APKをダウンロード（v1.5.1）</a>
   </p>
-  <p style="font-size:0.9rem;color:#666">対象: Android 10 以降（ジオフェンス検知に Google Play 開発者サービスが必要です）。</p>
+  <p class="muted">
+    最新版 v1.5.1（2026年8月27日公開）／ 約3.9MB ／ 対象: Android 10 以降（ジオフェンス検知に Google Play 開発者サービスが必要です）。
+  </p>
 
   <h2>インストール方法</h2>
   <ol>
@@ -105,8 +139,11 @@
     <li>初回は「不明なアプリのインストール」を求められるので、ブラウザ／ファイルアプリに対して許可します（設定 → アプリ → 特別なアプリアクセス → 不明なアプリのインストール）。</li>
     <li>画面の案内に従ってインストールします。</li>
   </ol>
-  <p style="font-size:0.9rem;color:#666">
+  <p class="muted">
     ※Google Play を経由しないため、インストール時に警告が表示される場合があります。提供元がこのサイト（masatools.pages.dev）であることをご確認のうえお進みください。
+  </p>
+  <p class="muted">
+    ※すでにインストール済みの場合も、新しいAPKを開けばそのまま上書き更新されます（旧版の削除は不要です。v1.1以降からの更新なら、登録した場所や音量プロファイルはそのまま引き継がれます）。
   </p>
 
   <h2>必要な権限</h2>
@@ -123,9 +160,18 @@
   <ul>
     <li>端末やメーカーの設定によって、通知音量と着信音量が連動する場合があります。</li>
     <li>省電力設定やメーカー独自のバックグラウンド制限により、入退場の検知が遅れることがあります。アプリ起動時・画面復帰時・約15分ごとのバックグラウンドチェックで自動補正します（権限画面から電池の最適化を除外しておくと安定します）。</li>
-    <li>判定半径は20〜5000mの範囲で、場所の広さに合わせて調整できます（自宅は20〜50m、広い施設は300m以上が目安）。近くに別の場所を登録している場合は、それぞれにWi-Fiを登録しておくと取り違えを防げます。</li>
+    <li>判定半径は5〜5000mの範囲で、場所の広さに合わせて調整できます（自宅や小さな職場は20〜50m、広い学校・病院・工場などは300〜500m以上が目安。5m・10mは動作確認用で、GPS誤差の影響を受けやすくなります）。近くに別の場所を登録している場合は、それぞれにWi-Fiを登録しておくと取り違えを防げます。</li>
     <li>地図タイルの表示にはネットワーク接続が必要です。登録後の入退場判定はオフラインでも動作します。</li>
     <li>場所や音量の設定は、端末内にのみ保存されます（外部に送信しません）。そのため機種変更の際は、新しい端末で登録し直してください（場所が数か所であれば数分で完了します）。</li>
+    <li>Androidの仕様上、Wi-Fiの自動切替やWi-FiのON/OFFはアプリから行えません。「Wi-Fi切替アシスト」は通知でお知らせし、タップでWi-Fiの設定画面を開くところまでを行います（Wi-Fiのパスワードはアプリに保存しません）。</li>
+  </ul>
+
+  <h2>うまく切り替わらないときは</h2>
+  <ul>
+    <li><strong>まず「権限」タブを確認</strong> — 位置情報が「アプリの使用中のみ許可」のままだと、アプリを閉じている間の自動切替は動きません。「常に許可」まで進めてください。</li>
+    <li><strong>電池の最適化を除外</strong> — 数日使わない期間があると、バックグラウンド処理ごと止められることがあります。権限タブから除外できます。</li>
+    <li><strong>「鳴らさない（サイレント）」「バイブのみ」だけ効かない場合</strong> — Androidの仕様で、マナーモードへの切り替えに「サイレントモード（Do Not Disturb）へのアクセス」の許可が必要な端末があります。設定 → アプリ → 特別なアプリアクセス → サイレントモードへのアクセス で本アプリを許可してください（音量の上げ下げだけならこの許可は不要です）。</li>
+    <li><strong>場所を取り違える・半径のすぐ外と判定される</strong> — ホームタブの「現在地の判定」に、測位精度・各場所までの距離・半径・圏内かどうかが表示されます。半径が足りないのか測位がずれているのかを確認できます。Wi-Fiを登録しておくと、屋内でも場所を確実に判別できます。</li>
   </ul>
 
   <h2>リンク</h2>
@@ -139,5 +185,6 @@
   </footer>
 </div>
 
+<script src="/analytics/count.js" defer></script>
 </body>
 </html>
