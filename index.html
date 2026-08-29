@@ -48,6 +48,7 @@
     .section{margin-top:52px}.section-title{margin-bottom:18px}h2{margin:0;font-size:26px;letter-spacing:-.02em}.section-title p{margin:6px 0 0;color:var(--muted);font-size:15px}
     .contact-card{border:1px solid var(--line);background:rgba(255,255,255,.78);border-radius:var(--radius);padding:26px 28px;box-shadow:var(--shadow)}.contact-card h3{margin:0 0 8px;font-size:22px}.contact-card p{margin:0 0 16px;color:var(--muted);font-size:15px}.contact-button{display:inline-flex;align-items:center;min-height:46px;padding:0 20px;border-radius:12px;font-weight:700;border:1px solid rgba(30,41,59,.12);background:rgba(255,255,255,.92)}
     .footer{border-top:1px solid var(--line);padding:24px 22px;color:var(--muted);text-align:center;font-size:15px}
+    .footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}.footer a:hover{color:var(--accent)}
     @media(max-width:860px){.cards{grid-template-columns:1fr}h1{font-size:28px}main{padding-top:32px}}
   </style>
   <link rel="stylesheet" href="/assets/masatools-site.css" />
@@ -133,7 +134,7 @@
     </section>
   </main>
 
-  <footer class="footer"><small>&copy; 2026 MasaTools. All rights reserved.</small></footer>
+  <footer class="footer"><small>&copy; 2026 MasaTools. All rights reserved. &nbsp;|&nbsp; <a href="/admin/">管理者</a></small></footer>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script>
     (function(){var el=document.getElementById('qr');if(!el||typeof QRCode==='undefined')return;new QRCode(el,{text:window.location.origin+window.location.pathname,width:128,height:128,colorDark:'#1f2937',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});})();

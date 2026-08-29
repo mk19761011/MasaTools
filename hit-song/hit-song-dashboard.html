@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -209,6 +209,115 @@ header {
     min-height: 32px;
     padding: 6px 10px;
     font-size: 0.82rem;
+}
+
+/* Server sync */
+.sync-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+    padding: 14px 20px;
+}
+
+.sync-bar[hidden] {
+    display: none;
+}
+
+.sync-headline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.sync-pill {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.sync-pill.sync-synced {
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+}
+
+.sync-pill.sync-checking,
+.sync-pill.sync-saving {
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.18);
+    color: #60a5fa;
+}
+
+.sync-pill.sync-diverged,
+.sync-pill.sync-empty,
+.sync-pill.sync-locked {
+    border-color: rgba(251, 191, 36, 0.4);
+    background: rgba(251, 191, 36, 0.18);
+    color: #fbbf24;
+}
+
+.sync-detail {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.sync-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sync-notice {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 12px 14px;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: 10px;
+    background: rgba(251, 191, 36, 0.1);
+}
+
+.sync-notice[hidden] {
+    display: none;
+}
+
+.sync-notice p {
+    flex: 1 1 260px;
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+.sync-notice-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.form-hint {
+    margin: -4px 0 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
+.form-hint code {
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.78rem;
 }
 
 .chart-container {
@@ -672,7 +781,8 @@ tbody tr {
 }
 
 .song-form input[type="text"],
-.song-form input[type="url"] {
+.song-form input[type="url"],
+.song-form input[type="password"] {
     width: 100%;
     min-height: 42px;
     padding: 10px 12px;
@@ -1164,8 +1274,7 @@ tbody tr {
         /* Disable fade animation for better performance */
     }
 }
-
-</style>
+    </style>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1215,6 +1324,24 @@ tbody tr {
                 <button class="action-btn danger-action" id="resetDataBtn" title="初期データに戻す">初期化</button>
             </div>
         </header>
+
+        <!-- Server sync -->
+        <section class="glass-panel sync-bar" id="syncBar" hidden>
+            <div class="sync-headline">
+                <span class="sync-pill" id="syncPill">確認中</span>
+                <span class="sync-detail" id="syncDetail"></span>
+            </div>
+            <div class="sync-buttons">
+                <button class="action-btn small-action" id="syncUnlockBtn" type="button">編集を有効化</button>
+                <button class="action-btn small-action" id="syncPushBtn" type="button">サーバーへ反映</button>
+                <button class="action-btn small-action" id="syncPullBtn" type="button">サーバーから再取得</button>
+                <button class="action-btn small-action" id="syncRestoreBtn" type="button" hidden>端末バックアップを復元</button>
+            </div>
+            <div class="sync-notice" id="syncNotice" hidden>
+                <p id="syncNoticeText"></p>
+                <div class="sync-notice-actions" id="syncNoticeActions"></div>
+            </div>
+        </section>
 
         <!-- Dashboard Widgets -->
         <section class="dashboard-grid">
@@ -1359,6 +1486,27 @@ tbody tr {
         </div>
     </div>
 
+    <!-- Edit Password Modal -->
+    <div id="tokenModal" class="modal-overlay hidden">
+        <div class="edit-dialog glass-panel" role="dialog" aria-modal="true" aria-labelledby="tokenModalTitle">
+            <button class="close-btn edit-close-btn" id="closeTokenModal" type="button">×</button>
+            <h2 id="tokenModalTitle">編集パスワード</h2>
+            <form id="tokenForm" class="song-form">
+                <label>
+                    <span>パスワード</span>
+                    <input type="password" id="editTokenInput" autocomplete="current-password" required>
+                </label>
+                <p class="form-hint" id="tokenHint">Cloudflare Pages に設定した <code>EDIT_TOKEN</code> の値を入力してください。このブラウザにのみ保存され、サーバーへ送信されるのは照合時だけです。</p>
+                <div class="form-actions">
+                    <button type="button" class="action-btn danger-action" id="forgetTokenBtn">保存済みを削除</button>
+                    <span class="form-spacer"></span>
+                    <button type="button" class="action-btn" id="cancelTokenBtn">キャンセル</button>
+                    <button type="submit" class="action-btn primary-action">確認</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Video Modal -->
     <div id="videoModal" class="modal-overlay hidden">
         <div class="modal-content glass-panel">
@@ -1411,8 +1559,8 @@ const initialData = [
     "流行": "A",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YZ3OHqSLOpo",
@@ -1420,9 +1568,9 @@ const initialData = [
     "曲名": "カブトムシ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9Jh-FBYGaU4",
@@ -1430,9 +1578,9 @@ const initialData = [
     "曲名": "ボーイフレンド",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=iqGHxcTPRfI",
@@ -1440,9 +1588,9 @@ const initialData = [
     "曲名": "花火",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=74IKR0WeKXY",
@@ -1451,8 +1599,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=8e5-XC-8rVU",
@@ -1461,8 +1609,8 @@ const initialData = [
     "流行": "A",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9WQ6vgHkyxo",
@@ -1470,9 +1618,9 @@ const initialData = [
     "曲名": "サンライズ",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jXkHICv_qCY",
@@ -1481,8 +1629,8 @@ const initialData = [
     "流行": "A",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qe5pN-xMnPo",
@@ -1491,38 +1639,38 @@ const initialData = [
     "流行": "A",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=09OWN1yEpgA",
-    "歌手名": "BOOWY ",
+    "歌手名": "BOOWY",
     "曲名": "Only You",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=nxeXaZlzqEA",
-    "歌手名": "BOOWY ",
+    "歌手名": "BOOWY",
     "曲名": "わがままジュリエット",
     "流行": "A",
     "評価": "B",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=29JRUtdEK3w",
-    "歌手名": "BOOWY ",
+    "歌手名": "BOOWY",
     "曲名": "B-Blue",
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=j7CDb610Bg0",
@@ -1530,9 +1678,9 @@ const initialData = [
     "曲名": "天体観測",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=R6tjNBLIRFw",
@@ -1540,9 +1688,9 @@ const initialData = [
     "曲名": "Easy Come, Easy Go!",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=a9J5a4Xl4WY",
@@ -1551,8 +1699,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=G2UgYTGK0HY",
@@ -1560,9 +1708,9 @@ const initialData = [
     "曲名": "ultra soul",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZgRPDC4xE4A",
@@ -1570,9 +1718,9 @@ const initialData = [
     "曲名": "LOVE PHANTOM",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IZ0Ojj7acgg",
@@ -1580,9 +1728,9 @@ const initialData = [
     "曲名": "ロマンティックか止まらない",
     "流行": "A",
     "評価": "B",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=MyINhQ6UW4Y",
@@ -1591,8 +1739,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=fbzikl8_NOs",
@@ -1600,9 +1748,9 @@ const initialData = [
     "曲名": "SAY YES",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yfZIaTZJo0o",
@@ -1610,9 +1758,9 @@ const initialData = [
     "曲名": "YAH YAH YAH",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dKaEWSia0n4",
@@ -1620,9 +1768,9 @@ const initialData = [
     "曲名": "万里の河",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=D7UkF0PUgFo",
@@ -1630,9 +1778,9 @@ const initialData = [
     "曲名": "モーニングムーン",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZlzwJuT1XCc",
@@ -1640,9 +1788,9 @@ const initialData = [
     "曲名": "太陽と埃の中で",
     "流行": "A",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=UFWT8IzDlMI",
@@ -1650,9 +1798,9 @@ const initialData = [
     "曲名": "僕はこの瞳て嘘をつく",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RDHBkza_ZcI",
@@ -1660,9 +1808,9 @@ const initialData = [
     "曲名": "やさしい気持ち",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=CjNxOaANplU",
@@ -1670,9 +1818,9 @@ const initialData = [
     "曲名": "強く儚い者たち",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=6H7WEDLa4zo",
@@ -1680,19 +1828,19 @@ const initialData = [
     "曲名": "恋をとめないて (1990tour)",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=PCv7eXOXuGc",
-    "歌手名": "Crystal Kay",
+    "歌手名": "Crystal Kay（クリスタル ケイ）",
     "曲名": "恋におちたら",
-    "流行": "A",
-    "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FWcuS-rfWyw",
@@ -1701,8 +1849,8 @@ const initialData = [
     "流行": "A",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yFvrbelLW5w",
@@ -1710,9 +1858,9 @@ const initialData = [
     "曲名": "このまま君だけを奪い去りたい",
     "流行": "A",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=o13WEDJMkQA",
@@ -1720,9 +1868,9 @@ const initialData = [
     "曲名": "瞳そらさないで",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zSYP29oFBk0",
@@ -1731,8 +1879,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5ok06tb3NGU",
@@ -1740,9 +1888,9 @@ const initialData = [
     "曲名": "陽はまたのぼりくりかえす",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zgLAWm68XVg",
@@ -1751,8 +1899,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=4HjtZKIec2A",
@@ -1761,8 +1909,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AYhxRUJxQYM",
@@ -1771,8 +1919,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZtDUKU-lx4w",
@@ -1781,8 +1929,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qDKSeZtvuZU",
@@ -1791,8 +1939,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=f2w9JwQaT4U",
@@ -1801,8 +1949,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=hIKf9RHq-TU",
@@ -1810,9 +1958,9 @@ const initialData = [
     "曲名": "fragile",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=k1S0i8FoV4c",
@@ -1821,8 +1969,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=PwhKGjv4Yjc",
@@ -1830,9 +1978,9 @@ const initialData = [
     "曲名": "Time goes by",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Pjm_y8q0Vwg",
@@ -1840,9 +1988,9 @@ const initialData = [
     "曲名": "Choo Choo Train",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Lll1gyFTJms",
@@ -1850,9 +1998,9 @@ const initialData = [
     "曲名": "Your eyes only ～曖昧なぼくの輪郭～",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QLDbcnpqSXE",
@@ -1860,9 +2008,9 @@ const initialData = [
     "曲名": "ただ･･･逢いたくて",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=LnAvMahBU5s",
@@ -1870,9 +2018,9 @@ const initialData = [
     "曲名": "銀河鉄道999",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Ddtu-ew6pCc",
@@ -1880,9 +2028,9 @@ const initialData = [
     "曲名": "突然",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=g4ge3N0xF9M",
@@ -1890,9 +2038,9 @@ const initialData = [
     "曲名": "サヨナラ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gPcPseeICjs",
@@ -1900,9 +2048,9 @@ const initialData = [
     "曲名": "HOWEVER",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DwTinTO0o9I",
@@ -1910,9 +2058,9 @@ const initialData = [
     "曲名": "キセキ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ImqUTsZtRqg",
@@ -1920,9 +2068,9 @@ const initialData = [
     "曲名": "想い出がいっぱい",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=W6s41bYxYf0",
@@ -1930,9 +2078,9 @@ const initialData = [
     "曲名": "DICE",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=glsH4Mgxz-g",
@@ -1940,9 +2088,9 @@ const initialData = [
     "曲名": "366日",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QIBPUU_tuJE",
@@ -1950,19 +2098,19 @@ const initialData = [
     "曲名": "明日への扉",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ewphY7jULL0",
-    "歌手名": "Judy & Mary",
+    "歌手名": "JUDY AND MARY",
     "曲名": "そばかす",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://youtu.be/FfCP2Q0srMs?si=-n2BtWFxRg-X3E_O",
@@ -1971,8 +2119,8 @@ const initialData = [
     "流行": "A",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=t_afbUg2nns",
@@ -1981,8 +2129,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bNhuzeYEpIE",
@@ -1990,9 +2138,9 @@ const initialData = [
     "曲名": "北風小僧の寒太郎",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AS2-k1oqbJA",
@@ -2000,9 +2148,9 @@ const initialData = [
     "曲名": "硝子の少年",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IiqOCE3_8iI",
@@ -2011,8 +2159,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OZ3UuZdUHZc",
@@ -2021,8 +2169,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=PfzzmEweKH8",
@@ -2030,9 +2178,9 @@ const initialData = [
     "曲名": "音色",
     "流行": "A",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xd8yYObr7L0",
@@ -2040,9 +2188,9 @@ const initialData = [
     "曲名": "KNOCKIN' ON YOUR DOOR",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Tj4aN-JxA7M",
@@ -2050,9 +2198,9 @@ const initialData = [
     "曲名": "flower",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WmM-KTcG3QY",
@@ -2060,9 +2208,9 @@ const initialData = [
     "曲名": "HONEY",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=kdEb-16-nyo",
@@ -2071,8 +2219,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FJHJCK7PhaI",
@@ -2081,8 +2229,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WfTkaKqQbGA",
@@ -2091,8 +2239,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yFGX82InozY",
@@ -2100,9 +2248,9 @@ const initialData = [
     "曲名": "Love in the sky",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DRLkiX-NZzE",
@@ -2110,9 +2258,9 @@ const initialData = [
     "曲名": "ROSIER",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=t1mcnxf8S9A",
@@ -2120,9 +2268,9 @@ const initialData = [
     "曲名": "ヴェル・エール～空白の瞬間の中で～",
     "流行": "A",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=UOpGHZxFRws",
@@ -2130,19 +2278,19 @@ const initialData = [
     "曲名": "月下の夜想曲",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RNBiaZbFGII",
     "歌手名": "m-flo",
     "曲名": "come again",
-    "流行": "A",
+    "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=HOsiSE_JTOM",
@@ -2150,9 +2298,9 @@ const initialData = [
     "曲名": "let go",
     "流行": "A",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=g0Pb5CDhndk",
@@ -2160,9 +2308,9 @@ const initialData = [
     "曲名": "気分上々↑↑",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=2jf5qfZTrrw",
@@ -2171,8 +2319,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qj9S58H59kM",
@@ -2180,9 +2328,9 @@ const initialData = [
     "曲名": "ブルーライトヨコスカ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RRACsXX6JB4",
@@ -2191,8 +2339,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=JeYJnSuYgrs",
@@ -2200,9 +2348,9 @@ const initialData = [
     "曲名": "つつみ込むように…",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qeffpUbJIBw",
@@ -2210,9 +2358,9 @@ const initialData = [
     "曲名": "ダンシング・オールナイト",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vSOLtBy-xas",
@@ -2220,69 +2368,69 @@ const initialData = [
     "曲名": "ESCAPE",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=C4zJfYA_ur8",
-    "歌手名": "Mr. Children",
+    "歌手名": "Mr.Children",
     "曲名": "CROSS ROAD",
     "流行": "S",
-    "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "評価": "S",
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EXxaBXKjl6Q",
-    "歌手名": "Mr. Children",
+    "歌手名": "Mr.Children",
     "曲名": "HANABI",
     "流行": "S",
-    "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "評価": "S",
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=rfVhsgCqG0I",
-    "歌手名": "Mr. Children",
+    "歌手名": "Mr.Children",
     "曲名": "イノセント・ワールド",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=4gd2oVFUcz0",
-    "歌手名": "Mr. Children",
+    "歌手名": "Mr.Children",
     "曲名": "名もなき詩",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mOJIchNt3RY",
-    "歌手名": "Mr. Children",
+    "歌手名": "Mr.Children",
     "曲名": "シーソーゲーム ～勇敢な恋の歌～",
     "流行": "S",
-    "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "評価": "S",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Nxwt_s1lM04",
-    "歌手名": "Mr. Children",
+    "歌手名": "Mr.Children",
     "曲名": "Tomorrow never knows",
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RkF5_BpBQU4",
@@ -2291,8 +2439,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=MYuSqV4JsVA",
@@ -2300,9 +2448,9 @@ const initialData = [
     "曲名": "Man & Woman",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=fSPHRIryljQ",
@@ -2310,9 +2458,9 @@ const initialData = [
     "曲名": "今を抱きしめて",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=SfwKRn6yzUM",
@@ -2321,8 +2469,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=iYkg90hDInc",
@@ -2330,9 +2478,9 @@ const initialData = [
     "曲名": "花",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1WTy2yqKI4w",
@@ -2340,9 +2488,9 @@ const initialData = [
     "曲名": "チョコレイト・ディスコ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=KbiSxunJatM",
@@ -2351,8 +2499,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EO4tRtPBq30",
@@ -2361,8 +2509,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=8RXUBBKAIs0",
@@ -2370,9 +2518,9 @@ const initialData = [
     "曲名": "これが私の生きる道",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AfjqLXhNSjw",
@@ -2380,9 +2528,9 @@ const initialData = [
     "曲名": "愛のしるし",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oVVrICEKdsQ",
@@ -2390,9 +2538,9 @@ const initialData = [
     "曲名": "渚にまつわるエトセトラ",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0AlITEvgs1Y",
@@ -2400,9 +2548,9 @@ const initialData = [
     "曲名": "フレンズ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mq9dl6hw_yk",
@@ -2410,9 +2558,9 @@ const initialData = [
     "曲名": "楽園ベイベー",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RgC8kKv0hqM",
@@ -2420,9 +2568,9 @@ const initialData = [
     "曲名": "1/3の純情な感情",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ObQ3mUp1cjk",
@@ -2430,9 +2578,9 @@ const initialData = [
     "曲名": "らいおんハート ～ SHAKE ～ 夜空ノムコウ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=s4qzMhw-09k",
@@ -2441,8 +2589,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Z2tedgbqJJs",
@@ -2451,8 +2599,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gU5oN0KVofU",
@@ -2461,8 +2609,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vBmU5v2EyxM",
@@ -2470,9 +2618,9 @@ const initialData = [
     "曲名": "HOT LIMIT",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FjG4A3_whXY",
@@ -2480,9 +2628,9 @@ const initialData = [
     "曲名": "離したくはない",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Rx0YTobCjag",
@@ -2490,9 +2638,9 @@ const initialData = [
     "曲名": "星空のディスタンス",
     "流行": "S",
     "評価": "B",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Lift8TF1Wes",
@@ -2500,9 +2648,9 @@ const initialData = [
     "曲名": "星のラブレター",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=4NO2WV_RYEo",
@@ -2510,9 +2658,9 @@ const initialData = [
     "曲名": "風になりたい",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xv55yyNxCuE",
@@ -2520,9 +2668,9 @@ const initialData = [
     "曲名": "JAM",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=M25353PADy8",
@@ -2530,9 +2678,9 @@ const initialData = [
     "曲名": "MY WINDING ROAD",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YIaghOy-HJU",
@@ -2540,9 +2688,9 @@ const initialData = [
     "曲名": "SPARK",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oGoEHWEGrjM",
@@ -2550,9 +2698,9 @@ const initialData = [
     "曲名": "プライマル。",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=r107W1YXrSM",
@@ -2561,8 +2709,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EgGnreyPmaQ",
@@ -2570,9 +2718,9 @@ const initialData = [
     "曲名": "BOY MEETS GIRL",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=s9BTjk0cXb0",
@@ -2580,9 +2728,9 @@ const initialData = [
     "曲名": "あー夏休み",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=R53CceEY77Y",
@@ -2590,9 +2738,9 @@ const initialData = [
     "曲名": "情熱",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=u25u9zedIBM",
@@ -2601,8 +2749,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=95RLXE7um68",
@@ -2610,9 +2758,9 @@ const initialData = [
     "曲名": "もっと強く抱きしめたなら",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZItcRV_K268",
@@ -2620,9 +2768,9 @@ const initialData = [
     "曲名": "愛が止まらない",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=nspXcSLwAA8",
@@ -2631,8 +2779,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QjLddLFpxvg",
@@ -2640,9 +2788,9 @@ const initialData = [
     "曲名": "Forever Love",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Oj9bvmzTR2A",
@@ -2651,8 +2799,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AJWIaqKDVp8",
@@ -2660,9 +2808,9 @@ const initialData = [
     "曲名": "紅",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jQSQQ5EZFvY",
@@ -2671,8 +2819,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=tB9xGidazZE",
@@ -2680,9 +2828,9 @@ const initialData = [
     "曲名": "じんじん",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jHdbJMkmQig",
@@ -2691,8 +2839,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=tPLBxLHM_MA",
@@ -2701,8 +2849,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jaFE9YH3Zmk",
@@ -2711,8 +2859,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=a7WhrI0Bbnk",
@@ -2720,9 +2868,9 @@ const initialData = [
     "曲名": "待つわ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oh921wAY1Lg",
@@ -2731,8 +2879,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=a-DVTrSkXI0",
@@ -2741,8 +2889,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=61z-cqg28R8",
@@ -2750,9 +2898,9 @@ const initialData = [
     "曲名": "SAKURA",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lz8frtP6_kk",
@@ -2761,8 +2909,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=NzIcRQBkMY8",
@@ -2770,9 +2918,9 @@ const initialData = [
     "曲名": "帰りたくなったよ",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OhNF--JhfPg",
@@ -2780,9 +2928,9 @@ const initialData = [
     "曲名": "気まぐれロマンティック",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qeXIMgYYg8s",
@@ -2790,9 +2938,9 @@ const initialData = [
     "曲名": "茜色の約束",
     "流行": "A",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=fqE3Yj6S6PQ",
@@ -2800,9 +2948,9 @@ const initialData = [
     "曲名": "ブルー・ライト・ヨコハマ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3a9eXEKM3AA",
@@ -2811,8 +2959,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=MgCrAXMcbD8",
@@ -2820,9 +2968,9 @@ const initialData = [
     "曲名": "いなかっぺ大将 OP",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=-_NaRPkaKdw",
@@ -2830,9 +2978,9 @@ const initialData = [
     "曲名": "ハイスクールララバイ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AiJIP3ARoJs",
@@ -2840,9 +2988,9 @@ const initialData = [
     "曲名": "なごり雪",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OyuLeL5xsR8",
@@ -2851,8 +2999,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bssK6prrHrQ",
@@ -2861,8 +3009,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ATU0gXzMsLw",
@@ -2870,9 +3018,9 @@ const initialData = [
     "曲名": "ガッツだぜ！！",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Z28KuShADpw",
@@ -2880,9 +3028,9 @@ const initialData = [
     "曲名": "それが答えだ！",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GdSg_NdtGbc",
@@ -2890,9 +3038,9 @@ const initialData = [
     "曲名": "バンザイ～好きでよかった～",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=L-ZWzztTX54",
@@ -2900,9 +3048,9 @@ const initialData = [
     "曲名": "笑えれば",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lmRBXQAqCy4",
@@ -2911,8 +3059,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0melyLHqP-s",
@@ -2920,9 +3068,9 @@ const initialData = [
     "曲名": "今宵の月のように",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gWFX_JqYYt8",
@@ -2931,8 +3079,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=iLeDUwKf9PM",
@@ -2940,9 +3088,9 @@ const initialData = [
     "曲名": "15の夜",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EPUtO0gNHPA",
@@ -2950,9 +3098,9 @@ const initialData = [
     "曲名": "I LOVE YOU",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=y1Ng1BjGtwo",
@@ -2961,8 +3109,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zOZR0DAHxI0",
@@ -2970,19 +3118,19 @@ const initialData = [
     "曲名": "YES-No",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=l-xcmbvi-YY",
     "歌手名": "オフコース",
-    "曲名": "さよなら ",
+    "曲名": "さよなら",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OQFDZ3086gs",
@@ -2990,9 +3138,9 @@ const initialData = [
     "曲名": "言葉にできない",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bBlwcDAx74s",
@@ -3000,9 +3148,9 @@ const initialData = [
     "曲名": "心の旅",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RLFGkxHPrUk",
@@ -3011,8 +3159,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=8oXW63oSaLk",
@@ -3020,9 +3168,9 @@ const initialData = [
     "曲名": "冬のファンタジー",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=kRaJsFM7VV8",
@@ -3030,9 +3178,9 @@ const initialData = [
     "曲名": "I'm proud",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WVa6PTlyCxw",
@@ -3040,9 +3188,9 @@ const initialData = [
     "曲名": "かぼちゃワインOP",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AbPL8KdXojg",
@@ -3050,9 +3198,9 @@ const initialData = [
     "曲名": "学生街の喫茶店",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=hJYTet8IefE",
@@ -3060,9 +3208,9 @@ const initialData = [
     "曲名": "涙くんさよなら",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=8WBSGQx8Z7o",
@@ -3071,8 +3219,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=JMtPy5lz258",
@@ -3080,9 +3228,9 @@ const initialData = [
     "曲名": "キャプテン　OP　君は何かができる",
     "流行": "A",
     "評価": "B",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=r-xkZtucx1Y",
@@ -3091,8 +3239,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=avC7-ljlWus",
@@ -3101,8 +3249,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xdYPswEY3yE",
@@ -3111,8 +3259,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=7TkDjPdwdbA",
@@ -3120,9 +3268,9 @@ const initialData = [
     "曲名": "年下の男の子",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=s7OejXEnZIU",
@@ -3131,8 +3279,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=SbU9ZZ0WHnA",
@@ -3141,8 +3289,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dZ7SCfplwcg",
@@ -3150,9 +3298,9 @@ const initialData = [
     "曲名": "大都会",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ba0juE9ROCg",
@@ -3160,9 +3308,9 @@ const initialData = [
     "曲名": "天使にふれたよ!",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=NeYQOpMCt2k",
@@ -3171,8 +3319,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yegBF2yoTDo",
@@ -3180,9 +3328,9 @@ const initialData = [
     "曲名": "さくら",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IV7usfiEbms",
@@ -3191,8 +3339,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BC9P3DSZu0A",
@@ -3200,9 +3348,9 @@ const initialData = [
     "曲名": "女々しくて",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=J1-4KwD3tT8",
@@ -3211,8 +3359,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9JPntOdxJLM",
@@ -3220,9 +3368,9 @@ const initialData = [
     "曲名": "YELL ～エール～",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GCx-zSwQNb4",
@@ -3230,9 +3378,9 @@ const initialData = [
     "曲名": "ここにしか咲かない花",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WPH1BLHKOJE",
@@ -3240,9 +3388,9 @@ const initialData = [
     "曲名": "蕾",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Dsdxxrnz1AQ",
@@ -3251,8 +3399,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=hYl8z3wlHZ0",
@@ -3261,8 +3409,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5Cl75Oohkps",
@@ -3270,9 +3418,9 @@ const initialData = [
     "曲名": "あの時君は若かった",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=7T00uNWKqvs",
@@ -3280,9 +3428,9 @@ const initialData = [
     "曲名": "日曜日よりの使者",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mXmoFVuoaVM",
@@ -3291,8 +3439,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bS8I95IP9TU",
@@ -3301,8 +3449,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WZUmSNcmcwg",
@@ -3311,8 +3459,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=2kbuQb98_AY",
@@ -3320,9 +3468,9 @@ const initialData = [
     "曲名": "あの素晴しい愛をもう一度",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=LIlZCmETvsY",
@@ -3331,8 +3479,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0ynrQXhHvgc",
@@ -3341,8 +3489,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=u66DIUNUQhc",
@@ -3351,8 +3499,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WBdj14T0ZVY",
@@ -3360,9 +3508,9 @@ const initialData = [
     "曲名": "いとしのエリー",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FiDaqa4xKbU",
@@ -3370,9 +3518,9 @@ const initialData = [
     "曲名": "ミス・ブランニュー・デイ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vomlA812I2Q",
@@ -3380,9 +3528,9 @@ const initialData = [
     "曲名": "みんなのうた",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vTkSyBp635M",
@@ -3391,18 +3539,18 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jQILVt98cmU",
     "歌手名": "ジッタリン・ジン",
     "曲名": "プレゼント",
     "流行": "S",
-    "評価": "S",
+    "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BFvdvIFsvPg",
@@ -3411,8 +3559,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vXSb3Khyikg",
@@ -3421,18 +3569,18 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AvEu9JptjnM",
-    "歌手名": "ジュディ・オング ",
+    "歌手名": "ジュディ・オング",
     "曲名": "魅せられて",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=6zEAGUwjDNM",
@@ -3440,9 +3588,9 @@ const initialData = [
     "曲名": "戦争を知らない子どもたち",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IvDTkTKi5pA",
@@ -3450,9 +3598,9 @@ const initialData = [
     "曲名": "全力少年",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=J5Z7tIq7bco",
@@ -3461,8 +3609,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Eze6-eHmtJg",
@@ -3471,8 +3619,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Ey3mlNmuXzc",
@@ -3480,9 +3628,9 @@ const initialData = [
     "曲名": "空も飛べるはず",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=8TpR6vIdhbE",
@@ -3491,8 +3639,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=CS7Ujl3EJFk",
@@ -3501,8 +3649,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dTVXfrLsp7A",
@@ -3510,9 +3658,9 @@ const initialData = [
     "曲名": "行け！タイガーマスク",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Dyd1BOPXu_A",
@@ -3521,8 +3669,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oB7cXlYZOOc",
@@ -3530,9 +3678,9 @@ const initialData = [
     "曲名": "駅",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=2L0bVbrftsI",
@@ -3540,9 +3688,9 @@ const initialData = [
     "曲名": "抱きしめてTONIGHT",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1LLsV-myhmQ",
@@ -3551,8 +3699,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dvbjQoX9p6o",
@@ -3560,9 +3708,9 @@ const initialData = [
     "曲名": "ギザギザハートの子守唄",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AQCinctvWes",
@@ -3570,9 +3718,9 @@ const initialData = [
     "曲名": "ジュリアに傷心",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dbs_F8HmWmg",
@@ -3580,9 +3728,9 @@ const initialData = [
     "曲名": "素直にI'm Sorry",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0-a02uymYbA",
@@ -3590,9 +3738,9 @@ const initialData = [
     "曲名": "夜明けのブレス",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ALjoR-0rDMo",
@@ -3601,8 +3749,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xNvTmNMlVjA",
@@ -3610,9 +3758,9 @@ const initialData = [
     "曲名": "てんとう虫のサンバ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=NEb9MTNk3y4",
@@ -3620,9 +3768,9 @@ const initialData = [
     "曲名": "シャングリラ",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QpYhfhqIT2Q",
@@ -3631,8 +3779,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=kBoVvij_uqk",
@@ -3640,9 +3788,9 @@ const initialData = [
     "曲名": "青春の影",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YIoykiM_AYw",
@@ -3651,8 +3799,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=52038YtM9Z0",
@@ -3661,8 +3809,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5E9dX2Hraso",
@@ -3671,8 +3819,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=fkHj4LD7nGg",
@@ -3681,8 +3829,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=i68RH-EbmTM",
@@ -3690,9 +3838,9 @@ const initialData = [
     "曲名": "或る日突然",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ePj6ctaXquI",
@@ -3701,8 +3849,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=tenaYCLIuOc",
@@ -3711,8 +3859,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=sZC3FLUWY4A",
@@ -3721,8 +3869,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=XkqIs91vJFQ",
@@ -3731,8 +3879,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=7sGpUdShZks",
@@ -3741,8 +3889,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=UtADP9e-RC8",
@@ -3750,9 +3898,9 @@ const initialData = [
     "曲名": "パーマン OP",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=238shSa2kbU",
@@ -3761,8 +3909,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=miZcc0vg_DE",
@@ -3770,9 +3918,9 @@ const initialData = [
     "曲名": "はじめ人間ギャートルズ OP",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5WYHAaUlzpw",
@@ -3781,8 +3929,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=XJOEfGApwOo&t=68s",
@@ -3790,9 +3938,9 @@ const initialData = [
     "曲名": "いちご白書をもう一度",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=-TuFqVLDxZU",
@@ -3800,19 +3948,19 @@ const initialData = [
     "曲名": "3年目の浮気",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pFuuRhk2tM0",
     "歌手名": "ピンキーとキラーズ",
-    "曲名": "恋の季節 ",
+    "曲名": "恋の季節",
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Ws7b58Rn8aM",
@@ -3821,958 +3969,958 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=6xxMbNm4NNI",
     "歌手名": "ピンク・レディー",
     "曲名": "カルメン’77［フリツケ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=--cLA33-Afw",
     "歌手名": "ピンク・レディー",
     "曲名": "サウスポー",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=XtnfxaXy2UM",
     "歌手名": "ピンク・レディー",
     "曲名": "サウスポー",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GxQtGioreD8",
     "歌手名": "ピンク・レディー",
     "曲名": "ペッパー警部",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pnCc3fp2ZC0",
     "歌手名": "ピンク・レディー",
     "曲名": "渚のシンドバッド",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9aAf0csBAAc",
     "歌手名": "ピンク・レディー",
     "曲名": "渚のシンドバッド",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=KYtvAgCNyAM",
     "歌手名": "ピンク・レディー",
     "曲名": "透明人間［フリツケ］",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IqYnEiNrDSA",
     "歌手名": "フィンガー5",
     "曲名": "学園天国",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v-ocCUhCsJk",
     "歌手名": "フィンガー5",
     "曲名": "恋のダイヤル6700",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WpSkxM6vj08",
     "歌手名": "ブラックビスケッツ",
     "曲名": "Timing～タイミング～",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IKjRLKQo7O0",
     "歌手名": "プリンセス プリンセス",
     "曲名": "Diamonds",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=rzfLx6TVCv0",
     "歌手名": "プリンセス プリンセス",
     "曲名": "M",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=x-_yZKI7EhE",
     "歌手名": "プリンセス プリンセス",
     "曲名": "世界でいちばん熱い夏",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=q_8ulbgIF5w",
     "歌手名": "ポルノグラフィティ",
     "曲名": "アポロ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DoGDllxt6Ao",
     "歌手名": "ポルノグラフィティ",
     "曲名": "サウダージ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EVlfJQ3G9yE",
     "歌手名": "まんが日本昔ばなし",
     "曲名": "にんげんっていいな　1991年",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=KANo91D0WWk",
     "歌手名": "まんが日本昔ばなし",
     "曲名": "花頭巾にっぽん昔ばなし",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=72wyEzmMKiE",
     "歌手名": "ミス花子",
     "曲名": "河内のオッサンの唄",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=L2PKUfaliJA",
     "歌手名": "みつばちハッチ",
     "曲名": "みつばちハッチ昆虫物語 みなしごハッチop",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=6A7j6eryPV4",
     "歌手名": "モーニング娘。",
     "曲名": "モーニング娘。 LOVEマシーン",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=kQEJoBKEr0A",
     "歌手名": "森高千里",
     "曲名": "雨",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9GrOq7VY7lM",
     "歌手名": "やしきたかじん",
     "曲名": "やっぱ好きやねん",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=k2lor5GFj20",
     "歌手名": "やしきたかじん",
     "曲名": "東京",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oFKHEerkhu4",
     "歌手名": "ヤッターマン",
     "曲名": "ヤッターマンOP",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=PRJoAPH0ZGo",
     "歌手名": "ゆず",
     "曲名": "栄光の架橋",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=hhDzDL9Y2Lo",
     "歌手名": "ゆず",
     "曲名": "夏色",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=JV46SwItmY0",
     "歌手名": "ラッツ＆スター",
     "曲名": "Tシャツに口紅",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Jw9uo1xKOKA",
     "歌手名": "ラッツ＆スター",
     "曲名": "め組のひと",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=noBcbcg9rQk",
     "歌手名": "ラッツ＆スター",
     "曲名": "ランナウェイ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=NUI9c-D1IcA",
     "歌手名": "ラッツ＆スター",
     "曲名": "夢で逢えたら",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=LZUR5B2bVRw",
     "歌手名": "ラッツ&スター",
     "曲名": "夢で逢えたら",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=2L5Yo6ww0aU",
     "歌手名": "ル・クプル",
     "曲名": "ひだまりの詩",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1wxTksLZ1Mw",
     "歌手名": "レミオロメン",
     "曲名": "粉雪",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=A5sFK9hj5y0",
     "歌手名": "ロス・インディオス＆シルヴィア",
     "曲名": "別れても好きな人",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dZoNIahi69M",
     "歌手名": "悪魔くん",
     "曲名": "悪魔くん OP",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9M3aJPz7BOc",
     "歌手名": "安室奈美恵",
     "曲名": "CAN YOU CELEBRATE?",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v4LFexW0-Js",
     "歌手名": "安室奈美恵",
     "曲名": "CAN YOU CELEBRATE?",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dsBk6kNyBQY",
     "歌手名": "安全地帯",
     "曲名": "悲しみにさよなら",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yiUuVRBaCy0",
     "歌手名": "杏里",
     "曲名": "CAT'S EYE",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=H9R1Hl6sJeE",
     "歌手名": "杏里",
     "曲名": "I Can't Stop The Loneliness",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mCCZDTgdoTs",
     "歌手名": "井上陽水",
     "曲名": "Make up Shadow",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dNS4rE2dKJA",
     "歌手名": "井上陽水",
     "曲名": "少年時代",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=HKOpvoaN0ps",
     "歌手名": "一休さん",
     "曲名": "一休さん ED ～ははうえさま～",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=wa2vy3riKFw",
     "歌手名": "一休さん",
     "曲名": "一休さんOP",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=TngUo1gDNOg",
     "歌手名": "一青窈",
     "曲名": "ハナミズキ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BGVBlc1LOsg",
     "歌手名": "稲垣潤一",
     "曲名": "クリスマスキャロルの頃には",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=rJwLPcL2u3c",
     "歌手名": "宇多田ヒカル",
     "曲名": "Automatic",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=o1sUaVJUeB0",
     "歌手名": "宇多田ヒカル",
     "曲名": "First Love",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=h5ChaMdRniM",
     "歌手名": "横浜銀蝿",
     "曲名": "ツッパリHigh School Rock'n Roll 登校編",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=A7ymSSPbewg",
     "歌手名": "横浜銀蝿",
     "曲名": "男の勲章",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xfWnmxUP-PI",
     "歌手名": "欧陽菲菲",
     "曲名": "Love Is Over",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BFMEvtbw-lI",
     "歌手名": "岡本真夜",
     "曲名": "TOMORROW",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=w3-qKDP26xA",
     "歌手名": "仮面ライダー",
     "曲名": "仮面ライダーOP",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ooPAyvG5HIg",
     "歌手名": "加山雄三",
     "曲名": "お嫁においで",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=aLs0GTQjzXc",
     "歌手名": "加山雄三",
     "曲名": "君といつまでも",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=11Kv9v151_0",
     "歌手名": "加山雄三",
     "曲名": "蒼い星くず",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mHI4Eoc5r6Q",
     "歌手名": "加山雄三",
     "曲名": "夜空の星",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5TR1wJCimyk",
     "歌手名": "夏川りみ",
     "曲名": "涙そうそう",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0gciVpfFh9Y",
     "歌手名": "科学忍者隊ガッチャマン",
     "曲名": "科学忍者隊ガッチャマン　オープニング",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=caj402eymGU",
     "歌手名": "歌のいずこ姐さん",
     "曲名": "メトロポリタン美術館いまいずこ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Uxy9Keo_KVc",
     "歌手名": "河島英五",
     "曲名": "酒と泪と男と女",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pMM6DbV4GpI",
     "歌手名": "怪物くん",
     "曲名": "怪物くん(1980) OP&ED",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DdO_dZyFsZg",
     "歌手名": "皆川おさむ",
     "曲名": "黒ネコのタンゴ (1969)",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9-exu6mzKLE",
     "歌手名": "笠置シヅ子",
     "曲名": "東京ブギウギ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pyc2tdcRfmM",
     "歌手名": "笠置シヅ子",
     "曲名": "買物ブギ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lNbnYAyBKwY",
     "歌手名": "岩崎宏美",
     "曲名": "聖母たちのララバイ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=j0vpP976jZg",
     "歌手名": "岩崎良美",
     "曲名": "タッチ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=uiFJhndmW4Q",
     "歌手名": "機動戦士ガンダム",
     "曲名": "機動戦士ガンダム OP (1979) 翔べ! ガンダム",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=iyw6-KVmgow",
     "歌手名": "鬼束ちひろ",
     "曲名": "月光",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=4-YgVqpHTcc",
     "歌手名": "吉幾三",
     "曲名": "雪國",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5raK_iAFrn8",
     "歌手名": "久保田早紀",
     "曲名": "異邦人",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YZ6wH-MqZvM",
     "歌手名": "久保田利伸",
     "曲名": "LA･LA･LA LOVE SONG",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oKXU7nFs8e4",
     "歌手名": "久保田利伸",
     "曲名": "Missing",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=uDZeka8oKnE",
     "歌手名": "宮城まり子",
     "曲名": "手のひらを太陽に",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1mUq1ulZtyE",
     "歌手名": "橋本洋介",
     "曲名": "焼肉食べ放題",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IxLYjWLN6Rg",
     "歌手名": "郷ひろみ",
     "曲名": "2億4千万の瞳",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lmYmXbJ5t9Q",
     "歌手名": "郷ひろみ",
     "曲名": "GOLDFINGER '99",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=HAkUeMEOXzQ",
     "歌手名": "郷ひろみ",
     "曲名": "言えないよ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dHmtEIecXgg",
     "歌手名": "玉置浩二",
     "曲名": "メロディー",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3X8ACv53TX4",
     "歌手名": "近藤真彦",
     "曲名": "ギンギラギンにさりげなく",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=15MNHdubf3w",
     "歌手名": "桑田佳祐／Mr.Children",
     "曲名": "奇跡の地球",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=duXT3U4ddNE",
     "歌手名": "研ナオコ",
     "曲名": "夏をあきらめて",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=nFN3iZ2yrNM",
     "歌手名": "五輪真弓",
     "曲名": "恋人よ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qllc2bYRFY4",
     "歌手名": "倖田來未",
     "曲名": "キューティーハニー",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=k5bKXXwqC1Q",
     "歌手名": "光GENJI",
     "曲名": "STAR LIGHT",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Mzw07euzYQ0",
     "歌手名": "光GENJI",
     "曲名": "ガラスの十代",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DhTqR99eGg4",
     "歌手名": "光GENJI",
     "曲名": "パラダイス銀河",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=VT1GnjxcwZc",
     "歌手名": "工藤静香",
     "曲名": "MUGO・ん・・・色っぽい",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Y-vtEQJTwI8",
     "歌手名": "工藤静香",
     "曲名": "慟哭",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yDgro0363DU",
     "歌手名": "広瀬香美",
     "曲名": "ゲレンデがとけるほど恋したい",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=KqOlfF-VDLw",
     "歌手名": "広瀬香美",
     "曲名": "ゲレンデがとけるほど恋したい",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=T8yZWCg85Cs",
     "歌手名": "広瀬香美",
     "曲名": "ロマンスの神様",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AgfUewgwPOw",
     "歌手名": "広瀬香美",
     "曲名": "ロマンスの神様",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pG0bviOCSH0",
     "歌手名": "広末涼子",
     "曲名": "MajiでKoiする5秒前",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=o6wtDPVkKqI",
     "歌手名": "高橋洋子",
     "曲名": "残酷な天使のテーゼ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=UR_OQTWoI2w",
@@ -4780,9 +4928,9 @@ const initialData = [
     "曲名": "ランバダ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gkS9F1oe7Z4",
@@ -4791,8 +4939,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=PRka5vlESV0",
@@ -4800,9 +4948,9 @@ const initialData = [
     "曲名": "PIECE OF MY WISH",
     "流行": "A",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=MWsUwoPxBms",
@@ -4810,9 +4958,9 @@ const initialData = [
     "曲名": "PRIDE",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zUYcZ3ZQoOg",
@@ -4820,249 +4968,249 @@ const initialData = [
     "曲名": "雨にキッスの花束を",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=_VNi7apme-w",
     "歌手名": "財津和夫",
     "曲名": "サボテンの花",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ip2U3w6b9rU",
     "歌手名": "坂本 九",
     "曲名": "上を向いて歩こう",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Z26VlA7OjS0",
     "歌手名": "山口百恵",
     "曲名": "いい日旅立ち",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DuErvJZomSw",
     "歌手名": "山口百恵",
     "曲名": "いい日旅立ち",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zl8syKdknrY",
     "歌手名": "山口百恵",
     "曲名": "プレイバック Part  2",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zrABEMNvrvA",
     "歌手名": "山口百恵",
     "曲名": "秋桜",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FUKotXlfmYk",
     "歌手名": "山根康広",
     "曲名": "Get Along Together-愛を贈りたいから-",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=M4sWFgBYNbI",
     "歌手名": "山崎まさよし",
     "曲名": "セロリ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ipiUI2TBlnk",
     "歌手名": "山本リンダ",
     "曲名": "どうにもとまらない",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Cfz3CcmTROY",
     "歌手名": "子門真人",
     "曲名": "およげ たいやきくん",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=CQ5KhUyDSq4",
     "歌手名": "子門真人",
     "曲名": "ほねほneワルツ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3ii96gUvUlM",
     "歌手名": "寺尾聰",
     "曲名": "ルビーの指環 (1981)",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QGYfX8z4goE",
     "歌手名": "篠原涼子",
     "曲名": "恋しさと せつなさと 心強さと",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=U_ZjULpq8oA",
     "歌手名": "舟木一夫",
     "曲名": "高校三年生",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0nvnYwi6mQE",
     "歌手名": "小泉今日子",
     "曲名": "あなたに会えてよかった",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=-BI6ePeBS90",
     "歌手名": "小泉今日子",
     "曲名": "なんてったってアイドル",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Rowzun7Kv78",
     "歌手名": "小泉今日子",
     "曲名": "なんてったってアイドル",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GTAVWhSPK90",
     "歌手名": "小泉今日子",
     "曲名": "渚のはいから人魚",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=6lKTQbrM9RI",
     "歌手名": "小沢健二",
     "曲名": "今夜はブギー・バック",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=aSg-Iupw3yk",
     "歌手名": "小田和正",
     "曲名": "たしかなこと",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=LDe0rbDromY",
     "歌手名": "小田和正",
     "曲名": "ラブ・ストーリーは突然に",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Nn_OTqn1blw",
     "歌手名": "小田和正",
     "曲名": "たしかなこと",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YPswF6FQBbU",
     "歌手名": "小野正利",
     "曲名": "You're the Only・・・",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vhSng8rgOw4",
     "歌手名": "小柳ゆき",
     "曲名": "あなたのキスを数えましょう～You were mine～",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WYNC8JzV5j8",
@@ -5071,8 +5219,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=alXL2lKYb9s",
@@ -5080,19 +5228,19 @@ const initialData = [
     "曲名": "もしかしてPARTⅡ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=CxiHVPqLf8s",
     "歌手名": "少年隊",
     "曲名": "仮面舞踏会",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BxEf3vGTeWQ",
@@ -5101,8 +5249,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=itBhCmIvtAA",
@@ -5110,9 +5258,9 @@ const initialData = [
     "曲名": "愛のメモリー",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WE_US-HXyMI",
@@ -5120,9 +5268,9 @@ const initialData = [
     "曲名": "SWEET MEMORIES",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OBRzwLgwalA",
@@ -5131,8 +5279,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=KWyuHedBJJo",
@@ -5141,8 +5289,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DU4hVxyGG2c",
@@ -5151,8 +5299,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jLqIUsQjQRQ",
@@ -5160,9 +5308,9 @@ const initialData = [
     "曲名": "抱いて・・・",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WojtxUZvuKA",
@@ -5170,9 +5318,9 @@ const initialData = [
     "曲名": "夏の扉",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=fYiNK4ZERlM",
@@ -5180,9 +5328,9 @@ const initialData = [
     "曲名": "風立ちぬ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xK0alF1lkYI",
@@ -5190,9 +5338,9 @@ const initialData = [
     "曲名": "瞳はダイアモンド",
     "流行": "S",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=-ZpQmBhxOT0",
@@ -5200,9 +5348,9 @@ const initialData = [
     "曲名": "リフレインが叫んでる",
     "流行": "S",
     "評価": "S",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qX7pFYH9O04",
@@ -5211,8 +5359,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=fxTD_ZIAnH4",
@@ -5221,18 +5369,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
-  },
-  {
-    "URL": "https://www.youtube.com/watch?v=u-FdVwDSLm8",
-    "歌手名": "松任谷由実",
-    "曲名": "真夏の夜の夢",
-    "流行": "S",
-    "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=kSrje0jehnw",
@@ -5241,8 +5379,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Z2VoEN1iooE",
@@ -5251,8 +5389,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0B_QUJRv6y0",
@@ -5261,8 +5399,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=hhu7_3gO58M",
@@ -5270,9 +5408,9 @@ const initialData = [
     "曲名": "襟裳岬",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OD11j9a5VpM",
@@ -5280,9 +5418,9 @@ const initialData = [
     "曲名": "さくら",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FdyOa2WIY6s",
@@ -5291,8 +5429,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=a-rTnkz54NU",
@@ -5301,8 +5439,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=J2Ya8mWfulU",
@@ -5311,8 +5449,8 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=V9RpKlzfSv0",
@@ -5321,8 +5459,8 @@ const initialData = [
     "流行": "S",
     "評価": "A",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RkyVwvaSTyE",
@@ -5330,529 +5468,529 @@ const initialData = [
     "曲名": "もしもピアノが弾けたなら",
     "流行": "A",
     "評価": "A",
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=VCC4fjOln0o",
     "歌手名": "青い三角定規",
     "曲名": "太陽がくれた季節",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "S",
+    "評価": "B",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=sXfDgY_GU2Y",
     "歌手名": "斉藤こず恵",
     "曲名": "山口さんちのツトム君",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "A",
+    "評価": "A",
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9G82-cb5zUk",
     "歌手名": "斉藤和義",
     "曲名": "歌うたいのバラッド（2008 Ver.）",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Wc_-EpdVaZo",
     "歌手名": "石井 明美",
     "曲名": "CHA CHA CHA",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "S",
+    "評価": "A",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xuMKgVJQZkQ",
     "歌手名": "石川さゆり",
     "曲名": "津軽海峡・冬景色",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=cwL09UKDqdI",
     "歌手名": "石川さゆり",
     "曲名": "天城越え",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ycbUJFRcTEc",
     "歌手名": "石川ひとみ",
     "曲名": "まちぶせ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FlVIkrvF1MM",
     "歌手名": "川橋啓史",
     "曲名": "山口さんちのツトム君",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GGeoyUI9xmU",
     "歌手名": "川本真琴",
     "曲名": "1/2",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=u0-iM590YYA",
     "歌手名": "倉木麻衣",
     "曲名": "Secret of my heart",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=TIwKI0qVJY0",
     "歌手名": "太田裕美",
     "曲名": "木綿のハンカチーフ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QWEkq7i0W_A",
     "歌手名": "大江千里",
     "曲名": "格好悪いふられ方",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xUkQi4lV-Cs",
     "歌手名": "大杉久美子",
     "曲名": "アタックNo.1",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=82IIgZrW1w8",
     "歌手名": "大滝詠一",
     "曲名": "幸せな結末",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=upODO6OuOOk",
     "歌手名": "大塚 愛",
     "曲名": "さくらんぼ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=uQFBQu-huD0",
     "歌手名": "大塚 愛",
     "曲名": "さくらんぼ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=JhpwJNZSp2M",
     "歌手名": "大塚 愛",
     "曲名": "プラネタリウム",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mAmUB7M0EkY",
     "歌手名": "沢田聖子",
     "曲名": "卒業 1982",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EJBRg10e-es",
     "歌手名": "沢田聖子",
     "曲名": "沢田聖子 See You Again",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=iDgrOv18fQM",
     "歌手名": "沢田知可子",
     "曲名": "会いたい",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=y1VYG5PQq54",
     "歌手名": "中森明菜",
     "曲名": "飾りじゃないのよ涙は",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0FxT-6ricE8",
     "歌手名": "中川翔子",
     "曲名": "City Hunter ～愛よ消えないで～",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AoToyjajWq0",
     "歌手名": "中島みゆき",
     "曲名": "銀の龍の背に乗って",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dxtE6iynsAY",
     "歌手名": "中島みゆき",
     "曲名": "空と君のあいだに",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=78UwqbJnI18",
     "歌手名": "中島みゆき",
     "曲名": "糸",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=aOOpDfmy7mw",
     "歌手名": "中島みゆき",
     "曲名": "時代",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v2SlpjCz7uE",
     "歌手名": "中島みゆき",
     "曲名": "地上の星",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mF5Qq2YheTg",
     "歌手名": "中島美嘉",
     "曲名": "中島美嘉雪の華",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jIe5GtVhD0k",
     "歌手名": "長渕剛",
     "曲名": "とんぼ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AoY2jZ6NBsU",
     "歌手名": "長渕剛",
     "曲名": "巡恋歌",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=_OWPJQ5N5vs",
     "歌手名": "鳥羽一郎",
     "曲名": "兄弟船",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zldBTSx9JpE",
     "歌手名": "椎名林檎",
     "曲名": "ギブス",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ECxBHhMc7oI",
     "歌手名": "椎名林檎",
     "曲名": "本能",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=El6XFu_tyLY",
     "歌手名": "天才バカボン",
     "曲名": "天才バカボン",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Sb_08h2nlLM",
     "歌手名": "天才バカボン",
     "曲名": "天才バカボンのOP",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yH9nRTI_tZA",
     "歌手名": "電気グルーヴ",
     "曲名": "Shangri-La",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zfcO3Y58m24",
     "歌手名": "渡辺美里",
     "曲名": "My Revolution",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bEkhJPPfREM",
     "歌手名": "都はるみ",
     "曲名": "好きになった人",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bFm3uoHqhII",
     "歌手名": "島倉千代子",
     "曲名": "人生いろいろ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bFm3uoHqhII",
     "歌手名": "島倉千代子",
     "曲名": "人生いろいろ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1nOIWI4OzD0",
     "歌手名": "島谷ひとみ",
     "曲名": "亜麻色の髪の乙女",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Loh2st9gMUE",
     "歌手名": "藤井フミヤ",
     "曲名": "Another Orion",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IRV6G0M8Zjg",
     "歌手名": "藤井フミヤ",
     "曲名": "True Love",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gz2DJWPLsq8",
     "歌手名": "藤巻亮太",
-    "曲名": 45725,
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "曲名": "45725",
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gdtCeInzr7g",
     "歌手名": "藤山一郎",
     "曲名": "青い山脈",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OGt31ml0EUU",
     "歌手名": "徳永英明",
     "曲名": "夢を信じて",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=P-20hyNYMt0",
     "歌手名": "日野美歌",
     "曲名": "男と女のラブゲーム",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=SlRDB8G-Q_U",
     "歌手名": "日野美歌",
     "曲名": "氷雨",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zwzoK4VWAHM",
     "歌手名": "忍者ハットリくん",
     "曲名": "アニソン 忍者ハットリくん OP 1981年",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RwEh816XjUk",
     "歌手名": "梅沢富美男",
     "曲名": "夢芝居",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Ze00CIK79qY",
     "歌手名": "爆風スランプ",
     "曲名": "Runner",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yGI0QZ4Gk34",
     "歌手名": "八代亜紀",
     "曲名": "舟唄",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DGDz13sSN2c",
@@ -5861,438 +5999,654 @@ const initialData = [
     "流行": "S",
     "評価": "S",
     "おすすめ": "◯",
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZFaJX1aV8pM",
     "歌手名": "美空ひばり",
     "曲名": "リンゴ追分",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IKSJvsvO6Yg",
     "歌手名": "美空ひばり",
     "曲名": "真赤な太陽",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Pb-N5VPy-40",
     "歌手名": "美空ひばり",
     "曲名": "川の流れのように",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EzzKuWjjhZE",
     "歌手名": "美空ひばり",
     "曲名": "川の流れのように",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3Xho-8tVA-E",
     "歌手名": "美空ひばり",
     "曲名": "東京キッド",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vRot2QZOH3w",
     "歌手名": "美少女戦士セーラームーン",
     "曲名": "美少女戦士セーラームーンOP",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5x_5yW6wpC8",
     "歌手名": "氷川きよし",
     "曲名": "きよしのズンドコ節",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AuZSyBa6phU",
     "歌手名": "浜崎あゆみ",
     "曲名": "SEASONS",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lHoEwxC3Fh8",
     "歌手名": "浜田省吾",
     "曲名": "もうひとつの土曜日",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jYAt0TivarE",
     "歌手名": "浜田省吾",
     "曲名": "悲しみは雪のように",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=61AsEkHB-i0",
     "歌手名": "布袋寅泰",
     "曲名": "Poison",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WfMEHQjHdH4",
     "歌手名": "布袋寅泰",
     "曲名": "スリル",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=_WTGwwM4xws",
     "歌手名": "風",
     "曲名": "22才の別れ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=uRijaxetcso",
     "歌手名": "風",
     "曲名": "はしだのりひことシューベルツ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AGYJ6jeu3p8",
     "歌手名": "福山雅治",
     "曲名": "桜坂",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Rhy7mmAWlsI",
     "歌手名": "平井 堅",
     "曲名": "瞳をとじて",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IHdfnKBAf0E",
     "歌手名": "平原綾香",
     "曲名": "Jupiter",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v-WUxs_fgeE",
     "歌手名": "米米CLUB",
     "曲名": "君がいるだけで",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v-WUxs_fgeE",
     "歌手名": "米米CLUB",
     "曲名": "君がいるだけで",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BDgUULLRVBU",
     "歌手名": "米米CLUB Official YouTube Channel",
     "曲名": "Shake Hip!(1986)",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GB95xoPUDHU",
     "歌手名": "魔法使いサリー",
     "曲名": "魔法使いサリー1989_op",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=XbCsY4-HV8M",
     "歌手名": "木山裕策",
     "曲名": "home",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=h5b-tBZfsT8",
     "歌手名": "木村カエラ",
     "曲名": "Butterfly",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Y0FiEZNZLRg",
     "歌手名": "木村カエラ",
     "曲名": "リルラ リルハ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WRJSPkKjRqo",
     "歌手名": "矢井田 瞳",
     "曲名": "My Sweet Darlin'",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zy8QttfQz_o",
     "歌手名": "薬師丸ひろ子",
     "曲名": "セーラー服と機関銃",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3Z6ONLWEVGA",
     "歌手名": "妖怪人間ベム",
     "曲名": "妖怪人間ベム Opening ＆ Ending",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ErzjKsRwU4s",
     "歌手名": "鈴木雅之",
     "曲名": "違う、そうじゃない",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BMmGR8qBzRQ",
     "歌手名": "鈴木聖美",
     "曲名": "ロンリー・チャップリン",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=U4MTW9ZcuQs",
     "歌手名": "氣志團",
     "曲名": "One Night Carnival",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=CkjmCwqhe-g",
     "歌手名": "槇原敬之",
     "曲名": "僕が一番欲しかったもの",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=b88pxLpMZKk",
     "歌手名": "槇原敬之",
     "曲名": "どんなときも",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ryBBU04OKus",
     "歌手名": "槇原敬之",
     "曲名": "どんなときも。",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Uo6JkQznzkM",
     "歌手名": "槇原敬之",
     "曲名": "どんなときも。",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=naz0-szzYXk",
     "歌手名": "槇原敬之",
     "曲名": "もう恋なんてしない",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YHj8O_SKpBk",
     "歌手名": "槇原敬之",
     "曲名": "遠く遠く",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=nLE6w_WJzRs",
     "歌手名": "槇原敬之",
     "曲名": "世界に一つだけの花",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yZt2XEjsduc",
     "歌手名": "槇原敬之",
     "曲名": "冬がはじまるよ",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=16AOXal0ytw",
     "歌手名": "德永英明",
     "曲名": "桜",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=hOrmu8X2A1g",
     "歌手名": "德永英明",
     "曲名": "レイニーブルー",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=C7QVaahn44A",
     "歌手名": "德永英明",
     "曲名": "壊れかけのRadio",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=c2AcM9iaPEw",
     "歌手名": "德永英明",
     "曲名": "夢を信じて",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=NhRD-Y6yttw",
     "歌手名": "髙橋真梨子",
     "曲名": "桃色吐息",
-    "流行": null,
-    "評価": null,
-    "おすすめ": null,
-    "花（XX/XX）": NaN,
-    "糸（XX/XX）": NaN
+    "流行": "",
+    "評価": "",
+    "おすすめ": "",
+    "花（XX/XX）": "",
+    "糸（XX/XX）": ""
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=inu2N03AqTI",
+    "歌手名": "鬼束ちひろ",
+    "曲名": "眩暈",
+    "流行": "A",
+    "評価": "A",
+    "おすすめ": ""
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=RXQRZ2Ub6BY",
+    "歌手名": "鬼束ちひろ",
+    "曲名": "流星群",
+    "流行": "A",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=LXft3v_cKHk",
+    "歌手名": "鬼束ちひろ",
+    "曲名": "私とワルツを",
+    "流行": "A",
+    "評価": "A",
+    "おすすめ": ""
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=BxJ86_wg-3M",
+    "歌手名": "鬼束ちひろ",
+    "曲名": "Sign",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=kQ9gbYURKy4&list=RDkQ9gbYURKy4&start_radio=1",
+    "歌手名": "松任谷由実",
+    "曲名": "守ってあげたい",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=LfQ0MVIYFnM",
+    "歌手名": "松任谷由実",
+    "曲名": "やさしさに包まれたなら",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=RwKHSa6NzWU",
+    "歌手名": "松任谷由実",
+    "曲名": "ルージュの伝言",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=yU2Znka--lY&list=RDN-uCT3jGEMs&index=3",
+    "歌手名": "つじあやの",
+    "曲名": "風になる",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=1ozaEf8U6N0",
+    "歌手名": "Crystal Kay（クリスタル ケイ）",
+    "曲名": "Boyfriend-partⅡ",
+    "流行": "A",
+    "評価": "A",
+    "おすすめ": ""
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=ULPWG114A0w",
+    "歌手名": "ジッタリン・ジン",
+    "曲名": "にちようび",
+    "流行": "A",
+    "評価": "A",
+    "おすすめ": ""
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=8HOA863lfyc",
+    "歌手名": "鬼束ちひろ",
+    "曲名": "We can go",
+    "流行": "A",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=KRWA33pXRjU&list=RDGMEMXdNDEg4wQ96My0DhjI-cIg&start_radio=1",
+    "歌手名": "今井美樹",
+    "曲名": "瞳がほほえむから",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=bbaU0fh0CNw",
+    "歌手名": "m-flo",
+    "曲名": "REEEWIND!",
+    "流行": "A",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=YVqZKflL4PY",
+    "歌手名": "m-flo loves BoA",
+    "曲名": "the Love Bug",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=RVOgbXmCo5g",
+    "歌手名": "m-flo loves MINMI",
+    "曲名": "Lotta Love -m&M mix-",
+    "流行": "S",
+    "評価": "A",
+    "おすすめ": ""
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=sGeI0R9i5MQ",
+    "歌手名": "Mr.Children",
+    "曲名": "君がいた夏",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=BbSrrsuOWJk",
+    "歌手名": "Mr.Children",
+    "曲名": "【es】～ Theme of es ～",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": ""
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=ZMLdS2ZiI8w&pp=ygUWbXIuY2hpbGRyZW4gZXZlcnl0aGluZw%3D%3D",
+    "歌手名": "Mr.Children",
+    "曲名": "Everything（it's you）",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=QCiERL2m3Ss",
+    "歌手名": "Mr.Children",
+    "曲名": "終わりなき旅",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=YxVJxm4Xx3Y",
+    "歌手名": "Mr.Children",
+    "曲名": "星になれたら",
+    "流行": "A",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=qiUgB0S-1Dc",
+    "歌手名": "Mr.Children",
+    "曲名": "抱きしめたい",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=3mwg3uRxMng",
+    "歌手名": "Mr.Children",
+    "曲名": "口笛",
+    "流行": "A",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=P-Qp-_NOWCA",
+    "歌手名": "Mr.Children",
+    "曲名": "OVER",
+    "流行": "A",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=43D_nBGfuGY",
+    "歌手名": "Mr.Children",
+    "曲名": "365日",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=3Um_xMmE8OA",
+    "歌手名": "Mr.Children",
+    "曲名": "くるみ",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=xXA5StMti8c",
+    "歌手名": "Mr.Children",
+    "曲名": "しるし",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
+  },
+  {
+    "URL": "https://www.youtube.com/watch?v=4wuWJ7GAc2s",
+    "歌手名": "Mr.Children",
+    "曲名": "Sign",
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": "◯"
   }
 ];
     </script>
@@ -6321,6 +6675,12 @@ const PUBLIC_APP_CONFIG = Object.freeze({
     ]
 });
 
+const SYNC_ENDPOINT = '/api/songs';
+const SYNC_STATE_KEY = 'hit_song_sync_state_v1';
+const LOCAL_SNAPSHOT_KEY = 'hit_song_local_snapshot_v1';
+const EDIT_TOKEN_KEY = 'hit_song_edit_token_v1';
+const SYNC_PUSH_DELAY = 1200;
+
 const baseData = typeof initialData !== 'undefined'
     ? initialData
     : (typeof SONGS_DATA !== 'undefined' ? SONGS_DATA : []);
@@ -6335,6 +6695,11 @@ let currentFilteredData = [];
 let autoPlayCheckInterval = null;
 let playbackMode = 'ordered';
 let dashboardInitialized = false;
+let serverState = { available: false, initialized: false, editable: false, revision: 0, updatedAt: null };
+let autoPushEnabled = false;
+let pushTimer = null;
+let pushInFlight = false;
+let tokenDialogIntent = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
@@ -6346,6 +6711,7 @@ document.addEventListener('DOMContentLoaded', () => {
         refreshView();
         dashboardInitialized = true;
         hideStartupError();
+        initServerSync().catch(error => console.warn('Server sync could not start:', error));
     } catch (error) {
         showStartupError(error);
     }
@@ -6527,6 +6893,10 @@ function persistData(data = songsData, options = {}) {
         console.error('Failed to save song data:', error);
         updateSaveStatus('保存できませんでした', 'error');
     }
+
+    if (!options.silent && options.sync !== false) {
+        schedulePush();
+    }
 }
 
 function toSerializableSongs(data) {
@@ -6538,6 +6908,484 @@ function toSerializableSongs(data) {
         });
         return clean;
     });
+}
+
+/* ---------------------------------------------------------------- *
+ * Server sync
+ *
+ * The list stays usable with no server at all: local data renders
+ * first, and the server copy only replaces it once we know this
+ * browser has nothing unsent. Nothing here ever clears local data.
+ * ---------------------------------------------------------------- */
+
+function isRemotePage() {
+    return window.location.protocol === 'http:' || window.location.protocol === 'https:';
+}
+
+function getEditToken() {
+    return safeGetStorageItem(EDIT_TOKEN_KEY) || '';
+}
+
+function setEditToken(token) {
+    try {
+        localStorage.setItem(EDIT_TOKEN_KEY, token);
+    } catch (error) {
+        console.warn('Edit token could not be stored:', error);
+    }
+}
+
+function loadSyncState() {
+    const saved = safeGetStorageItem(SYNC_STATE_KEY);
+    if (!saved) return null;
+    try {
+        return JSON.parse(saved);
+    } catch (_error) {
+        return null;
+    }
+}
+
+function saveSyncState(revision, hash) {
+    try {
+        localStorage.setItem(SYNC_STATE_KEY, JSON.stringify({
+            revision,
+            hash,
+            syncedAt: new Date().toISOString()
+        }));
+    } catch (error) {
+        console.warn('Sync state could not be stored:', error);
+    }
+}
+
+function hashSongs(data) {
+    const canonical = JSON.stringify((data || []).map(item => [
+        cleanText(item[FIELD.artist]),
+        cleanText(item[FIELD.title]),
+        cleanText(item[FIELD.trend]),
+        cleanText(item[FIELD.rating]),
+        isRecommended(item) ? '1' : '',
+        cleanText(item[FIELD.url])
+    ]));
+
+    let hash = 0;
+    for (let i = 0; i < canonical.length; i++) {
+        hash = ((hash << 5) - hash) + canonical.charCodeAt(i);
+        hash |= 0;
+    }
+    return `${canonical.length.toString(36)}-${Math.abs(hash).toString(36)}`;
+}
+
+/** One-time copy of whatever this browser held before it ever saw the server. */
+function snapshotLocalOnce() {
+    if (safeGetStorageItem(LOCAL_SNAPSHOT_KEY)) return;
+
+    try {
+        localStorage.setItem(LOCAL_SNAPSHOT_KEY, JSON.stringify({
+            savedAt: new Date().toISOString(),
+            count: songsData.length,
+            songs: toSerializableSongs(songsData)
+        }));
+    } catch (error) {
+        console.warn('Local snapshot could not be stored:', error);
+    }
+    updateSyncButtons();
+}
+
+function readLocalSnapshot() {
+    const saved = safeGetStorageItem(LOCAL_SNAPSHOT_KEY);
+    if (!saved) return null;
+    try {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed?.songs) ? parsed : null;
+    } catch (_error) {
+        return null;
+    }
+}
+
+function restoreLocalSnapshot() {
+    const snapshot = readLocalSnapshot();
+    if (!snapshot) return;
+
+    const label = `${snapshot.count}曲 / ${formatTimestamp(snapshot.savedAt)}`;
+    if (!confirm(`この端末のバックアップ（${label}）を表示に戻しますか？サーバーへは自動送信しません。`)) return;
+
+    songsData = normalizeSongs(snapshot.songs);
+    autoPushEnabled = false;
+    persistData(songsData, { silent: true });
+    updateSaveStatus('バックアップを復元しました', 'saved');
+    showSyncNotice('バックアップを表示に戻しました。サーバーへ反映する場合は「サーバーへ反映」を押してください。', [
+        { label: 'サーバーへ反映', action: () => pushToServer({ manual: true }) }
+    ]);
+    refreshView();
+}
+
+function formatTimestamp(value) {
+    if (!value) return '不明';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '不明' : date.toLocaleString('ja-JP');
+}
+
+async function requestServer(method, body = null) {
+    const headers = {};
+    if (body) headers['content-type'] = 'application/json';
+
+    const token = getEditToken();
+    if (token) headers['x-edit-token'] = token;
+
+    const response = await fetch(SYNC_ENDPOINT, {
+        method,
+        headers,
+        cache: 'no-store',
+        body: body ? JSON.stringify(body) : undefined
+    });
+
+    let payload = null;
+    try {
+        payload = await response.json();
+    } catch (_error) {
+        // A project without the Function deployed returns the static 404 page.
+    }
+    return { ok: response.ok, status: response.status, payload };
+}
+
+function readServerMeta(data) {
+    serverState.available = true;
+    serverState.editable = Boolean(data.editable);
+    serverState.revision = Number(data.revision) || 0;
+    serverState.updatedAt = data.updatedAt || null;
+    serverState.initialized = Boolean(data.initialized);
+}
+
+function describeServerRevision() {
+    const stamp = serverState.updatedAt ? formatTimestamp(serverState.updatedAt) : '';
+    const base = `サーバー rev.${serverState.revision}`;
+    return stamp ? `${base} / ${stamp}` : base;
+}
+
+async function initServerSync() {
+    const bar = document.getElementById('syncBar');
+    updateSyncButtons();
+
+    if (!isRemotePage()) {
+        if (bar) bar.hidden = true;
+        return;
+    }
+
+    if (bar) bar.hidden = false;
+    setSyncStatus('checking', 'サーバーを確認しています…');
+
+    const result = await requestServer('GET').catch(() => null);
+    if (!result || !result.payload) {
+        setSyncStatus('offline', 'サーバー未接続（この端末にのみ保存されます）');
+        return;
+    }
+    if (result.status === 503) {
+        setSyncStatus('offline', 'サーバー未設定（この端末にのみ保存されます）');
+        return;
+    }
+    if (!result.ok) {
+        setSyncStatus('offline', `サーバー応答エラー (${result.status})`);
+        return;
+    }
+
+    readServerMeta(result.payload);
+
+    if (!serverState.initialized || !Array.isArray(result.payload.songs)) {
+        setSyncStatus('empty', 'サーバーにまだデータがありません');
+        showSyncNotice(`サーバーは空です。この端末の${songsData.length}曲を最初のデータとして送信できます。`, [
+            { label: 'この端末のデータを送信', action: () => pushToServer({ manual: true }) }
+        ]);
+        return;
+    }
+
+    applyRemoteSongs(normalizeSongs(result.payload.songs));
+}
+
+function applyRemoteSongs(remoteSongs, options = {}) {
+    snapshotLocalOnce();
+
+    const remoteHash = hashSongs(remoteSongs);
+    const localHash = hashSongs(songsData);
+
+    if (remoteHash === localHash) {
+        autoPushEnabled = true;
+        saveSyncState(serverState.revision, localHash);
+        hideSyncNotice();
+        setSyncStatus('synced', describeServerRevision());
+        return;
+    }
+
+    // A visitor who has never edited anything can safely take the server copy:
+    // their list is still the untouched data embedded in the page.
+    const localIsPristine = localHash === hashSongs(originalData);
+    const syncState = loadSyncState();
+    if (options.force || localIsPristine || (syncState && syncState.hash === localHash)) {
+        adoptRemoteSongs(remoteSongs);
+        return;
+    }
+
+    // This browser holds edits the server has never seen, so keep showing them.
+    autoPushEnabled = false;
+    setSyncStatus('diverged', 'この端末に未送信の変更があります');
+    showSyncNotice(
+        `この端末（${songsData.length}曲）とサーバー（${remoteSongs.length}曲・${describeServerRevision()}）の内容が違います。どちらを使うか選んでください。`,
+        [
+            { label: 'この端末の内容をサーバーへ反映', action: () => pushToServer({ manual: true }) },
+            { label: 'サーバーの内容を表示', action: () => adoptRemoteSongs(remoteSongs) }
+        ]
+    );
+}
+
+function adoptRemoteSongs(remoteSongs) {
+    snapshotLocalOnce();
+    songsData = remoteSongs;
+    persistData(songsData, { silent: true });
+    saveSyncState(serverState.revision, hashSongs(songsData));
+    autoPushEnabled = true;
+    hideSyncNotice();
+    setSyncStatus('synced', describeServerRevision());
+    updateSaveStatus('サーバーの内容を表示しました', 'saved');
+    refreshView();
+}
+
+async function pullFromServer() {
+    if (!isRemotePage()) return;
+    setSyncStatus('checking', 'サーバーから取得しています…');
+
+    const result = await requestServer('GET').catch(() => null);
+    if (!result || !result.ok || !result.payload) {
+        setSyncStatus('offline', 'サーバーから取得できませんでした');
+        return;
+    }
+
+    readServerMeta(result.payload);
+
+    if (!serverState.initialized || !Array.isArray(result.payload.songs)) {
+        setSyncStatus('empty', 'サーバーにまだデータがありません');
+        return;
+    }
+
+    const remoteSongs = normalizeSongs(result.payload.songs);
+    if (hashSongs(remoteSongs) !== hashSongs(songsData)) {
+        const message = `サーバーの内容（${remoteSongs.length}曲）を表示に反映しますか？\nこの端末の表示は置き換わります（バックアップは残ります）。`;
+        if (!confirm(message)) {
+            setSyncStatus('diverged', 'この端末に未送信の変更があります');
+            return;
+        }
+    }
+    applyRemoteSongs(remoteSongs, { force: true });
+}
+
+function schedulePush() {
+    if (!autoPushEnabled || !serverState.available || !getEditToken()) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => pushToServer({}), SYNC_PUSH_DELAY);
+}
+
+async function pushToServer(options = {}) {
+    if (!isRemotePage() || pushInFlight) return;
+    clearTimeout(pushTimer);
+
+    if (!getEditToken()) {
+        if (options.manual) openTokenDialog({ thenPush: true });
+        return;
+    }
+
+    pushInFlight = true;
+    setSyncStatus('saving', 'サーバーへ保存しています…');
+
+    try {
+        const result = await requestServer('PUT', {
+            songs: toSerializableSongs(songsData),
+            baseRevision: serverState.revision,
+            force: Boolean(options.force),
+            allowShrink: Boolean(options.allowShrink)
+        });
+        handlePushResult(result);
+    } catch (error) {
+        console.error('Server save failed:', error);
+        setSyncStatus('offline', 'サーバーへ保存できませんでした');
+    } finally {
+        pushInFlight = false;
+    }
+}
+
+function handlePushResult(result) {
+    const payload = result.payload || {};
+
+    if (result.ok) {
+        serverState.available = true;
+        serverState.initialized = true;
+        serverState.revision = Number(payload.revision) || serverState.revision + 1;
+        serverState.updatedAt = payload.updatedAt || new Date().toISOString();
+        autoPushEnabled = true;
+        saveSyncState(serverState.revision, hashSongs(songsData));
+        hideSyncNotice();
+        setSyncStatus('synced', describeServerRevision());
+        updateSaveStatus('サーバーに保存しました', 'saved');
+        return;
+    }
+
+    autoPushEnabled = false;
+
+    if (result.status === 401) {
+        setSyncStatus('locked', '編集パスワードが違います');
+        showSyncNotice('編集パスワードが正しくありません。もう一度入力してください。', [
+            { label: 'パスワードを入力', action: () => openTokenDialog({ thenPush: true }) }
+        ]);
+        return;
+    }
+
+    if (result.status === 503) {
+        setSyncStatus('offline', 'サーバー未設定（この端末にのみ保存されます）');
+        return;
+    }
+
+    if (payload.error === 'conflict') {
+        serverState.revision = Number(payload.revision) || serverState.revision;
+        serverState.updatedAt = payload.updatedAt || serverState.updatedAt;
+        setSyncStatus('diverged', '他の端末がサーバーを更新しました');
+        showSyncNotice(
+            `他の端末がサーバーを更新しています（サーバー ${payload.count}曲・rev.${payload.revision}）。どちらを残すか選んでください。`,
+            [
+                { label: 'サーバーの内容を取得', action: () => pullFromServer() },
+                { label: 'この端末の内容で上書き', action: () => pushToServer({ manual: true, force: true }) }
+            ]
+        );
+        return;
+    }
+
+    if (payload.error === 'empty_payload' || payload.error === 'large_shrink') {
+        setSyncStatus('diverged', '曲数が大きく減るため保留しました');
+        showSyncNotice(
+            `サーバーの${payload.currentCount}曲を${payload.newCount}曲へ減らそうとしています。意図した操作か確認してください。`,
+            [
+                { label: 'それでも反映する', action: () => pushToServer({ manual: true, force: true, allowShrink: true }) },
+                { label: 'サーバーの内容を取得', action: () => pullFromServer() }
+            ]
+        );
+        return;
+    }
+
+    setSyncStatus('offline', `サーバーへ保存できませんでした (${result.status})`);
+}
+
+function setSyncStatus(state, detail) {
+    const labels = {
+        checking: '確認中',
+        synced: '同期済み',
+        saving: '保存中',
+        diverged: '要確認',
+        empty: '未初期化',
+        locked: 'ロック中',
+        offline: 'ローカルのみ'
+    };
+
+    const pill = document.getElementById('syncPill');
+    if (pill) {
+        pill.textContent = labels[state] || state;
+        pill.className = `sync-pill sync-${state}`;
+    }
+
+    const detailElement = document.getElementById('syncDetail');
+    if (detailElement) detailElement.textContent = detail || '';
+
+    updateSyncButtons();
+}
+
+function updateSyncButtons() {
+    const unlockButton = document.getElementById('syncUnlockBtn');
+    if (unlockButton) {
+        unlockButton.textContent = getEditToken() ? '編集パスワードを変更' : '編集を有効化';
+    }
+
+    const restoreButton = document.getElementById('syncRestoreBtn');
+    if (restoreButton) {
+        const snapshot = readLocalSnapshot();
+        restoreButton.hidden = !snapshot;
+        if (snapshot) {
+            restoreButton.title = `${snapshot.count}曲 / ${formatTimestamp(snapshot.savedAt)} 時点`;
+        }
+    }
+}
+
+function showSyncNotice(text, actions = []) {
+    const notice = document.getElementById('syncNotice');
+    const textElement = document.getElementById('syncNoticeText');
+    const actionsElement = document.getElementById('syncNoticeActions');
+    if (!notice || !textElement || !actionsElement) return;
+
+    textElement.textContent = text;
+    actionsElement.innerHTML = '';
+    actions.forEach(({ label, action }) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'action-btn small-action';
+        button.textContent = label;
+        button.addEventListener('click', action);
+        actionsElement.appendChild(button);
+    });
+
+    notice.hidden = false;
+}
+
+function hideSyncNotice() {
+    const notice = document.getElementById('syncNotice');
+    if (notice) notice.hidden = true;
+}
+
+function openTokenDialog(intent = {}) {
+    const modal = document.getElementById('tokenModal');
+    const input = document.getElementById('editTokenInput');
+    if (!modal || !input) return;
+
+    tokenDialogIntent = intent;
+    input.value = getEditToken();
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => modal.classList.add('active'));
+    setTimeout(() => input.focus(), 50);
+}
+
+function closeTokenDialog() {
+    const modal = document.getElementById('tokenModal');
+    if (!modal || modal.classList.contains('hidden')) return;
+    modal.classList.remove('active');
+    setTimeout(() => modal.classList.add('hidden'), 200);
+}
+
+async function submitTokenDialog(event) {
+    event.preventDefault();
+
+    const input = document.getElementById('editTokenInput');
+    const hint = document.getElementById('tokenHint');
+    const token = cleanText(input?.value);
+    if (!token) return;
+
+    setEditToken(token);
+    const result = await requestServer('PUT', { verifyOnly: true }).catch(() => null);
+
+    if (!result || !result.ok) {
+        const message = result && result.status === 401
+            ? '編集パスワードが違います。もう一度入力してください。'
+            : 'サーバーに接続できませんでした。少し時間をおいて試してください。';
+        if (hint) hint.textContent = message;
+        setSyncStatus('locked', message);
+        return;
+    }
+
+    const intent = tokenDialogIntent || {};
+    tokenDialogIntent = null;
+    closeTokenDialog();
+    updateSaveStatus('編集を有効にしました', 'saved');
+    updateSyncButtons();
+
+    if (intent.thenPush) pushToServer({ manual: true });
+}
+
+function forgetEditToken() {
+    safeRemoveStorageItem(EDIT_TOKEN_KEY);
+    autoPushEnabled = false;
+    closeTokenDialog();
+    setSyncStatus('locked', '編集パスワードを削除しました');
 }
 
 function setupControls() {
@@ -6553,6 +7401,10 @@ function setupControls() {
     document.getElementById('resumePlaybackBtn')?.addEventListener('click', resumePlayback);
     document.getElementById('playRandomPositionBtn')?.addEventListener('click', playFromRandomPosition);
     document.getElementById('shufflePlaybackBtn')?.addEventListener('click', startShufflePlayback);
+    document.getElementById('syncUnlockBtn')?.addEventListener('click', () => openTokenDialog());
+    document.getElementById('syncPushBtn')?.addEventListener('click', () => pushToServer({ manual: true }));
+    document.getElementById('syncPullBtn')?.addEventListener('click', () => pullFromServer());
+    document.getElementById('syncRestoreBtn')?.addEventListener('click', restoreLocalSnapshot);
     importInput?.addEventListener('change', event => {
         const file = event.target.files?.[0];
         if (file) importSongsFromFile(file);
@@ -6597,10 +7449,15 @@ function setupModalEvents() {
     document.getElementById('cancelSongBtn')?.addEventListener('click', closeSongEditor);
     document.getElementById('songForm')?.addEventListener('submit', saveSongFromForm);
     document.getElementById('deleteSongBtn')?.addEventListener('click', deleteCurrentSong);
+    document.getElementById('closeTokenModal')?.addEventListener('click', closeTokenDialog);
+    document.getElementById('cancelTokenBtn')?.addEventListener('click', closeTokenDialog);
+    document.getElementById('forgetTokenBtn')?.addEventListener('click', forgetEditToken);
+    document.getElementById('tokenForm')?.addEventListener('submit', submitTokenDialog);
 
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape') {
             closeSongEditor();
+            closeTokenDialog();
             closeVideoModal();
         }
     });
@@ -7125,11 +7982,26 @@ function hasFiles(event) {
 }
 
 function resetToOriginalData() {
-    if (!confirm('初期データに戻しますか？現在の編集内容はブラウザ保存から削除されます。')) return;
+    const warning = serverState.initialized
+        ? '初期データに戻しますか？この端末の表示だけが戻り、サーバー上のデータは変わりません。'
+        : '初期データに戻しますか？現在の編集内容はブラウザ保存から削除されます。';
+    if (!confirm(warning)) return;
+
     safeRemoveStorageItem(DATA_STORAGE_KEY);
     safeRemoveStorageItem(LEGACY_EDITS_KEY);
+    safeRemoveStorageItem(SYNC_STATE_KEY);
     songsData = normalizeSongs(cloneData(originalData));
+
+    // A local reset must never flow straight through to the shared copy.
+    autoPushEnabled = false;
     updateSaveStatus('初期化しました', 'saved');
+
+    if (serverState.initialized) {
+        setSyncStatus('diverged', 'この端末のみ初期化しました');
+        showSyncNotice('この端末の表示だけを初期データに戻しました。サーバーの内容は変わっていません。', [
+            { label: 'サーバーの内容を取得', action: () => pullFromServer() }
+        ]);
+    }
     refreshView();
 }
 
@@ -7401,9 +8273,7 @@ function startAutoPlayMonitoring() {
         }
     }, 1000);
 }
-
     </script>
 </body>
 
 </html>
-
