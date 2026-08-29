@@ -52,6 +52,9 @@
   .links a.secondary { background: transparent; color: #15803d; border: 1px solid #15803d; }
   a { color: #15803d; }
   .note { background: #f4f9f5; border: 1px solid #d3e8d8; border-radius: 8px; padding: 12px 16px; font-size: 0.92rem; }
+  .shot { margin: 20px 0; text-align: center; }
+  .shot img { max-width: 280px; width: 100%; height: auto; border-radius: 20px; border: 1px solid #d3e8d8; box-shadow: 0 12px 28px rgba(15,23,42,.12); }
+  .shot figcaption { margin-top: 10px; font-size: 0.88rem; color: #666; }
   .muted { font-size: 0.9rem; color: #666; }
   .steps { counter-reset: step; list-style: none; padding-left: 0; }
   .steps li { position: relative; padding-left: 40px; margin: 10px 0; }
@@ -90,13 +93,18 @@
     会社・病院・図書館・学校などでは音量を抑え、自宅では着信や通知音が鳴る状態に戻すなど、お好みの設定が可能です。
   </p>
 
+  <figure class="shot">
+    <img src="assets/screenshot-home.jpg" alt="Volume Area Controller のホーム画面。現在の音量、いまの場所、Wi-Fi、現在地の判定が表示されている" loading="lazy">
+    <figcaption>ホーム画面：いまの場所と適用中の音量プロファイルがひと目で分かります</figcaption>
+  </figure>
+
   <h2>主な機能</h2>
   <ul>
     <li>場所（緯度・経度・半径）ごとに音量プロファイルを割り当て、入退場を自動検知して音量を適用</li>
     <li>同じ音量プロファイルを複数の場所で使い回せる「場所ルール × 音量プロファイル」方式</li>
     <li>登録した場所以外にいるときの動作（指定プロファイルを適用／直前の音量を維持）</li>
     <li>メディア音量は指定したときだけ変更。動画や音楽の再生中に勝手に変わりません</li>
-    <li><strong>朝のアラーム保護</strong> — 「自宅」に登録した場所や、アラーム保護をONにしたプロファイルでは、朝5〜9時にアラーム音量が下がっていても自動で引き上げます</li>
+    <li>朝のアラーム保護 — 「自宅」に登録した場所や、アラーム保護をONにしたプロファイルでは、朝5〜9時にアラーム音量が下がっていても自動で引き上げます</li>
     <li>屋内などで測位が数十mずれても、近くに一定時間とどまれば正しい場所として自動補正（設定でOFFも可能）</li>
     <li>場所ごとに複数のWi-Fi（SSID）を登録でき、接続中のWi-Fiで場所を確実に判別（2.4GHzと5GHzでSSIDが分かれる自宅などにも対応）</li>
     <li>手で音量を変えたら同じ場所にいる間は自動で上書きしない「手動変更ガード」</li>
@@ -118,7 +126,7 @@
 
   <h2>料金</h2>
   <p>
-    完全無料です（広告・アプリ内課金・サブスクなし）。地図はOpenStreetMapを使用しているため、<strong>APIキーの取得や登録は一切不要</strong>で、追加費用もかかりません。
+    完全無料です（広告・アプリ内課金・サブスクなし）
   </p>
 
   <h2>ダウンロード（Android）</h2>
