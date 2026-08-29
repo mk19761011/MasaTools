@@ -32,20 +32,25 @@
     main{max-width:1180px;margin:0 auto;padding:40px 22px 56px}
     .badge{display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:999px;font-size:13px;font-weight:700;color:#92400e;background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.3)}
     h1{margin:16px 0 8px;font-size:32px;letter-spacing:-.02em}
-    .lead{margin:0 0 34px;color:var(--muted);font-size:16px;max-width:60ch}
-    .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
-    .card{display:flex;flex-direction:column;border-radius:var(--radius);padding:26px 28px;background:rgba(255,255,255,.82);border:1px solid var(--line);box-shadow:var(--shadow)}
-    .card h2{margin:0 0 6px;font-size:22px;letter-spacing:-.02em}
-    .card p{margin:0 0 16px;color:#334155;font-size:15px}
-    .button-row{margin-top:auto;display:flex;flex-wrap:wrap;gap:10px}
-    .button{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 20px;border-radius:12px;font-weight:700;font-size:15px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-dark))}
+    .lead{margin:0 0 34px;color:var(--muted);font-size:16px;max-width:64ch}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.82);box-shadow:var(--shadow);overflow:hidden}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:22px 26px;border-bottom:1px solid var(--line)}
+    .panel-head h2{margin:0;font-size:20px;letter-spacing:-.02em}
+    .panel-head .count{color:var(--muted);font-size:14px}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 26px;border-bottom:1px solid var(--line)}
+    .row:last-child{border-bottom:0}
+    .row .meta{min-width:0}
+    .row .name{font-weight:700;font-size:16px;word-break:break-all}
+    .row .sub{color:var(--muted);font-size:14px}
+    .button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;font-weight:700;font-size:15px;color:#fff;white-space:nowrap;background:linear-gradient(135deg,var(--accent),var(--accent-dark))}
     .button svg{width:18px;height:18px}
-    .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:34px 28px;text-align:center;color:var(--muted);background:rgba(255,255,255,.55)}
-    .empty p{margin:0}
+    .state{padding:34px 26px;text-align:center;color:var(--muted);font-size:15px}
+    .state.error{color:#991b1b}
+    .state code{font-size:13px;background:rgba(30,41,59,.07);padding:2px 6px;border-radius:6px}
     .footer{border-top:1px solid var(--line);padding:24px 22px;color:var(--muted);text-align:center;font-size:15px}
     .footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
     .footer a:hover{color:var(--accent)}
-    @media(max-width:860px){.cards{grid-template-columns:1fr}h1{font-size:26px}main{padding-top:32px}}
+    @media(max-width:860px){h1{font-size:26px}main{padding-top:32px}.row{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
 <body>
@@ -59,31 +64,94 @@
   <main>
     <span class="badge">非公開エリア</span>
     <h1>管理者ページ</h1>
-    <p class="lead">パスワードを知っている人だけが閲覧できるエリアです。一般公開していないアプリはここから配布します。検索エンジンには登録されません。</p>
+    <p class="lead">パスワードを知っている人だけが閲覧できるエリアです。ファイル本体は GitHub ではなく Cloudflare R2 に保管されているため、リポジトリからは取得できません。検索エンジンにも登録されません。</p>
 
-    <!--
-      アプリを追加するときは、admin/ 配下にフォルダを作り（例: admin/sample-app/）、
-      下の <div class="cards"> の中に次のカードを1つ足してください。
-
-      <article class="card">
-        <h2>アプリ名</h2>
-        <p>アプリの説明を1〜2行で書きます。</p>
-        <div class="button-row">
-          <a class="button" href="/admin/sample-app/">詳細・ダウンロード
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </article>
-    -->
-
-    <div class="cards">
-    </div>
-
-    <div class="empty">
-      <p>まだアプリが配置されていません。</p>
-    </div>
+    <section class="panel">
+      <div class="panel-head">
+        <h2>非公開アプリ</h2>
+        <span class="count" id="count"></span>
+      </div>
+      <div id="list">
+        <p class="state">読み込み中…</p>
+      </div>
+    </section>
   </main>
 
   <footer class="footer"><small>&copy; 2026 MasaTools. All rights reserved. &nbsp;|&nbsp; <a href="/">公開サイトへ戻る</a></small></footer>
+
+  <script>
+    (function () {
+      var list = document.getElementById('list');
+      var count = document.getElementById('count');
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function formatSize(bytes) {
+        if (!bytes && bytes !== 0) return '';
+        var units = ['B', 'KB', 'MB', 'GB'];
+        var value = bytes;
+        var unit = 0;
+        while (value >= 1024 && unit < units.length - 1) { value /= 1024; unit += 1; }
+        return (unit === 0 ? value : value.toFixed(1)) + ' ' + units[unit];
+      }
+
+      function formatDate(value) {
+        if (!value) return '';
+        var d = new Date(value);
+        if (isNaN(d)) return '';
+        return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+      }
+
+      function showState(message, isError) {
+        list.innerHTML = '<p class="state' + (isError ? ' error' : '') + '">' + message + '</p>';
+      }
+
+      fetch('/admin/files/', { headers: { Accept: 'application/json' } })
+        .then(function (res) {
+          return res.json().then(function (body) { return { status: res.status, body: body }; });
+        })
+        .then(function (result) {
+          if (result.status === 503 && result.body.error === 'r2_not_bound') {
+            count.textContent = '';
+            showState('R2 バケットが未設定です。Cloudflare Pages の設定で <code>ADMIN_FILES</code> を R2 バケットにバインドしてください。', true);
+            return;
+          }
+          if (result.status !== 200) {
+            count.textContent = '';
+            showState('一覧を取得できませんでした（' + result.status + '）。', true);
+            return;
+          }
+
+          var files = result.body.files || [];
+          count.textContent = files.length + ' 件';
+
+          if (files.length === 0) {
+            showState('まだファイルがありません。R2 バケットにアップロードすると、ここに自動で並びます。');
+            return;
+          }
+
+          list.innerHTML = files.map(function (file) {
+            var sub = [formatSize(file.size), formatDate(file.uploaded)].filter(Boolean).join(' ・ ');
+            return '<div class="row">' +
+              '<div class="meta">' +
+                '<div class="name">' + escapeHtml(file.name) + '</div>' +
+                '<div class="sub">' + escapeHtml(sub) + '</div>' +
+              '</div>' +
+              '<a class="button" href="' + escapeHtml(file.url) + '">ダウンロード' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>' +
+              '</a>' +
+            '</div>';
+          }).join('');
+        })
+        .catch(function () {
+          count.textContent = '';
+          showState('一覧を取得できませんでした。時間をおいて再読み込みしてください。', true);
+        });
+    })();
+  </script>
 </body>
 </html>
