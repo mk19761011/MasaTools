@@ -27,7 +27,7 @@ GitHub の公開リポジトリには入りません。これがこのフォル�
 初回だけ必要な準備
 ------------------
 
-    npm install -g wrangler
+    npm install -g wrangler@3.114.17
     wrangler login
 
 wrangler login はブラウザが開き、Cloudflare アカウントでの承認を求められます。

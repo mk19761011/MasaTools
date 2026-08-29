@@ -13,7 +13,7 @@
 #   /admin/ の「非公開アプリ」一覧に自動で並ぶ。
 #
 # 前提: wrangler がインストール済みで `wrangler login` 済みであること。
-#   npm install -g wrangler
+#   npm install -g wrangler@3.114.17
 #   wrangler login
 #
 # 内容が変わっていないファイルは SHA-256 で判定してスキップする。
@@ -61,10 +61,32 @@ function Resolve-Wrangler {
     }
     return $found.Source
   }
+
+  # npm のグローバル bin が PATH に反映されていない直後でも使えるよう、
+  # npm の配置先にある Windows 用シムも確認する。
+  $npm = Get-Command npm -ErrorAction SilentlyContinue
+  if ($npm) {
+    try {
+      $npmCmd = [System.IO.Path]::ChangeExtension($npm.Source, ".cmd")
+      if (-not (Test-Path $npmCmd)) {
+        $npmCmd = $npm.Source
+      }
+      $npmPrefix = ((& $npmCmd prefix -g 2>$null) | Select-Object -First 1).Trim()
+      if (-not [string]::IsNullOrWhiteSpace($npmPrefix)) {
+        $npmWrangler = Join-Path $npmPrefix "wrangler.cmd"
+        if (Test-Path $npmWrangler) {
+          return $npmWrangler
+        }
+      }
+    } catch {
+      # 下の案内を表示するため、npm の照会失敗はここでは握りつぶす。
+    }
+  }
+
   Write-Host ""
   Write-Host "wrangler が見つかりません。次の 2 つを実行してから、もう一度このスクリプトを動かしてください。" -ForegroundColor Red
   Write-Host ""
-  Write-Host "    npm install -g wrangler"
+  Write-Host "    npm install -g wrangler@3.114.17"
   Write-Host "    wrangler login"
   Write-Host ""
   Write-Host "wrangler login はブラウザが開き、Cloudflare アカウントでの承認を求められます。" -ForegroundColor Yellow
