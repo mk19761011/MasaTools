@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="index,follow">
 <title>プライバシーポリシー | Volume Area Controller | MasaTools</title>
+<meta name="description" content="Androidアプリ「Volume Area Controller（音量エリアコントローラー）」のプライバシーポリシー。位置情報の使いみち、要求する権限とその理由、外部送信の有無を説明します。">
+<link rel="canonical" href="https://masatools.pages.dev/volumeac/privacy/">
 <link rel="icon" type="image/svg+xml" href="../icon.svg">
 <style>
   :root { color-scheme: light; }
@@ -17,19 +19,21 @@
     background: #ffffff;
   }
   .wrap { max-width: 760px; margin: 0 auto; padding: 24px 20px 64px; }
-  .mt-bar { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(30,41,59,.08); }
-  .mt-bar-inner { max-width: 760px; margin: 0 auto; padding: 12px 20px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
-  .mt-logo { display: inline-flex; align-items: center; gap: 9px; font-weight: 800; color: #1a1a1a; text-decoration: none; font-size: 15px; }
-  .mt-logo-mark { width: 26px; height: 26px; border-radius: 9px; background: linear-gradient(135deg,#2563eb,#14b8a6); flex: 0 0 auto; }
-  .mt-back { color: #15803d; text-decoration: none; font-size: 14px; white-space: nowrap; }
   header { border-bottom: 2px solid #15803d; padding-bottom: 12px; margin-bottom: 24px; }
   h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  .app { color: #15803d; font-weight: 700; }
+  .app { color: #15803d; font-weight: 700; margin: 0; }
   .meta { color: #666; font-size: 0.9rem; margin: 4px 0 0; }
   h2 { font-size: 1.15rem; margin: 32px 0 8px; padding-left: 10px; border-left: 4px solid #15803d; }
   ul { padding-left: 1.3em; }
   li { margin: 4px 0; }
+  .lead { background: #f4f9f5; border: 1px solid #d3e8d8; border-radius: 8px; padding: 14px 18px; }
+  .lead ul { margin: 8px 0 0; }
   .note { background: #f4f9f5; border: 1px solid #d3e8d8; border-radius: 8px; padding: 12px 16px; font-size: 0.92rem; }
+  .table-wrap { overflow-x: auto; margin: 12px 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 480px; font-size: 0.94rem; }
+  th, td { border: 1px solid #e2e8e4; padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: #f4f9f5; font-weight: 700; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; background: #f1f5f3; padding: 1px 5px; border-radius: 4px; }
   a { color: #15803d; }
   footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; color: #666; font-size: 0.88rem; }
 </style>
@@ -40,68 +44,117 @@
 <div class="wrap">
   <header>
     <h1>プライバシーポリシー</h1>
-    <p class="app">Volume Area Controller</p>
-    <p class="meta">最終改定日: 2026年7月8日</p>
+    <p class="app">Volume Area Controller（音量エリアコントローラー）</p>
+    <p class="meta">最終改定日: 2026年9月3日</p>
   </header>
 
   <p>
-    本ポリシーは、Androidアプリ「Volume Area Controller（音量エリアコントローラー）」（以下「本アプリ」）における情報の取り扱いについて説明します。
-    本アプリは、利用者が登録した場所への入退場を検知し、端末の音量設定を自動で切り替える機能を提供します。
+    本ポリシーは、Androidアプリ「Volume Area Controller（音量エリアコントローラー）」（以下「本アプリ」）における情報の取り扱いを説明するものです。
+    本アプリは、利用者が登録した場所への入退場を検知して、端末の音量設定を自動で切り替えるアプリです。
   </p>
 
+  <div class="lead">
+    <strong>要点</strong>
+    <ul>
+      <li>取得した情報は<strong>すべて端末内にのみ保存</strong>します。開発者のサーバーはありません。</li>
+      <li>位置情報を外部へ送信することは<strong>一切ありません</strong>。</li>
+      <li>広告SDK・アクセス解析SDK・クラッシュ収集SDKは<strong>使用していません</strong>。</li>
+      <li>外部と通信するのは、場所の登録画面で<strong>地図を表示するときだけ</strong>です。</li>
+    </ul>
+  </div>
+
   <h2>1. 取得・保存する情報</h2>
-  <p>本アプリは、利用者の操作に応じて以下の情報を<strong>端末内</strong>に保存します。</p>
+  <p>本アプリは、以下の情報を端末内で取り扱います。いずれも端末内での動作判定と、アプリの機能そのもののために使用します。</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>情報</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td>現在地の緯度・経度・測位精度</td><td>登録した場所への入退場を判定するため</td></tr>
+        <tr><td>接続中・周辺に見えるWi-Fi名（SSID）</td><td>近接した場所を取り違えないための判定補助と、Wi-Fi切替アシスト（任意設定）</td></tr>
+        <tr><td>登録した場所（名前・緯度・経度・判定半径・優先度・カテゴリ）</td><td>アプリの機能そのものとして保存するため</td></tr>
+        <tr><td>音量プロファイル（着信・通知・アラーム・メディアの音量、バイブ設定）</td><td>アプリの機能そのものとして保存するため</td></tr>
+        <tr><td>音量の適用履歴</td><td>切り替わった記録を確認するため（直近7日・最大300件を超えた分は自動で削除されます）</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Wi-Fiについては<strong>ネットワーク名（SSID）のみ</strong>を保存します。Wi-Fiのパスワードを入力・保存することはありません。
+    接続の切り替えは、端末にすでに保存されているWi-Fi情報にもとづいてAndroid側で行われます。
+  </p>
+
+  <h2>2. 位置情報の利用について</h2>
   <ul>
-    <li>場所ルール（利用者が登録した場所の名前・緯度・経度・判定半径・優先度など）</li>
-    <li>音量プロファイル（着信・通知・アラーム・メディアの音量設定）</li>
-    <li>デフォルトルール・一時例外（宿泊先モード等）の設定</li>
-    <li>Wi-Fi切替アシスト用に指定したWi-Fi名（SSID）</li>
-    <li>音量の適用履歴（最大100件）</li>
+    <li>位置情報は、<strong>登録した場所への入退場を判定するためだけ</strong>に使用します。</li>
+    <li>本アプリは、アプリを閉じている間・使っていない間も位置情報を取得します。外出先から自宅や職場に着いたときに自動で音量を切り替えるという、本アプリの中心的な機能を実現するために必要なためです。</li>
+    <li>入退場の検知には、Androidのジオフェンス機能（Google Play開発者サービス）を利用します。</li>
+    <li>移動の軌跡（位置情報の履歴）を蓄積することはありません。保持するのは最後に測位した1点と、直近の判定結果のみです。</li>
+    <li>位置情報を外部へ送信することはありません。</li>
   </ul>
 
-  <h2>2. 位置情報の利用</h2>
+  <h2>3. 要求する権限とその理由</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>権限</th><th>必要な理由</th></tr></thead>
+      <tbody>
+        <tr><td><code>ACCESS_FINE_LOCATION</code><br><code>ACCESS_COARSE_LOCATION</code></td><td>登録した場所との距離を計算し、圏内・圏外を判定するため</td></tr>
+        <tr><td><code>ACCESS_BACKGROUND_LOCATION</code></td><td>アプリを閉じている間も入退場を検知し、音量を自動で切り替えるため</td></tr>
+        <tr><td><code>MODIFY_AUDIO_SETTINGS</code></td><td>着信・通知・アラーム・メディアの音量を切り替えるため</td></tr>
+        <tr><td><code>ACCESS_NOTIFICATION_POLICY</code></td><td>マナーモード・バイブなど、音の鳴り方の設定を変更するため</td></tr>
+        <tr><td><code>POST_NOTIFICATIONS</code></td><td>音量が切り替わったことやWi-Fi切替アシストのお知らせを表示するため（任意。未許可でも音量の自動切替は動作します）</td></tr>
+        <tr><td><code>ACCESS_WIFI_STATE</code><br><code>CHANGE_WIFI_STATE</code></td><td>登録したWi-Fi名（SSID）による場所判定の補助と、Wi-Fi切替アシストのため</td></tr>
+        <tr><td><code>INTERNET</code><br><code>ACCESS_NETWORK_STATE</code></td><td>場所の登録・編集画面で地図（OpenStreetMap）を表示するため</td></tr>
+        <tr><td><code>RECEIVE_BOOT_COMPLETED</code></td><td>端末の再起動後に、エリアの検知を自動で再開するため</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    このほか、確実に動作させるために「電池の最適化から除外する」設定を案内していますが、これは権限ではなくAndroid側の設定であり、許可しなくてもアプリは動作します。
+  </p>
+
+  <h2>4. 保存場所と第三者提供</h2>
+  <div class="table-wrap">
+    <table>
+      <tbody>
+        <tr><th>保存先</th><td>端末内のデータベースのみ</td></tr>
+        <tr><th>クラウドへの保存・同期</th><td>行いません</td></tr>
+        <tr><th>Androidの自動バックアップ</th><td>対象外に設定しています（データが端末の外へコピーされません）</td></tr>
+        <tr><th>第三者への提供・販売</th><td>一切行いません</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">
+    本アプリをアンインストールすると、端末内に保存されたデータはすべて削除されます。開発者側にはもともとデータが存在しないため、何も残りません。
+  </p>
+
+  <h2>5. 外部との通信について</h2>
   <ul>
-    <li>位置情報（バックグラウンド含む）は、登録した場所への入退場を検知するためだけに使用します。</li>
-    <li>入退場の検知には、Android のジオフェンス機能（Google Play 開発者サービス）を利用します。</li>
-    <li>位置情報の履歴を収集・蓄積したり、外部へ送信したりすることはありません。</li>
+    <li>本アプリが行う唯一の通信は、場所の登録・編集画面で地図を表示する際の、OpenStreetMapタイルサーバーからの地図画像の取得です。この通信では、一般的なWeb通信と同様に接続元のIPアドレスがOpenStreetMap Foundationのサーバーに届きますが、本アプリが位置情報や利用者を特定できる情報を付加して送信することはありません。</li>
+    <li>登録後の入退場判定・音量の切り替えは、通信を行わずオフラインで動作します。</li>
+    <li>広告配信・アクセス解析（アナリティクス）・クラッシュ収集などの外部サービスは組み込んでいません。</li>
+    <li>設定タブの「アンケートに回答する」などのボタンは、タップするとブラウザで外部サイトを開くだけの機能です。アプリからこれらのサイトへデータを送信することはありません。開いた先での取り扱いは、それぞれのサービスのプライバシーポリシーが適用されます。</li>
   </ul>
 
-  <h2>3. 外部へ送信される情報</h2>
+  <h2>6. 利用者によるデータの削除</h2>
   <ul>
-    <li>本アプリは開発者の運営するサーバーを持ちません。登録した場所・音量プロファイル・履歴などを開発者のサーバーへ送信することはありません。</li>
-    <li>広告SDK・分析SDK・クラッシュ収集SDKは使用していません。</li>
-    <li>唯一の通信は、場所の登録・編集画面で地図を表示する際の OpenStreetMap タイルサーバーからの地図画像の取得です。この際、一般的なWeb通信と同様に、IPアドレス等がタイルサーバー（OpenStreetMap Foundation）へ送られます。登録後の入退場判定はオフラインでも動作し、通信を行いません。</li>
-  </ul>
-  <p class="note">位置情報を扱うアプリであるため、Android の自動バックアップ（クラウドへのバックアップ）は無効化しています。データが端末の外へコピーされることはありません。</p>
-
-  <h2>4. 必要な権限</h2>
-  <ul>
-    <li><strong>位置情報・バックグラウンド位置情報</strong> — 場所の登録と入退場の検知に使用します。</li>
-    <li><strong>通知</strong> — 音量切り替えやWi-Fi切替アシストのお知らせに使用します。</li>
-    <li><strong>サイレントモード（Do Not Disturb）へのアクセス</strong> — 「鳴らさない」設定の適用に使用します。未許可の場合は通常の音量変更のみ行います。</li>
+    <li>登録した場所・音量プロファイル・履歴は、アプリ内で個別に削除できます。</li>
+    <li>許可した権限は、Androidの設定またはアプリの「権限」タブからいつでも取り消せます。</li>
+    <li>アプリをアンインストールすると、保存されたデータはすべて削除されます。</li>
   </ul>
 
-  <h2>5. ユーザーによる削除方法</h2>
-  <ul>
-    <li>場所ルール・音量プロファイル・履歴は、アプリ内で個別に削除できます。</li>
-    <li>アプリをアンインストールすると、端末内に保存されたデータはすべて削除されます。</li>
-  </ul>
+  <h2>7. 子どもの利用について</h2>
+  <p>本アプリは特定の年齢層を対象としたものではなく、子どもを主な対象とするアプリではありません。</p>
 
-  <h2>6. 子どもの利用について</h2>
-  <p>本アプリは子ども向けに設計されたものではありません。</p>
-
-  <h2>7. お問い合わせ</h2>
-  <p>本ポリシーや本アプリに関するお問い合わせは、以下までご連絡ください。</p>
+  <h2>8. お問い合わせ</h2>
   <ul>
     <li>運営者: MasaTools</li>
     <li>連絡先: <a href="mailto:masatools.info@gmail.com">masatools.info@gmail.com</a></li>
   </ul>
 
-  <h2>8. 改定</h2>
-  <p>本ポリシーは予告なく改定される場合があります。改定した場合は、本ページ冒頭の改定日を更新します。</p>
+  <h2>9. 本ポリシーの改定</h2>
+  <p>アプリの機能追加・変更に伴い、本ポリシーを改定することがあります。改定した場合は、本ページ冒頭の最終改定日を更新します。</p>
 
   <footer>
-    Volume Area Controller — プライバシーポリシー / 最終改定日 2026年7月8日
+    Volume Area Controller — プライバシーポリシー / 最終改定日 2026年9月3日 / <a href="../">アプリ紹介ページへ戻る</a>
   </footer>
 </div>
 </body>

@@ -90,7 +90,7 @@
   </header>
 
   <p class="links">
-    <a class="mt-primary-action" data-mt-download="volumeac" href="download/VolumeAC-1.5.2-release.apk">APKをダウンロード（v1.5.2）</a>
+    <a class="mt-primary-action" data-mt-download="volumeac" href="download/VolumeAC-1.5.10-release.apk">APKをダウンロード（v1.5.10）</a>
     <a class="secondary mt-secondary-action" href="https://forms.gle/yFWhTHNNPJrsjLVu6" target="_blank" rel="noopener noreferrer">匿名アンケートに答える</a>
   </p>
 
@@ -121,14 +121,16 @@
     <li>同じ音量プロファイルを複数の場所で使い回せる「場所ルール × 音量プロファイル」方式</li>
     <li>登録した場所以外にいるときの動作（指定プロファイルを適用／直前の音量を維持）</li>
     <li>メディア音量は指定したときだけ変更。動画や音楽の再生中に勝手に変わりません</li>
-    <li>朝のアラーム保護 — 「自宅」に登録した場所や、アラーム保護をONにしたプロファイルでは、朝5〜9時にアラーム音量が下がっていても自動で引き上げます</li>
-    <li>屋内などで測位が数十mずれても、近くに一定時間とどまれば正しい場所として自動補正（設定でOFFも可能）</li>
+    <li>朝のアラーム保護 — 「アラーム保護」をONにした音量プロファイルが適用されている間は、朝5〜9時にアラーム音量が下がっていても自動で引き上げます</li>
+    <li>屋内などで測位が数十mずれても、近くに一定時間とどまれば正しい場所として自動補正（場所タブでOFFにもできます）</li>
     <li>場所ごとに複数のWi-Fi（SSID）を登録でき、接続中のWi-Fiで場所を確実に判別（2.4GHzと5GHzでSSIDが分かれる自宅などにも対応）</li>
     <li>手で音量を変えたら同じ場所にいる間は自動で上書きしない「手動変更ガード」</li>
     <li>場所ごとにWi-Fiを指定できる「Wi-Fi切替アシスト」（違うWi-Fi接続中なら通知でお知らせ）</li>
     <li>移動しなくても動作確認できる「テスト入場」「テスト退場」ボタン</li>
     <li>場所登録はOpenStreetMapの地図から。現在地取得・住所検索・地図タップ・緯度経度入力に対応</li>
     <li>いつ・どこで・どのプロファイルに切り替わったかが分かる適用履歴（実際に音量が変わったときだけ記録／直近7日・最大300件）</li>
+    <li>音量プロファイルの編集画面で、着信音・通知音・アラーム音を編集中の音量のまま試聴できる再生ボタン</li>
+    <li>設定のバックアップ — 登録した場所と音量プロファイルをJSONファイルへ書き出し／読み込み。機種変更やアプリの入れ直しでも設定を作り直さずに済みます</li>
   </ul>
 
   <h2>使いはじめの3ステップ</h2>
@@ -151,10 +153,10 @@
     本アプリは Google Play ではなく、このサイトから直接配布しています（無料）。下のボタンからAPKをダウンロードしてインストールしてください。
   </p>
   <p class="links">
-    <a id="dlBtn" class="mt-primary-action" data-mt-download="volumeac" href="download/VolumeAC-1.5.2-release.apk">APKをダウンロード（v1.5.2）</a>
+    <a id="dlBtn" class="mt-primary-action" data-mt-download="volumeac" href="download/VolumeAC-1.5.10-release.apk">APKをダウンロード（v1.5.10）</a>
   </p>
   <p class="muted">
-    最新版 v1.5.2（2026年8月28日公開）／ 約3.8MB ／ 対象: Android 10 以降（ジオフェンス検知に Google Play 開発者サービスが必要です）。
+    最新版 v1.5.10（2026年9月7日公開）／ 約3.9MB ／ 対象: Android 10 以降（ジオフェンス検知に Google Play 開発者サービスが必要です）。
   </p>
 
   <h2>インストール方法</h2>
