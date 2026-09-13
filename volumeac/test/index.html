@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Volume Area Controller Google Play クローズドテスト参加ガイド">
+  <!-- 検索結果に出さない。テスターへURLを直接伝えて使うページのため。
+       一般公開したくなった場合はこの1行を削除する。 -->
+  <meta name="robots" content="noindex,nofollow">
+  <title>Volume Area Controller テスト参加ガイド</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-soft: #eef4ff;
+      --text: #172033;
+      --muted: #5d687c;
+      --primary: #15803d;
+      --primary-dark: #0f5c2c;
+      --accent: #e6f4ea;
+      --success: #18794e;
+      --warning-bg: #fff7df;
+      --warning-border: #efc44f;
+      --border: #dce3ef;
+      --shadow: 0 12px 32px rgba(31, 49, 82, 0.10);
+      --radius: 18px;
+      --max: 1040px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, #e3f5ea 0, transparent 31rem),
+        var(--bg);
+      line-height: 1.75;
+    }
+
+    a { color: var(--primary); }
+    img { max-width: 100%; display: block; }
+
+    .container {
+      width: min(calc(100% - 32px), var(--max));
+      margin-inline: auto;
+    }
+
+    .hero {
+      padding: 58px 0 38px;
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, #0f5c2c, #1fa159 60%, #22c55e);
+      color: #fff;
+      border-radius: 28px;
+      padding: clamp(28px, 6vw, 58px);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 330px;
+      height: 330px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.09);
+      right: -110px;
+      top: -150px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      opacity: .9;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 6vw, 3.45rem);
+      line-height: 1.2;
+      letter-spacing: -.02em;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin: 20px 0 0;
+      font-size: clamp(1rem, 2.4vw, 1.18rem);
+      opacity: .95;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 5px 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      font-weight: 700;
+      font-size: .92rem;
+    }
+
+    .hero-actions,
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 10px 20px;
+      border: 0;
+      border-radius: 12px;
+      font: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    .button:hover { transform: translateY(-1px); }
+    .button-primary { background: #fff; color: #0f5c2c; }
+    .button-secondary {
+      background: rgba(255,255,255,.13);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.35);
+    }
+
+    main { padding-bottom: 60px; }
+
+    section {
+      margin-top: 28px;
+      scroll-margin-top: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: clamp(22px, 4vw, 36px);
+      box-shadow: 0 6px 22px rgba(31,49,82,.06);
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: clamp(1.45rem, 4vw, 2rem);
+      line-height: 1.35;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+      line-height: 1.45;
+    }
+
+    p { margin: 0 0 14px; }
+    p:last-child { margin-bottom: 0; }
+
+    .important {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .important-icon {
+      font-size: 1.35rem;
+      line-height: 1.3;
+    }
+
+    .steps {
+      display: grid;
+      gap: 16px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: #fff;
+    }
+
+    .step-number {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: var(--accent);
+      color: var(--primary);
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+
+    .step p { color: var(--muted); }
+
+    .figure {
+      margin: 18px 0 4px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #f8faff;
+    }
+
+    .figure img {
+      width: 100%;
+      aspect-ratio: 16 / 8.7;
+      object-fit: cover;
+    }
+
+    .figure figcaption {
+      padding: 10px 14px;
+      color: var(--muted);
+      font-size: .9rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .mini-card {
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 20px;
+      background: #fff;
+    }
+
+    .mini-card.good { border-top: 5px solid var(--success); }
+    .mini-card.notice { border-top: 5px solid var(--primary); }
+
+    ul.checklist {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0;
+    }
+
+    ul.checklist li {
+      position: relative;
+      padding-left: 30px;
+      margin: 10px 0;
+    }
+
+    ul.checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #e8f7f0;
+      color: var(--success);
+      font-size: .85rem;
+      font-weight: 800;
+    }
+
+    .schedule {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .schedule > div {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .schedule > div:nth-last-child(-n+2) { border-bottom: 0; }
+    .schedule .day {
+      font-weight: 800;
+      background: var(--surface-soft);
+      color: var(--primary-dark);
+    }
+
+    .faq details {
+      border-top: 1px solid var(--border);
+      padding: 16px 0;
+    }
+
+    .faq details:first-of-type { border-top: 0; }
+    .faq summary {
+      cursor: pointer;
+      font-weight: 750;
+      list-style: none;
+    }
+
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::before {
+      content: "＋";
+      display: inline-block;
+      width: 1.5em;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .faq details[open] summary::before { content: "－"; }
+    .faq details p { margin: 10px 0 0 1.5em; color: var(--muted); }
+
+    .privacy {
+      background: linear-gradient(180deg, #f8fdf9, #fff);
+    }
+
+    .contact-card {
+      text-align: center;
+      background: linear-gradient(135deg, #eefaf1, #fff);
+    }
+
+    .contact-card .button-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .contact-card .button-secondary {
+      background: #fff;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .small-note {
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    footer {
+      padding: 34px 0 48px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    footer .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      margin-top: 10px;
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #eef2f8;
+      font-size: .92em;
+    }
+
+    @media (max-width: 720px) {
+      .hero { padding-top: 22px; }
+      .hero-card { border-radius: 20px; }
+      .two-column { grid-template-columns: 1fr; }
+      .schedule { grid-template-columns: 92px 1fr; }
+      .step { grid-template-columns: 44px 1fr; gap: 12px; }
+      .step-number { width: 44px; height: 44px; border-radius: 12px; }
+      .button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    ============================================================
+    編集する場所
+    ============================================================
+    1. 下部の CONFIG に各URL・日付・連絡先を入力してください。
+    2. images 内のSVG（手順1〜3）は実際の画面キャプチャに差し替えられます。
+       ファイル名を同じにすればHTML側の修正は不要です。
+    3. アプリの実際のデータ処理に合わせて、プライバシー欄を確認してください。
+  -->
+
+  <header class="hero">
+    <div class="container">
+      <div class="hero-card">
+        <p class="eyebrow">Google Play クローズドテスト</p>
+        <h1>Volume Area Controller<br>テスト参加ガイド</h1>
+        <p class="lead">
+          Google Playでの一般公開に向けて、Volume Area Controllerを実際にお試しいただくテスターを募集しています。
+          参加からインストール、テスト期間中のお願いまで、このページだけで確認できます。
+        </p>
+
+        <div class="badges" aria-label="参加概要">
+          <span class="badge">参加無料</span>
+          <span class="badge">Android 10以降の端末が必要</span>
+          <span class="badge">初回設定 約5分</span>
+          <span class="badge">参加状態を14日間維持</span>
+        </div>
+
+        <div class="hero-actions">
+          <a class="button button-primary js-config-link" data-config="signupUrl" href="#participate">
+            テスターに申し込む
+          </a>
+          <a class="button button-secondary" href="#steps">参加手順を見る</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section aria-labelledby="about-title">
+      <div class="card">
+        <h2 id="about-title">このテストについて</h2>
+        <p>
+          Volume Area Controllerは、自宅や職場など登録した場所への出入りを検知して、
+          着信・通知・アラームの音量やマナーモードを自動で切り替えるAndroidアプリです。
+          音声の録音や会話の記録は一切行いません。
+          現在は、Google Playで誰でも検索できる一般公開の前段階として、
+          招待された方だけが参加できる「クローズドテスト」を行います。
+        </p>
+
+        <div class="important">
+          <div class="important-icon" aria-hidden="true">📌</div>
+          <div>
+            <strong>14日間、毎日長時間使う必要はありません。</strong><br>
+            テスト参加を解除せず、期間中に数回、登録した場所へ実際に出入りする
+            （または「場所」タブのテスト入場・退場ボタンで試す）操作にご協力ください。
+            短い感想や不具合報告にもご協力をお願いします。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="steps" aria-labelledby="steps-title">
+      <div class="card">
+        <h2 id="steps-title">参加からインストールまで</h2>
+
+        <div class="steps">
+          <article class="step">
+            <div class="step-number" aria-hidden="true">1</div>
+            <div>
+              <h3>参加を申し込む</h3>
+              <p>
+                申込フォームに、Google Playで使用しているGoogleアカウント（メールアドレス）と、
+                お使いの端末などを入力します。スマートフォンのGoogle Playで実際にログインしている
+                アカウントをご記入ください。別のアカウントだと、参加リンクを開いてもインストールできません。
+              </p>
+              <figure class="figure">
+                <img src="images/step-1-application.svg"
+                     alt="テスター参加申込フォームの画像を配置する枠">
+                <figcaption>画像予定：テスター参加申込フォーム</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-number" aria-hidden="true">2</div>
+            <div>
+              <h3>専用の参加リンクを開く</h3>
+              <p>
+                登録完了の案内が届いたら、申込時と同じGoogleアカウントで参加リンクを開きます。
+                複数のGoogleアカウントを使っている場合は、画面右上のアカウントをご確認ください。
+              </p>
+              <figure class="figure">
+                <img src="images/step-2-opt-in.svg"
+                     alt="Google Playのテスター参加画面の画像を配置する枠">
+                <figcaption>画像予定：Google Playの参加ページと「テスターになる」ボタン</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-number" aria-hidden="true">3</div>
+            <div>
+              <h3>「テスターになる」を押す</h3>
+              <p>
+                参加ページでテスター登録を完了します。
+                登録しただけではインストールされないため、続けてGoogle Playのアプリページへ進みます。
+              </p>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-number" aria-hidden="true">4</div>
+            <div>
+              <h3>Google Playからインストールする</h3>
+              <p>
+                Google PlayのVolume Area Controllerページで「インストール」を押します。
+                通常の検索には表示されない場合があるため、必ず案内されたリンクから開いてください。
+              </p>
+              <figure class="figure">
+                <img src="images/step-3-install.svg"
+                     alt="Google Playのインストール画面の画像を配置する枠">
+                <figcaption>画像予定：Volume Area ControllerのGoogle Playページ</figcaption>
+              </figure>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-number" aria-hidden="true">5</div>
+            <div>
+              <h3>初回セットアップと、最初の場所を登録する</h3>
+              <p>
+                初回起動時、案内に沿って位置情報の権限を許可します。
+                途中で出てくる「アプリを開いている間の位置情報」「アプリを閉じている間の位置情報（常に許可）」は
+                どちらも必須です。両方を許可しないと、自動切替がうまく動きません。
+                続けて、自宅など実際によく行く場所を1件登録してください（正確な住所を教えていただく必要はありません）。
+              </p>
+              <figure class="figure">
+                <img src="images/step-4-first-use.jpg"
+                     alt="Volume Area Controllerの実際の画面。左がホーム画面（いま鳴るかどうかの表示）、右が場所タブ（登録済みの場所の一覧）">
+                <figcaption>実際の画面（左：ホーム画面／右：場所タブ）</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="request-title">
+      <div class="card">
+        <h2 id="request-title">テスターの方へのお願い</h2>
+
+        <div class="two-column">
+          <div class="mini-card good">
+            <h3>必ずお願いしたいこと</h3>
+            <ul class="checklist">
+              <li>申込時と同じGoogleアカウントを使用する</li>
+              <li>参加リンクでテスター登録を完了する</li>
+              <li>Google PlayからVolume Area Controllerをインストールする</li>
+              <li>初回セットアップで、位置情報の権限を2つとも許可する</li>
+              <li>自宅など、実際によく行く場所を1件以上登録する</li>
+              <li>14日間はテスト参加を解除しない</li>
+              <li>期間中に数回、登録した場所への出入りを試す</li>
+              <li>最後に短いアンケートへ回答する</li>
+            </ul>
+          </div>
+
+          <div class="mini-card notice">
+            <h3>必要ありません</h3>
+            <ul class="checklist">
+              <li>毎日アプリを開いて操作すること</li>
+              <li>専門的なテスト知識や開発経験</li>
+              <li>Google Playで公開レビューを書くこと</li>
+              <li>正確な自宅住所などをこちらへ伝えること</li>
+              <li>有料サービスへ申し込むこと</li>
+              <li>必ず高評価を付けること</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="schedule-title">
+      <div class="card">
+        <h2 id="schedule-title">14日間の進め方</h2>
+        <p>
+          すべて短時間で構いません。アプリの状態に応じて、内容を変更してお願いする場合があります。
+        </p>
+
+        <div class="schedule" role="table" aria-label="テスト予定">
+          <div class="day" role="rowheader">初日</div>
+          <div role="cell">参加登録、インストール、初回セットアップ（権限の許可・最初の場所の登録）</div>
+
+          <div class="day" role="rowheader">4～6日目</div>
+          <div role="cell">登録した場所への出入りを試す（実際の移動、または「テスト入場」「テスト退場」ボタン）</div>
+
+          <div class="day" role="rowheader">8～11日目</div>
+          <div role="cell">普段の生活の中で、自動切替が期待どおりに動くかを確認</div>
+
+          <div class="day" role="rowheader">13～14日目</div>
+          <div role="cell">最終確認と、簡単なアンケート・不具合報告</div>
+        </div>
+
+        <p class="small-note" style="margin-top:14px">
+          テスト期間：<strong id="test-period">日程調整中</strong>
+        </p>
+      </div>
+    </section>
+
+    <section aria-labelledby="privacy-title">
+      <div class="card privacy">
+        <h2 id="privacy-title">位置情報について</h2>
+        <p>
+          Volume Area Controllerは、登録した場所への出入りを検知するために位置情報を使用しますが、
+          音声の録音や会話の記録は一切行いません。取得した位置情報は端末内でのみ処理し、
+          外部のサーバーへ送信することはありません。広告SDK・解析SDKも使用していません。
+        </p>
+        <p>
+          アプリが取り扱うデータや保存の仕組みなど、正式な内容は下記のプライバシーポリシーでご確認ください。
+        </p>
+        <p>
+          <strong>お申し込みでいただく情報について：</strong>
+          申込フォームでご記入いただくメールアドレス・お名前・端末情報は、
+          Google Playのテスター登録とご連絡にのみ使用します。第三者へ提供することはありません。
+          テスト終了後3か月以内に削除します。
+        </p>
+        <div class="actions">
+          <a class="button button-primary js-config-link"
+             data-config="privacyUrl" href="#">
+            プライバシーポリシーを見る
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="faq-title">
+      <div class="card faq">
+        <h2 id="faq-title">よくある質問</h2>
+
+        <details>
+          <summary>費用はかかりますか？</summary>
+          <p>
+            テスト参加とアプリのインストールは無料です。
+          </p>
+        </details>
+
+        <details>
+          <summary>14日間、毎日使う必要がありますか？</summary>
+          <p>
+            毎日長時間使う必要はありません。14日間はテスト参加を解除せず、
+            このページの予定を目安に数回お試しください。
+          </p>
+        </details>
+
+        <details>
+          <summary>参加した日とインストール日が違ってもよいですか？</summary>
+          <p>
+            できるだけ参加登録と同じ日にインストールしてください。
+            すぐにインストールできなかった場合は、案内された連絡先へお知らせください。
+          </p>
+        </details>
+
+        <details>
+          <summary>Google Playで検索しても見つかりません。</summary>
+          <p>
+            クローズドテスト中は、通常の検索に表示されない場合があります。
+            登録完了の案内に記載された専用リンクから開いてください。
+          </p>
+        </details>
+
+        <details>
+          <summary>「このアカウントはテストに参加できません」と表示されます。</summary>
+          <p>
+            申込時とは別のGoogleアカウントで開いている可能性があります。
+            Google Playとブラウザーのアカウントをご確認ください。解決しない場合は、
+            表示画面のスクリーンショットを添えてご連絡ください。
+          </p>
+        </details>
+
+        <details>
+          <summary>位置情報の許可を求められますが、何に使われますか？</summary>
+          <p>
+            登録した場所（自宅・職場など）への出入りを判定するためだけに使います。
+            取得した位置情報は端末内だけで処理し、外部のサーバーやアプリ開発者へ送信することはありません。
+            「常に許可」まで許可しないと、アプリを閉じている間は自動切替が動きませんので、
+            初回セットアップで2つとも許可していただくようお願いしています。
+          </p>
+        </details>
+
+        <details>
+          <summary>バッテリーを多く消費しませんか？</summary>
+          <p>
+            常時GPSを使い続けるのではなく、Google Play開発者サービスの省電力な位置検知（ジオフェンス）に
+            依存しています。気になる場合は、権限タブの「電池の最適化から除外」の項目もご確認ください
+            （除外しないと、自動切替が途中で止まることがあります）。
+          </p>
+        </details>
+
+        <details>
+          <summary>途中で不具合が起きた場合はどうしますか？</summary>
+          <p>
+            アプリのバージョン、端末名、Androidのバージョン、行った操作、
+            表示されたメッセージをフィードバックフォームからお知らせください。
+            正確な自宅住所などの個人情報は送らないでください。
+          </p>
+        </details>
+
+        <details>
+          <summary>テストを途中でやめたい場合は？</summary>
+          <p>
+            参加解除の前に、可能であれば担当者へご連絡ください。
+            端末の問題などご不安がある場合は、無理に継続する必要はありません。
+          </p>
+        </details>
+      </div>
+    </section>
+
+    <section id="participate" aria-labelledby="participate-title">
+      <div class="card contact-card">
+        <h2 id="participate-title">テストに参加する</h2>
+        <p>
+          ご協力いただける方は、申込フォームからご登録ください。
+          登録内容を確認後、Google Playのテスト参加リンクをご案内します。
+        </p>
+
+        <div class="actions" style="justify-content:center">
+          <a class="button button-primary js-config-link"
+             data-config="signupUrl" href="#">
+            参加申込フォーム
+          </a>
+          <a class="button button-secondary js-config-link"
+             data-config="feedbackUrl" href="#">
+            不具合・感想を送る
+          </a>
+        </div>
+
+        <p class="small-note" style="margin-top:16px">
+          お問い合わせ：<span id="contact-text">連絡先準備中</span>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <strong>Volume Area Controller クローズドテスト</strong>
+      <div class="links">
+        <a href="https://support.google.com/googleplay/android-developer/answer/9845334?hl=ja"
+           target="_blank" rel="noopener noreferrer">
+          Google公式：テストの設定について
+        </a>
+        <a href="https://support.google.com/googleplay/android-developer/answer/14151465?hl=ja"
+           target="_blank" rel="noopener noreferrer">
+          Google公式：個人デベロッパーのテスト要件
+        </a>
+      </div>
+      <p class="small-note" style="margin-top:14px">
+        最終更新：<span id="updated-date">未設定</span>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    /*
+      ==========================================================
+      ここだけ編集すれば、リンク・日付・連絡先を変更できます。
+      URLが空欄のボタンを押すと「準備中」と表示されます。
+      ==========================================================
+    */
+    const CONFIG = {
+      signupUrl: "",       // Googleフォームなどの申込URL
+      feedbackUrl: "",     // Googleフォーム / GitHub Issuesなど
+      privacyUrl: "https://masatools.pages.dev/volumeac/privacy/",
+      contact: "masatools.info@gmail.com",
+      testStartDate: "",   // 例: "2026年9月20日"
+      testEndDate: "",     // 例: "2026年10月3日"
+      updatedDate: "2026年9月13日"
+    };
+
+    document.querySelectorAll(".js-config-link").forEach((link) => {
+      const key = link.dataset.config;
+      const url = CONFIG[key];
+
+      if (url) {
+        link.href = url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+      } else {
+        link.href = "#";
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          alert("このリンクは現在準備中です。公開前に管理者がURLを設定します。");
+        });
+      }
+    });
+
+    const testPeriod = document.getElementById("test-period");
+    if (CONFIG.testStartDate && CONFIG.testEndDate) {
+      testPeriod.textContent = `${CONFIG.testStartDate} ～ ${CONFIG.testEndDate}`;
+    }
+
+    document.getElementById("contact-text").textContent =
+      CONFIG.contact || "連絡先準備中";
+
+    document.getElementById("updated-date").textContent =
+      CONFIG.updatedDate || "未設定";
+  </script>
+</body>
+</html>

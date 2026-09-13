@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 870" role="img" aria-label="参加申込フォームの画像を差し替える枠">
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8faff"/>
+      <stop offset="1" stop-color="#eef4ff"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="870" fill="url(#bg1)"/>
+
+  <!-- フォームのイメージ（枠だけの簡易表現） -->
+  <g transform="translate(500 175)">
+    <rect x="0" y="0" width="600" height="520" rx="20" fill="#ffffff" stroke="#dce3ef" stroke-width="2"/>
+    <rect x="0" y="0" width="600" height="14" rx="7" fill="#15803d"/>
+    <rect x="44" y="62" width="300" height="22" rx="11" fill="#172033" opacity=".72"/>
+    <rect x="44" y="104" width="430" height="14" rx="7" fill="#5d687c" opacity=".38"/>
+
+    <g fill="#f4f7fb" stroke="#dce3ef" stroke-width="2">
+      <rect x="44" y="160" width="512" height="66" rx="12"/>
+      <rect x="44" y="248" width="512" height="66" rx="12"/>
+      <rect x="44" y="336" width="512" height="66" rx="12"/>
+    </g>
+    <g fill="#5d687c" opacity=".45">
+      <rect x="64" y="185" width="196" height="16" rx="8"/>
+      <rect x="64" y="273" width="248" height="16" rx="8"/>
+      <rect x="64" y="361" width="164" height="16" rx="8"/>
+    </g>
+
+    <rect x="44" y="430" width="168" height="52" rx="12" fill="#15803d"/>
+    <rect x="76" y="448" width="104" height="16" rx="8" fill="#ffffff" opacity=".9"/>
+  </g>
+
+  <!-- 差し替え案内 -->
+  <g text-anchor="middle" font-family="'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif">
+    <text x="800" y="120" font-size="34" font-weight="700" fill="#0f5c2c">画像は準備中です</text>
+    <text x="800" y="770" font-size="26" fill="#5d687c">参加申込フォームを作成したあと、この画像を差し替えてください</text>
+    <text x="800" y="812" font-size="22" fill="#8b95a6">images/step-1-application.svg</text>
+  </g>
+</svg>

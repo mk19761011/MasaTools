@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 870" role="img" aria-label="Google Playのインストール画面の画像を差し替える枠">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8faff"/>
+      <stop offset="1" stop-color="#eef4ff"/>
+    </linearGradient>
+    <linearGradient id="icon3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22c55e"/>
+      <stop offset="1" stop-color="#0f5c2c"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="870" fill="url(#bg3)"/>
+
+  <!-- Google Play アプリページのイメージ（スマホ縦画面） -->
+  <g transform="translate(650 130)">
+    <rect x="0" y="0" width="300" height="610" rx="34" fill="#ffffff" stroke="#dce3ef" stroke-width="2"/>
+
+    <!-- アプリアイコンと名前 -->
+    <rect x="30" y="46" width="82" height="82" rx="20" fill="url(#icon3)"/>
+    <rect x="130" y="62" width="130" height="18" rx="9" fill="#172033" opacity=".72"/>
+    <rect x="130" y="92" width="92" height="13" rx="6" fill="#5d687c" opacity=".4"/>
+
+    <!-- インストールボタン -->
+    <rect x="30" y="156" width="240" height="50" rx="25" fill="#15803d"/>
+    <rect x="106" y="173" width="88" height="16" rx="8" fill="#ffffff" opacity=".92"/>
+
+    <!-- スクリーンショット帯 -->
+    <g fill="#f4f7fb" stroke="#dce3ef" stroke-width="2">
+      <rect x="30" y="240" width="106" height="188" rx="12"/>
+      <rect x="152" y="240" width="106" height="188" rx="12"/>
+    </g>
+
+    <!-- 説明文 -->
+    <g fill="#5d687c" opacity=".3">
+      <rect x="30" y="462" width="240" height="12" rx="6"/>
+      <rect x="30" y="490" width="216" height="12" rx="6"/>
+      <rect x="30" y="518" width="240" height="12" rx="6"/>
+      <rect x="30" y="546" width="150" height="12" rx="6"/>
+    </g>
+  </g>
+
+  <!-- 差し替え案内 -->
+  <g text-anchor="middle" font-family="'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif">
+    <text x="800" y="98" font-size="34" font-weight="700" fill="#0f5c2c">画像は準備中です</text>
+    <text x="800" y="790" font-size="26" fill="#5d687c">Google Playのアプリページを撮影して差し替えます</text>
+    <text x="800" y="830" font-size="22" fill="#8b95a6">images/step-3-install.svg</text>
+  </g>
+</svg>
