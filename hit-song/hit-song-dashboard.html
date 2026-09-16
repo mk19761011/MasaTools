@@ -1274,6 +1274,877 @@ tbody tr {
         /* Disable fade animation for better performance */
     }
 }
+
+/* ==========================================================================
+   Ambience & Studio panel (ambience.js)
+   Everything here is inert until the "演出" switches are turned on.
+   ========================================================================== */
+
+@property --amb-1 {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #7c3aed;
+}
+
+@property --amb-2 {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #0ea5e9;
+}
+
+@property --amb-3 {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #1e1b4b;
+}
+
+:root {
+    --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+    transition: --amb-1 2.4s ease, --amb-2 2.4s ease, --amb-3 2.4s ease;
+}
+
+.ambience {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.4s var(--ease-soft);
+}
+
+body.ambience-on .ambience {
+    opacity: 1;
+}
+
+.ambience-art {
+    position: absolute;
+    inset: -12%;
+    background-position: center;
+    background-size: cover;
+    filter: blur(34px) saturate(1.35) brightness(0.55);
+    opacity: 0;
+    transform: scale(1.08);
+    transition: opacity 1.8s ease;
+    animation: ambience-drift 42s ease-in-out infinite alternate;
+    will-change: transform, opacity;
+}
+
+.ambience-art.is-visible {
+    opacity: 0.85;
+}
+
+.ambience-tint {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(55% 60% at 8% 12%, color-mix(in srgb, var(--amb-1) 58%, transparent) 0%, transparent 70%),
+        radial-gradient(50% 55% at 94% 88%, color-mix(in srgb, var(--amb-2) 50%, transparent) 0%, transparent 70%),
+        linear-gradient(160deg, color-mix(in srgb, var(--amb-3) 60%, rgba(6, 8, 20, 0.45)) 0%, rgba(6, 8, 20, 0.6) 100%);
+}
+
+.ambience-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 90% at 50% 40%, transparent 45%, rgba(3, 5, 14, 0.72) 100%);
+}
+
+@keyframes ambience-drift {
+    from {
+        transform: scale(1.08) translate3d(-1.5%, -1%, 0);
+    }
+
+    to {
+        transform: scale(1.16) translate3d(1.5%, 1.2%, 0);
+    }
+}
+
+body.ambience-on {
+    --bg-panel: rgba(12, 18, 36, 0.56);
+}
+
+body.ambience-on .modal-overlay {
+    background: color-mix(in srgb, var(--amb-3) 35%, rgba(2, 4, 12, 0.8));
+}
+
+body.ambience-on .modal-content {
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--amb-2) 35%, transparent),
+        0 30px 120px -10px color-mix(in srgb, var(--amb-1) 55%, transparent),
+        0 0 160px 20px color-mix(in srgb, var(--amb-2) 26%, transparent);
+    transition: transform 0.3s ease, box-shadow 2.4s ease;
+}
+
+/* ----- floating trigger ----- */
+
+.studio-trigger {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 900;
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.62);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    backdrop-filter: blur(14px) saturate(1.4);
+    color: var(--text-main);
+    cursor: pointer;
+    box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.6);
+    transition: transform 0.5s var(--ease-soft), border-color 0.3s ease, box-shadow 0.6s ease;
+}
+
+.studio-trigger svg {
+    position: relative;
+    z-index: 1;
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    transition: transform 0.9s var(--ease-soft);
+}
+
+.studio-trigger:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.studio-trigger:hover svg,
+.studio-trigger[aria-expanded="true"] svg {
+    transform: rotate(60deg);
+}
+
+.studio-trigger:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.studio-trigger-ring {
+    position: absolute;
+    inset: -1px;
+    padding: 1.5px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--amb-1), var(--amb-2), var(--amb-1));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    animation: studio-spin 6s linear infinite;
+}
+
+.studio-trigger.is-active .studio-trigger-ring {
+    opacity: 1;
+}
+
+.studio-trigger.is-active {
+    box-shadow: 0 0 34px -6px color-mix(in srgb, var(--amb-2) 65%, transparent);
+}
+
+@keyframes studio-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ----- mood caption ----- */
+
+.studio-caption {
+    position: fixed;
+    right: 90px;
+    bottom: 33px;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: calc(100vw - 120px);
+    padding: 8px 16px 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    background: rgba(10, 14, 30, 0.55);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    color: var(--text-main);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(12px);
+    pointer-events: none;
+    transition: opacity 0.8s ease, transform 0.8s var(--ease-soft);
+}
+
+.studio-caption.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+.studio-caption-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--amb-1), var(--amb-2));
+    box-shadow: 0 0 12px var(--amb-2);
+}
+
+.studio-caption-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.26em;
+    color: var(--text-muted);
+}
+
+.studio-caption-mood {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ----- panel ----- */
+
+.studio-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 940;
+    background: rgba(2, 4, 12, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+}
+
+.studio-scrim.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.studio-panel {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    bottom: 16px;
+    z-index: 950;
+    width: min(400px, calc(100vw - 32px));
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 26px 22px 18px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    background:
+        linear-gradient(160deg, color-mix(in srgb, var(--amb-1) 18%, transparent), transparent 42%),
+        rgba(9, 13, 28, 0.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.3);
+    backdrop-filter: blur(24px) saturate(1.3);
+    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+    transform: translateX(calc(100% + 32px));
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.6s var(--ease-soft), opacity 0.4s ease, visibility 0s linear 0.6s;
+}
+
+.studio-panel.is-open {
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.6s var(--ease-soft), opacity 0.3s ease, visibility 0s;
+}
+
+.studio-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 4px;
+}
+
+.studio-eyebrow {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    color: var(--text-muted);
+}
+
+.studio-title {
+    margin-top: 6px;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    background: linear-gradient(120deg, #fff 35%, color-mix(in srgb, var(--amb-2) 70%, #fff));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.studio-lead {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.studio-close {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.5s var(--ease-soft);
+}
+
+.studio-close svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+}
+
+.studio-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(90deg);
+}
+
+.studio-close:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.studio-features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.studio-card {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.035);
+    cursor: pointer;
+    transition: background 0.5s ease, border-color 0.5s ease, transform 0.4s var(--ease-soft), opacity 0.3s ease;
+}
+
+.studio-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-1px);
+}
+
+.studio-card.is-on {
+    border-color: color-mix(in srgb, var(--amb-2) 42%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--amb-1) 24%, transparent), color-mix(in srgb, var(--amb-2) 12%, transparent));
+}
+
+.studio-card.is-disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+
+.studio-card.is-disabled:hover {
+    background: rgba(255, 255, 255, 0.035);
+    transform: none;
+}
+
+.studio-card-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-muted);
+    transition: background 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.studio-card-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.studio-card.is-on .studio-card-icon {
+    background: linear-gradient(135deg, var(--amb-1), var(--amb-2));
+    color: #fff;
+    box-shadow: 0 8px 24px -8px var(--amb-2);
+}
+
+.studio-card-body {
+    min-width: 0;
+}
+
+.studio-card-title {
+    margin-top: 3px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.studio-card-desc {
+    margin-top: 4px;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.studio-card-status {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.72rem;
+    color: color-mix(in srgb, var(--amb-2) 55%, #e2e8f0);
+}
+
+.studio-card-status:empty {
+    display: none;
+}
+
+.studio-card-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+}
+
+.studio-card-status[data-tone="muted"] {
+    color: var(--text-muted);
+}
+
+.studio-card-status[data-tone="muted"]::before {
+    box-shadow: none;
+}
+
+.studio-card-status[data-tone="warn"] {
+    color: #fcd34d;
+}
+
+.studio-card-status[data-tone="busy"]::before {
+    animation: studio-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes studio-pulse {
+    50% {
+        opacity: 0.25;
+    }
+}
+
+.studio-switch {
+    position: relative;
+    width: 50px;
+    height: 28px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: background 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease;
+}
+
+.studio-switch-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+}
+
+.studio-switch[aria-checked="true"] {
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--amb-1), var(--amb-2));
+    box-shadow: 0 0 20px -4px var(--amb-2);
+}
+
+.studio-switch[aria-checked="true"] .studio-switch-knob {
+    background: #fff;
+    transform: translateX(22px);
+}
+
+.studio-switch:disabled {
+    cursor: default;
+}
+
+.studio-switch:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.studio-now {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.studio-now-art {
+    width: 76px;
+    aspect-ratio: 1;
+    border-radius: 14px;
+    background-color: var(--amb-3);
+    background-image: linear-gradient(135deg, var(--amb-1), var(--amb-2));
+    background-position: center;
+    background-size: cover;
+    box-shadow: 0 10px 30px -10px var(--amb-1);
+}
+
+.studio-now-body {
+    min-width: 0;
+}
+
+.studio-now-title {
+    margin-top: 4px;
+    overflow: hidden;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.studio-now-meta {
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.studio-swatches {
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+}
+
+.studio-swatches span {
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+}
+
+.studio-swatches span:nth-child(1) {
+    background: var(--amb-1);
+}
+
+.studio-swatches span:nth-child(2) {
+    background: var(--amb-2);
+}
+
+.studio-swatches span:nth-child(3) {
+    background: var(--amb-3);
+}
+
+.studio-foot {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+@media (max-width: 600px) {
+    .studio-trigger {
+        right: 16px;
+        bottom: 16px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .studio-caption {
+        right: 76px;
+        bottom: 24px;
+        max-width: calc(100vw - 100px);
+    }
+
+    .studio-panel {
+        top: auto;
+        right: 8px;
+        bottom: 8px;
+        left: 8px;
+        width: auto;
+        max-height: 84vh;
+        border-radius: 22px;
+        transform: translateY(calc(100% + 16px));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ambience-art,
+    .studio-trigger-ring {
+        animation: none;
+    }
+
+    .studio-panel,
+    .studio-card,
+    .studio-switch-knob,
+    .studio-trigger,
+    .studio-trigger svg,
+    .studio-close {
+        transition-duration: 0.01ms;
+    }
+}
+
+/* ==========================================================================
+   ライブラリ診断 (library.js)
+   ========================================================================== */
+
+.check-overlay {
+    /* Below the song editor (1000) so editing a row keeps the report behind. */
+    z-index: 990;
+}
+
+.check-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: min(680px, calc(100vw - 24px));
+    max-height: min(84vh, 860px);
+    padding: 24px;
+    transform: scale(0.96);
+    transition: transform 0.3s ease;
+}
+
+.check-overlay.active .check-dialog {
+    transform: scale(1);
+}
+
+.check-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.check-eyebrow {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    color: var(--text-muted);
+}
+
+.check-head h2 {
+    margin-top: 6px;
+    font-size: 1.5rem;
+    font-weight: 900;
+}
+
+.check-lead {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.check-close {
+    position: static;
+    flex-shrink: 0;
+}
+
+.check-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* The class rule would otherwise win over the hidden attribute. */
+.check-progress[hidden] {
+    display: none;
+}
+
+.check-progress-track {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.check-progress-bar {
+    width: 0;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 0.3s ease;
+}
+
+.check-progress-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.check-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 22px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.check-summary {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--text-main);
+}
+
+.check-section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.check-section-head h3 {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.check-badge {
+    min-width: 26px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(248, 113, 113, 0.18);
+    color: #fecaca;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.check-hint {
+    margin-top: 6px;
+    font-size: 0.76rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.check-group {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.check-group + .check-group {
+    margin-top: 8px;
+}
+
+.check-group-note {
+    padding: 2px 4px 8px;
+    font-size: 0.76rem;
+    color: var(--accent);
+}
+
+.check-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 4px;
+}
+
+.check-row + .check-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.check-row-text {
+    min-width: 0;
+}
+
+.check-row-title {
+    overflow: hidden;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.check-row-meta {
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.check-row-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 6px;
+}
+
+.check-row-actions .action-btn {
+    min-height: 30px;
+    padding: 4px 10px;
+    font-size: 0.74rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.check-foot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .check-dialog {
+        max-height: 88vh;
+        padding: 18px;
+    }
+
+    .check-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+/* ----- build label (renderBuildInfo) ----- */
+
+.app-footer {
+    padding: 4px 0 64px;
+    text-align: center;
+}
+
+.app-footer span {
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
     </style>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1321,6 +2192,7 @@ tbody tr {
                 <button class="action-btn" id="importBtn" title="Excel / JSON を読み込み">読み込み</button>
                 <button class="action-btn" id="exportExcelBtn" title="Excel として保存">Excel保存</button>
                 <button class="action-btn" id="exportJsonBtn" title="JSON として保存">JSON保存</button>
+                <button class="action-btn" id="checkLibraryBtn" title="リンク切れ・重複・表記ゆれを調べる">診断</button>
                 <button class="action-btn danger-action" id="resetDataBtn" title="初期データに戻す">初期化</button>
             </div>
         </header>
@@ -1429,6 +2301,10 @@ tbody tr {
                 </table>
             </div>
         </main>
+
+        <footer class="app-footer">
+            <span id="buildInfo"></span>
+        </footer>
     </div>
 
     <!-- Song Edit Modal -->
@@ -1551,6 +2427,9 @@ tbody tr {
 
     <!-- Load Data -->
     <script>
+const BUILD_INFO = Object.freeze({"version": "1.0.0", "build": "01", "tag": "v1.0.0-b01", "commit": "e0d229a", "builtAt": "2026-09-16T22:33:12Z"});
+    </script>
+    <script>
 const initialData = [
   {
     "URL": "https://www.youtube.com/watch?v=uKgmu8g-kXE",
@@ -1558,9 +2437,7 @@ const initialData = [
     "曲名": "ハピネス",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=YZ3OHqSLOpo",
@@ -1568,9 +2445,7 @@ const initialData = [
     "曲名": "カブトムシ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=9Jh-FBYGaU4",
@@ -1578,9 +2453,7 @@ const initialData = [
     "曲名": "ボーイフレンド",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=iqGHxcTPRfI",
@@ -1588,9 +2461,7 @@ const initialData = [
     "曲名": "花火",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=74IKR0WeKXY",
@@ -1598,9 +2469,7 @@ const initialData = [
     "曲名": "はしまりはいつも雨",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=8e5-XC-8rVU",
@@ -1608,9 +2477,7 @@ const initialData = [
     "曲名": "Dreamland",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=9WQ6vgHkyxo",
@@ -1618,9 +2485,7 @@ const initialData = [
     "曲名": "サンライズ",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jXkHICv_qCY",
@@ -1628,9 +2493,7 @@ const initialData = [
     "曲名": "VALENTI",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=qe5pN-xMnPo",
@@ -1638,9 +2501,7 @@ const initialData = [
     "曲名": "A Perfect Sky",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=09OWN1yEpgA",
@@ -1648,9 +2509,7 @@ const initialData = [
     "曲名": "Only You",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=nxeXaZlzqEA",
@@ -1658,9 +2517,7 @@ const initialData = [
     "曲名": "わがままジュリエット",
     "流行": "A",
     "評価": "B",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=29JRUtdEK3w",
@@ -1668,9 +2525,7 @@ const initialData = [
     "曲名": "B-Blue",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=j7CDb610Bg0",
@@ -1678,9 +2533,7 @@ const initialData = [
     "曲名": "天体観測",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=R6tjNBLIRFw",
@@ -1688,9 +2541,7 @@ const initialData = [
     "曲名": "Easy Come, Easy Go!",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=a9J5a4Xl4WY",
@@ -1698,9 +2549,7 @@ const initialData = [
     "曲名": "BAD COMMUNICATION",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=G2UgYTGK0HY",
@@ -1708,9 +2557,7 @@ const initialData = [
     "曲名": "ultra soul",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZgRPDC4xE4A",
@@ -1718,9 +2565,7 @@ const initialData = [
     "曲名": "LOVE PHANTOM",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IZ0Ojj7acgg",
@@ -1728,9 +2573,7 @@ const initialData = [
     "曲名": "ロマンティックか止まらない",
     "流行": "A",
     "評価": "B",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=MyINhQ6UW4Y",
@@ -1738,9 +2581,7 @@ const initialData = [
     "曲名": "LOVE SONG",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=fbzikl8_NOs",
@@ -1748,9 +2589,7 @@ const initialData = [
     "曲名": "SAY YES",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yfZIaTZJo0o",
@@ -1758,9 +2597,7 @@ const initialData = [
     "曲名": "YAH YAH YAH",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dKaEWSia0n4",
@@ -1768,9 +2605,7 @@ const initialData = [
     "曲名": "万里の河",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=D7UkF0PUgFo",
@@ -1778,9 +2613,7 @@ const initialData = [
     "曲名": "モーニングムーン",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZlzwJuT1XCc",
@@ -1788,9 +2621,7 @@ const initialData = [
     "曲名": "太陽と埃の中で",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=UFWT8IzDlMI",
@@ -1798,9 +2629,7 @@ const initialData = [
     "曲名": "僕はこの瞳て嘘をつく",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RDHBkza_ZcI",
@@ -1808,9 +2637,7 @@ const initialData = [
     "曲名": "やさしい気持ち",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=CjNxOaANplU",
@@ -1818,9 +2645,7 @@ const initialData = [
     "曲名": "強く儚い者たち",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=6H7WEDLa4zo",
@@ -1828,9 +2653,7 @@ const initialData = [
     "曲名": "恋をとめないて (1990tour)",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=PCv7eXOXuGc",
@@ -1838,9 +2661,7 @@ const initialData = [
     "曲名": "恋におちたら",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=FWcuS-rfWyw",
@@ -1848,9 +2669,7 @@ const initialData = [
     "曲名": "ごきげんだぜっ！",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=yFvrbelLW5w",
@@ -1858,9 +2677,7 @@ const initialData = [
     "曲名": "このまま君だけを奪い去りたい",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=o13WEDJMkQA",
@@ -1868,9 +2685,7 @@ const initialData = [
     "曲名": "瞳そらさないで",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zSYP29oFBk0",
@@ -1878,9 +2693,7 @@ const initialData = [
     "曲名": "Grateful Days",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=5ok06tb3NGU",
@@ -1888,9 +2701,7 @@ const initialData = [
     "曲名": "陽はまたのぼりくりかえす",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zgLAWm68XVg",
@@ -1898,9 +2709,7 @@ const initialData = [
     "曲名": "何度でも",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=4HjtZKIec2A",
@@ -1908,9 +2717,7 @@ const initialData = [
     "曲名": "決戦は金曜日",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=AYhxRUJxQYM",
@@ -1918,9 +2725,7 @@ const initialData = [
     "曲名": "未来予想図Ⅱ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZtDUKU-lx4w",
@@ -1928,9 +2733,7 @@ const initialData = [
     "曲名": "Dｒスランプ　アラレちゃんOP",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=qDKSeZtvuZU",
@@ -1938,9 +2741,7 @@ const initialData = [
     "曲名": "アラレちゃん音頭",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=f2w9JwQaT4U",
@@ -1948,9 +2749,7 @@ const initialData = [
     "曲名": "くちばしにチェリー",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=hIKf9RHq-TU",
@@ -1958,9 +2757,7 @@ const initialData = [
     "曲名": "fragile",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=k1S0i8FoV4c",
@@ -1968,9 +2765,7 @@ const initialData = [
     "曲名": "出逢った頃のように",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=PwhKGjv4Yjc",
@@ -1978,9 +2773,7 @@ const initialData = [
     "曲名": "Time goes by",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Pjm_y8q0Vwg",
@@ -1988,9 +2781,7 @@ const initialData = [
     "曲名": "Choo Choo Train",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Lll1gyFTJms",
@@ -1998,9 +2789,7 @@ const initialData = [
     "曲名": "Your eyes only ～曖昧なぼくの輪郭～",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QLDbcnpqSXE",
@@ -2008,9 +2797,7 @@ const initialData = [
     "曲名": "ただ･･･逢いたくて",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=LnAvMahBU5s",
@@ -2018,9 +2805,7 @@ const initialData = [
     "曲名": "銀河鉄道999",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Ddtu-ew6pCc",
@@ -2028,9 +2813,7 @@ const initialData = [
     "曲名": "突然",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=g4ge3N0xF9M",
@@ -2038,9 +2821,7 @@ const initialData = [
     "曲名": "サヨナラ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gPcPseeICjs",
@@ -2048,9 +2829,7 @@ const initialData = [
     "曲名": "HOWEVER",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DwTinTO0o9I",
@@ -2058,9 +2837,7 @@ const initialData = [
     "曲名": "キセキ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ImqUTsZtRqg",
@@ -2068,9 +2845,7 @@ const initialData = [
     "曲名": "想い出がいっぱい",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=W6s41bYxYf0",
@@ -2078,9 +2853,7 @@ const initialData = [
     "曲名": "DICE",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=glsH4Mgxz-g",
@@ -2088,9 +2861,7 @@ const initialData = [
     "曲名": "366日",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QIBPUU_tuJE",
@@ -2098,9 +2869,7 @@ const initialData = [
     "曲名": "明日への扉",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ewphY7jULL0",
@@ -2108,9 +2877,7 @@ const initialData = [
     "曲名": "そばかす",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://youtu.be/FfCP2Q0srMs?si=-n2BtWFxRg-X3E_O",
@@ -2118,9 +2885,7 @@ const initialData = [
     "曲名": "Over Drive",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=t_afbUg2nns",
@@ -2128,9 +2893,7 @@ const initialData = [
     "曲名": "愛は勝つ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=bNhuzeYEpIE",
@@ -2138,9 +2901,7 @@ const initialData = [
     "曲名": "北風小僧の寒太郎",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AS2-k1oqbJA",
@@ -2148,9 +2909,7 @@ const initialData = [
     "曲名": "硝子の少年",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IiqOCE3_8iI",
@@ -2158,9 +2917,7 @@ const initialData = [
     "曲名": "長い間",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=OZ3UuZdUHZc",
@@ -2168,9 +2925,7 @@ const initialData = [
     "曲名": "未来へ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=PfzzmEweKH8",
@@ -2178,9 +2933,7 @@ const initialData = [
     "曲名": "音色",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xd8yYObr7L0",
@@ -2188,9 +2941,7 @@ const initialData = [
     "曲名": "KNOCKIN' ON YOUR DOOR",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Tj4aN-JxA7M",
@@ -2198,9 +2949,7 @@ const initialData = [
     "曲名": "flower",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WmM-KTcG3QY",
@@ -2208,9 +2957,7 @@ const initialData = [
     "曲名": "HONEY",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=kdEb-16-nyo",
@@ -2218,9 +2965,7 @@ const initialData = [
     "曲名": "ひだまりの詩",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=FJHJCK7PhaI",
@@ -2228,9 +2973,7 @@ const initialData = [
     "曲名": "BELIEVE IN LOVE",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=WfTkaKqQbGA",
@@ -2238,9 +2981,7 @@ const initialData = [
     "曲名": "今すぐKiss Me",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=yFGX82InozY",
@@ -2248,9 +2989,7 @@ const initialData = [
     "曲名": "Love in the sky",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DRLkiX-NZzE",
@@ -2258,9 +2997,7 @@ const initialData = [
     "曲名": "ROSIER",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=t1mcnxf8S9A",
@@ -2268,9 +3005,7 @@ const initialData = [
     "曲名": "ヴェル・エール～空白の瞬間の中で～",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=UOpGHZxFRws",
@@ -2278,9 +3013,7 @@ const initialData = [
     "曲名": "月下の夜想曲",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RNBiaZbFGII",
@@ -2288,9 +3021,7 @@ const initialData = [
     "曲名": "come again",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=HOsiSE_JTOM",
@@ -2298,9 +3029,7 @@ const initialData = [
     "曲名": "let go",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=g0Pb5CDhndk",
@@ -2308,9 +3037,7 @@ const initialData = [
     "曲名": "気分上々↑↑",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=2jf5qfZTrrw",
@@ -2318,9 +3045,7 @@ const initialData = [
     "曲名": "想い出の九十九里浜",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=qj9S58H59kM",
@@ -2328,9 +3053,7 @@ const initialData = [
     "曲名": "ブルーライトヨコスカ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RRACsXX6JB4",
@@ -2338,9 +3061,7 @@ const initialData = [
     "曲名": "The Perfect Vision",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=JeYJnSuYgrs",
@@ -2348,9 +3069,7 @@ const initialData = [
     "曲名": "つつみ込むように…",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qeffpUbJIBw",
@@ -2358,9 +3077,7 @@ const initialData = [
     "曲名": "ダンシング・オールナイト",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vSOLtBy-xas",
@@ -2368,9 +3085,7 @@ const initialData = [
     "曲名": "ESCAPE",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=C4zJfYA_ur8",
@@ -2378,9 +3093,7 @@ const initialData = [
     "曲名": "CROSS ROAD",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=EXxaBXKjl6Q",
@@ -2388,9 +3101,7 @@ const initialData = [
     "曲名": "HANABI",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=rfVhsgCqG0I",
@@ -2398,9 +3109,7 @@ const initialData = [
     "曲名": "イノセント・ワールド",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=4gd2oVFUcz0",
@@ -2408,9 +3117,7 @@ const initialData = [
     "曲名": "名もなき詩",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=mOJIchNt3RY",
@@ -2418,9 +3125,7 @@ const initialData = [
     "曲名": "シーソーゲーム ～勇敢な恋の歌～",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Nxwt_s1lM04",
@@ -2428,9 +3133,7 @@ const initialData = [
     "曲名": "Tomorrow never knows",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=RkF5_BpBQU4",
@@ -2438,9 +3141,7 @@ const initialData = [
     "曲名": "Hello, Again 〜昔からある場所〜",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=MYuSqV4JsVA",
@@ -2448,9 +3149,7 @@ const initialData = [
     "曲名": "Man & Woman",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=fSPHRIryljQ",
@@ -2458,9 +3157,7 @@ const initialData = [
     "曲名": "今を抱きしめて",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=SfwKRn6yzUM",
@@ -2468,9 +3165,7 @@ const initialData = [
     "曲名": "人魚",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=iYkg90hDInc",
@@ -2478,9 +3173,7 @@ const initialData = [
     "曲名": "花",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1WTy2yqKI4w",
@@ -2488,9 +3181,7 @@ const initialData = [
     "曲名": "チョコレイト・ディスコ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=KbiSxunJatM",
@@ -2498,9 +3189,7 @@ const initialData = [
     "曲名": "ポリリズム",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=EO4tRtPBq30",
@@ -2508,9 +3197,7 @@ const initialData = [
     "曲名": "アジアの純真",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=8RXUBBKAIs0",
@@ -2518,9 +3205,7 @@ const initialData = [
     "曲名": "これが私の生きる道",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AfjqLXhNSjw",
@@ -2528,9 +3213,7 @@ const initialData = [
     "曲名": "愛のしるし",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oVVrICEKdsQ",
@@ -2538,9 +3221,7 @@ const initialData = [
     "曲名": "渚にまつわるエトセトラ",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0AlITEvgs1Y",
@@ -2548,9 +3229,7 @@ const initialData = [
     "曲名": "フレンズ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mq9dl6hw_yk",
@@ -2558,9 +3237,7 @@ const initialData = [
     "曲名": "楽園ベイベー",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RgC8kKv0hqM",
@@ -2568,9 +3245,7 @@ const initialData = [
     "曲名": "1/3の純情な感情",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ObQ3mUp1cjk",
@@ -2578,9 +3253,7 @@ const initialData = [
     "曲名": "らいおんハート ～ SHAKE ～ 夜空ノムコウ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=s4qzMhw-09k",
@@ -2588,9 +3261,7 @@ const initialData = [
     "曲名": "White Love",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=Z2tedgbqJJs",
@@ -2598,9 +3269,7 @@ const initialData = [
     "曲名": "タマシイレボリューション",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=gU5oN0KVofU",
@@ -2608,9 +3277,7 @@ const initialData = [
     "曲名": "愛をこめて花束を",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=vBmU5v2EyxM",
@@ -2618,9 +3285,7 @@ const initialData = [
     "曲名": "HOT LIMIT",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FjG4A3_whXY",
@@ -2628,9 +3293,7 @@ const initialData = [
     "曲名": "離したくはない",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Rx0YTobCjag",
@@ -2638,9 +3301,7 @@ const initialData = [
     "曲名": "星空のディスタンス",
     "流行": "S",
     "評価": "B",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Lift8TF1Wes",
@@ -2648,9 +3309,7 @@ const initialData = [
     "曲名": "星のラブレター",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=4NO2WV_RYEo",
@@ -2658,9 +3317,7 @@ const initialData = [
     "曲名": "風になりたい",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xv55yyNxCuE",
@@ -2668,9 +3325,7 @@ const initialData = [
     "曲名": "JAM",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=M25353PADy8",
@@ -2678,9 +3333,7 @@ const initialData = [
     "曲名": "MY WINDING ROAD",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YIaghOy-HJU",
@@ -2688,9 +3341,7 @@ const initialData = [
     "曲名": "SPARK",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oGoEHWEGrjM",
@@ -2698,9 +3349,7 @@ const initialData = [
     "曲名": "プライマル。",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=r107W1YXrSM",
@@ -2708,9 +3357,7 @@ const initialData = [
     "曲名": "Get Wild",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=EgGnreyPmaQ",
@@ -2718,9 +3365,7 @@ const initialData = [
     "曲名": "BOY MEETS GIRL",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=s9BTjk0cXb0",
@@ -2728,9 +3373,7 @@ const initialData = [
     "曲名": "あー夏休み",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=R53CceEY77Y",
@@ -2738,9 +3381,7 @@ const initialData = [
     "曲名": "情熱",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=u25u9zedIBM",
@@ -2748,9 +3389,7 @@ const initialData = [
     "曲名": "悲しみジョニー",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=95RLXE7um68",
@@ -2758,9 +3397,7 @@ const initialData = [
     "曲名": "もっと強く抱きしめたなら",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZItcRV_K268",
@@ -2768,9 +3405,7 @@ const initialData = [
     "曲名": "愛が止まらない",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=nspXcSLwAA8",
@@ -2778,9 +3413,7 @@ const initialData = [
     "曲名": "淋しい熱帯魚",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=QjLddLFpxvg",
@@ -2788,9 +3421,7 @@ const initialData = [
     "曲名": "Forever Love",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Oj9bvmzTR2A",
@@ -2798,9 +3429,7 @@ const initialData = [
     "曲名": "Silent Jealousy",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=AJWIaqKDVp8",
@@ -2808,9 +3437,7 @@ const initialData = [
     "曲名": "紅",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jQSQQ5EZFvY",
@@ -2818,9 +3445,7 @@ const initialData = [
     "曲名": "少女時代",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=tB9xGidazZE",
@@ -2828,9 +3453,7 @@ const initialData = [
     "曲名": "じんじん",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jHdbJMkmQig",
@@ -2838,9 +3461,7 @@ const initialData = [
     "曲名": "笑顔を探して",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=tPLBxLHM_MA",
@@ -2848,9 +3469,7 @@ const initialData = [
     "曲名": "SHOW ME",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=jaFE9YH3Zmk",
@@ -2858,9 +3477,7 @@ const initialData = [
     "曲名": "揺れる想い",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=a7WhrI0Bbnk",
@@ -2868,9 +3485,7 @@ const initialData = [
     "曲名": "待つわ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oh921wAY1Lg",
@@ -2878,9 +3493,7 @@ const initialData = [
     "曲名": "完全無欠のロックンローラー",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=a-DVTrSkXI0",
@@ -2888,9 +3501,7 @@ const initialData = [
     "曲名": "アルプスの少女ハイジ”",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=61z-cqg28R8",
@@ -2898,9 +3509,7 @@ const initialData = [
     "曲名": "SAKURA",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lz8frtP6_kk",
@@ -2908,9 +3517,7 @@ const initialData = [
     "曲名": "YELL",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=NzIcRQBkMY8",
@@ -2918,9 +3525,7 @@ const initialData = [
     "曲名": "帰りたくなったよ",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OhNF--JhfPg",
@@ -2928,9 +3533,7 @@ const initialData = [
     "曲名": "気まぐれロマンティック",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qeXIMgYYg8s",
@@ -2938,9 +3541,7 @@ const initialData = [
     "曲名": "茜色の約束",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=fqE3Yj6S6PQ",
@@ -2948,9 +3549,7 @@ const initialData = [
     "曲名": "ブルー・ライト・ヨコハマ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3a9eXEKM3AA",
@@ -2958,9 +3557,7 @@ const initialData = [
     "曲名": "おさかな天国 PV",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=MgCrAXMcbD8",
@@ -2968,9 +3565,7 @@ const initialData = [
     "曲名": "いなかっぺ大将 OP",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=-_NaRPkaKdw",
@@ -2978,9 +3573,7 @@ const initialData = [
     "曲名": "ハイスクールララバイ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AiJIP3ARoJs",
@@ -2988,9 +3581,7 @@ const initialData = [
     "曲名": "なごり雪",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OyuLeL5xsR8",
@@ -2998,9 +3589,7 @@ const initialData = [
     "曲名": "ウルトラマン OP集 昭和篇",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=bssK6prrHrQ",
@@ -3008,9 +3597,7 @@ const initialData = [
     "曲名": "ええねん",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=ATU0gXzMsLw",
@@ -3018,9 +3605,7 @@ const initialData = [
     "曲名": "ガッツだぜ！！",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Z28KuShADpw",
@@ -3028,9 +3613,7 @@ const initialData = [
     "曲名": "それが答えだ！",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GdSg_NdtGbc",
@@ -3038,9 +3621,7 @@ const initialData = [
     "曲名": "バンザイ～好きでよかった～",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=L-ZWzztTX54",
@@ -3048,9 +3629,7 @@ const initialData = [
     "曲名": "笑えれば",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lmRBXQAqCy4",
@@ -3058,9 +3637,7 @@ const initialData = [
     "曲名": "ラムのラブソング",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=0melyLHqP-s",
@@ -3068,9 +3645,7 @@ const initialData = [
     "曲名": "今宵の月のように",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gWFX_JqYYt8",
@@ -3078,9 +3653,7 @@ const initialData = [
     "曲名": "ダンシング・ヒーロー",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=iLeDUwKf9PM",
@@ -3088,9 +3661,7 @@ const initialData = [
     "曲名": "15の夜",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EPUtO0gNHPA",
@@ -3098,9 +3669,7 @@ const initialData = [
     "曲名": "I LOVE YOU",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=y1Ng1BjGtwo",
@@ -3108,9 +3677,7 @@ const initialData = [
     "曲名": "セーラー服を脱がさないで",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=zOZR0DAHxI0",
@@ -3118,9 +3685,7 @@ const initialData = [
     "曲名": "YES-No",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=l-xcmbvi-YY",
@@ -3128,9 +3693,7 @@ const initialData = [
     "曲名": "さよなら",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OQFDZ3086gs",
@@ -3138,9 +3701,7 @@ const initialData = [
     "曲名": "言葉にできない",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bBlwcDAx74s",
@@ -3148,9 +3709,7 @@ const initialData = [
     "曲名": "心の旅",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RLFGkxHPrUk",
@@ -3158,9 +3717,7 @@ const initialData = [
     "曲名": "麦畑",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=8oXW63oSaLk",
@@ -3168,9 +3725,7 @@ const initialData = [
     "曲名": "冬のファンタジー",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=kRaJsFM7VV8",
@@ -3178,9 +3733,7 @@ const initialData = [
     "曲名": "I'm proud",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WVa6PTlyCxw",
@@ -3188,9 +3741,7 @@ const initialData = [
     "曲名": "かぼちゃワインOP",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AbPL8KdXojg",
@@ -3198,9 +3749,7 @@ const initialData = [
     "曲名": "学生街の喫茶店",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=hJYTet8IefE",
@@ -3208,9 +3757,7 @@ const initialData = [
     "曲名": "涙くんさよなら",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=8WBSGQx8Z7o",
@@ -3218,9 +3765,7 @@ const initialData = [
     "曲名": "はじめてのチュウ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=JMtPy5lz258",
@@ -3228,9 +3773,7 @@ const initialData = [
     "曲名": "キャプテン　OP　君は何かができる",
     "流行": "A",
     "評価": "B",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=r-xkZtucx1Y",
@@ -3238,9 +3781,7 @@ const initialData = [
     "曲名": "ファンキー・モンキー・ベイビー",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=avC7-ljlWus",
@@ -3248,9 +3789,7 @@ const initialData = [
     "曲名": "港のヨーコヨコハマヨコスカ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=xdYPswEY3yE",
@@ -3258,9 +3797,7 @@ const initialData = [
     "曲名": "春一番",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=7TkDjPdwdbA",
@@ -3268,9 +3805,7 @@ const initialData = [
     "曲名": "年下の男の子",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=s7OejXEnZIU",
@@ -3278,9 +3813,7 @@ const initialData = [
     "曲名": "炎のキン肉マン",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=SbU9ZZ0WHnA",
@@ -3288,9 +3821,7 @@ const initialData = [
     "曲名": "愛をとりもどせ!!",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=dZ7SCfplwcg",
@@ -3298,9 +3829,7 @@ const initialData = [
     "曲名": "大都会",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ba0juE9ROCg",
@@ -3308,9 +3837,7 @@ const initialData = [
     "曲名": "天使にふれたよ!",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=NeYQOpMCt2k",
@@ -3318,9 +3845,7 @@ const initialData = [
     "曲名": "ゲゲゲの鬼太郎",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=yegBF2yoTDo",
@@ -3328,9 +3853,7 @@ const initialData = [
     "曲名": "さくら",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IV7usfiEbms",
@@ -3338,9 +3861,7 @@ const initialData = [
     "曲名": "友よ ～ この先もずっと…",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=BC9P3DSZu0A",
@@ -3348,9 +3869,7 @@ const initialData = [
     "曲名": "女々しくて",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=J1-4KwD3tT8",
@@ -3358,9 +3877,7 @@ const initialData = [
     "曲名": "ガンダーラ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=9JPntOdxJLM",
@@ -3368,9 +3885,7 @@ const initialData = [
     "曲名": "YELL ～エール～",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GCx-zSwQNb4",
@@ -3378,9 +3893,7 @@ const initialData = [
     "曲名": "ここにしか咲かない花",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WPH1BLHKOJE",
@@ -3388,9 +3901,7 @@ const initialData = [
     "曲名": "蕾",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Dsdxxrnz1AQ",
@@ -3398,9 +3909,7 @@ const initialData = [
     "曲名": "桜",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=hYl8z3wlHZ0",
@@ -3408,9 +3917,7 @@ const initialData = [
     "曲名": "キッスは目にして！",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=5Cl75Oohkps",
@@ -3418,9 +3925,7 @@ const initialData = [
     "曲名": "あの時君は若かった",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=7T00uNWKqvs",
@@ -3428,9 +3933,7 @@ const initialData = [
     "曲名": "日曜日よりの使者",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mXmoFVuoaVM",
@@ -3438,9 +3941,7 @@ const initialData = [
     "曲名": "恋のバカンス",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=bS8I95IP9TU",
@@ -3448,9 +3949,7 @@ const initialData = [
     "曲名": "恋のフーガ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=WZUmSNcmcwg",
@@ -3458,9 +3957,7 @@ const initialData = [
     "曲名": "コーヒー・ルンバ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=2kbuQb98_AY",
@@ -3468,9 +3965,7 @@ const initialData = [
     "曲名": "あの素晴しい愛をもう一度",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=LIlZCmETvsY",
@@ -3478,9 +3973,7 @@ const initialData = [
     "曲名": "新宝島",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=0ynrQXhHvgc",
@@ -3488,9 +3981,7 @@ const initialData = [
     "曲名": "夢冒険",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=u66DIUNUQhc",
@@ -3498,9 +3989,7 @@ const initialData = [
     "曲名": "宇宙戦艦ヤマト",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=WBdj14T0ZVY",
@@ -3508,9 +3997,7 @@ const initialData = [
     "曲名": "いとしのエリー",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FiDaqa4xKbU",
@@ -3518,9 +4005,7 @@ const initialData = [
     "曲名": "ミス・ブランニュー・デイ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vomlA812I2Q",
@@ -3528,9 +4013,7 @@ const initialData = [
     "曲名": "みんなのうた",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vTkSyBp635M",
@@ -3538,9 +4021,7 @@ const initialData = [
     "曲名": "真夏の果実",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=jQILVt98cmU",
@@ -3548,9 +4029,7 @@ const initialData = [
     "曲名": "プレゼント",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=BFvdvIFsvPg",
@@ -3558,9 +4037,7 @@ const initialData = [
     "曲名": "夏祭り",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=vXSb3Khyikg",
@@ -3568,9 +4045,7 @@ const initialData = [
     "曲名": "バケツのおひさんつかまえた",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=AvEu9JptjnM",
@@ -3578,9 +4053,7 @@ const initialData = [
     "曲名": "魅せられて",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=6zEAGUwjDNM",
@@ -3588,9 +4061,7 @@ const initialData = [
     "曲名": "戦争を知らない子どもたち",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IvDTkTKi5pA",
@@ -3598,9 +4069,7 @@ const initialData = [
     "曲名": "全力少年",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=J5Z7tIq7bco",
@@ -3608,9 +4077,7 @@ const initialData = [
     "曲名": "奏（かなで）",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=Eze6-eHmtJg",
@@ -3618,9 +4085,7 @@ const initialData = [
     "曲名": "チェリー",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=Ey3mlNmuXzc",
@@ -3628,9 +4093,7 @@ const initialData = [
     "曲名": "空も飛べるはず",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=8TpR6vIdhbE",
@@ -3638,9 +4101,7 @@ const initialData = [
     "曲名": "コンピューターおばあちゃん",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=CS7Ujl3EJFk",
@@ -3648,9 +4109,7 @@ const initialData = [
     "曲名": "野に咲く花のように",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=dTVXfrLsp7A",
@@ -3658,9 +4117,7 @@ const initialData = [
     "曲名": "行け！タイガーマスク",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Dyd1BOPXu_A",
@@ -3668,9 +4125,7 @@ const initialData = [
     "曲名": "元気を出して",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=oB7cXlYZOOc",
@@ -3678,9 +4133,7 @@ const initialData = [
     "曲名": "駅",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=2L0bVbrftsI",
@@ -3688,9 +4141,7 @@ const initialData = [
     "曲名": "抱きしめてTONIGHT",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1LLsV-myhmQ",
@@ -3698,9 +4149,7 @@ const initialData = [
     "曲名": "さよなら人類",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=dvbjQoX9p6o",
@@ -3708,9 +4157,7 @@ const initialData = [
     "曲名": "ギザギザハートの子守唄",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AQCinctvWes",
@@ -3718,9 +4165,7 @@ const initialData = [
     "曲名": "ジュリアに傷心",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dbs_F8HmWmg",
@@ -3728,9 +4173,7 @@ const initialData = [
     "曲名": "素直にI'm Sorry",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0-a02uymYbA",
@@ -3738,9 +4181,7 @@ const initialData = [
     "曲名": "夜明けのブレス",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ALjoR-0rDMo",
@@ -3748,9 +4189,7 @@ const initialData = [
     "曲名": "涙のリクエスト",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=xNvTmNMlVjA",
@@ -3758,9 +4197,7 @@ const initialData = [
     "曲名": "てんとう虫のサンバ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=NEb9MTNk3y4",
@@ -3768,9 +4205,7 @@ const initialData = [
     "曲名": "シャングリラ",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QpYhfhqIT2Q",
@@ -3778,9 +4213,7 @@ const initialData = [
     "曲名": "心の旅",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=kBoVvij_uqk",
@@ -3788,9 +4221,7 @@ const initialData = [
     "曲名": "青春の影",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YIoykiM_AYw",
@@ -3798,9 +4229,7 @@ const initialData = [
     "曲名": "デビルマン オープニングタイトル",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=52038YtM9Z0",
@@ -3808,9 +4237,7 @@ const initialData = [
     "曲名": "魔訶不思議アドベンチャー！",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=5E9dX2Hraso",
@@ -3818,9 +4245,7 @@ const initialData = [
     "曲名": "ドリフ大爆笑  オープニング   1981年",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=fkHj4LD7nGg",
@@ -3828,9 +4253,7 @@ const initialData = [
     "曲名": "ドリフ大爆笑2003年 オープニング･エンディング",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=i68RH-EbmTM",
@@ -3838,9 +4261,7 @@ const initialData = [
     "曲名": "或る日突然",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ePj6ctaXquI",
@@ -3848,9 +4269,7 @@ const initialData = [
     "曲名": "ど根性ガエル OP",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=tenaYCLIuOc",
@@ -3858,9 +4277,7 @@ const initialData = [
     "曲名": "最後の雨",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=sZC3FLUWY4A",
@@ -3868,9 +4285,7 @@ const initialData = [
     "曲名": "TATTOO",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=XkqIs91vJFQ",
@@ -3878,9 +4293,7 @@ const initialData = [
     "曲名": "いっぽんでもニンジン",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=7sGpUdShZks",
@@ -3888,9 +4301,7 @@ const initialData = [
     "曲名": "パタパタママ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=UtADP9e-RC8",
@@ -3898,9 +4309,7 @@ const initialData = [
     "曲名": "パーマン OP",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=238shSa2kbU",
@@ -3908,9 +4317,7 @@ const initialData = [
     "曲名": "ハクション大魔王～♪",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=miZcc0vg_DE",
@@ -3918,9 +4325,7 @@ const initialData = [
     "曲名": "はじめ人間ギャートルズ OP",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5WYHAaUlzpw",
@@ -3928,9 +4333,7 @@ const initialData = [
     "曲名": "WON'T BE LONG",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=XJOEfGApwOo&t=68s",
@@ -3938,9 +4341,7 @@ const initialData = [
     "曲名": "いちご白書をもう一度",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=-TuFqVLDxZU",
@@ -3948,9 +4349,7 @@ const initialData = [
     "曲名": "3年目の浮気",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pFuuRhk2tM0",
@@ -3958,9 +4357,7 @@ const initialData = [
     "曲名": "恋の季節",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=Ws7b58Rn8aM",
@@ -3968,9 +4365,7 @@ const initialData = [
     "曲名": "UFO",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=6xxMbNm4NNI",
@@ -3978,9 +4373,7 @@ const initialData = [
     "曲名": "カルメン’77［フリツケ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=--cLA33-Afw",
@@ -3988,9 +4381,7 @@ const initialData = [
     "曲名": "サウスポー",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=XtnfxaXy2UM",
@@ -3998,9 +4389,7 @@ const initialData = [
     "曲名": "サウスポー",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GxQtGioreD8",
@@ -4008,9 +4397,7 @@ const initialData = [
     "曲名": "ペッパー警部",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pnCc3fp2ZC0",
@@ -4018,9 +4405,7 @@ const initialData = [
     "曲名": "渚のシンドバッド",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9aAf0csBAAc",
@@ -4028,9 +4413,7 @@ const initialData = [
     "曲名": "渚のシンドバッド",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=KYtvAgCNyAM",
@@ -4038,9 +4421,7 @@ const initialData = [
     "曲名": "透明人間［フリツケ］",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IqYnEiNrDSA",
@@ -4048,9 +4429,7 @@ const initialData = [
     "曲名": "学園天国",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v-ocCUhCsJk",
@@ -4058,9 +4437,7 @@ const initialData = [
     "曲名": "恋のダイヤル6700",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WpSkxM6vj08",
@@ -4068,9 +4445,7 @@ const initialData = [
     "曲名": "Timing～タイミング～",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IKjRLKQo7O0",
@@ -4078,9 +4453,7 @@ const initialData = [
     "曲名": "Diamonds",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=rzfLx6TVCv0",
@@ -4088,9 +4461,7 @@ const initialData = [
     "曲名": "M",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=x-_yZKI7EhE",
@@ -4098,9 +4469,7 @@ const initialData = [
     "曲名": "世界でいちばん熱い夏",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=q_8ulbgIF5w",
@@ -4108,9 +4477,7 @@ const initialData = [
     "曲名": "アポロ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DoGDllxt6Ao",
@@ -4118,9 +4485,7 @@ const initialData = [
     "曲名": "サウダージ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EVlfJQ3G9yE",
@@ -4128,9 +4493,7 @@ const initialData = [
     "曲名": "にんげんっていいな　1991年",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=KANo91D0WWk",
@@ -4138,9 +4501,7 @@ const initialData = [
     "曲名": "花頭巾にっぽん昔ばなし",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=72wyEzmMKiE",
@@ -4148,9 +4509,7 @@ const initialData = [
     "曲名": "河内のオッサンの唄",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=L2PKUfaliJA",
@@ -4158,9 +4517,7 @@ const initialData = [
     "曲名": "みつばちハッチ昆虫物語 みなしごハッチop",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=6A7j6eryPV4",
@@ -4168,9 +4525,7 @@ const initialData = [
     "曲名": "モーニング娘。 LOVEマシーン",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=kQEJoBKEr0A",
@@ -4178,9 +4533,7 @@ const initialData = [
     "曲名": "雨",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9GrOq7VY7lM",
@@ -4188,9 +4541,7 @@ const initialData = [
     "曲名": "やっぱ好きやねん",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=k2lor5GFj20",
@@ -4198,9 +4549,7 @@ const initialData = [
     "曲名": "東京",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oFKHEerkhu4",
@@ -4208,9 +4557,7 @@ const initialData = [
     "曲名": "ヤッターマンOP",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=PRJoAPH0ZGo",
@@ -4218,9 +4565,7 @@ const initialData = [
     "曲名": "栄光の架橋",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=hhDzDL9Y2Lo",
@@ -4228,9 +4573,7 @@ const initialData = [
     "曲名": "夏色",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=JV46SwItmY0",
@@ -4238,9 +4581,7 @@ const initialData = [
     "曲名": "Tシャツに口紅",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Jw9uo1xKOKA",
@@ -4248,9 +4589,7 @@ const initialData = [
     "曲名": "め組のひと",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=noBcbcg9rQk",
@@ -4258,9 +4597,7 @@ const initialData = [
     "曲名": "ランナウェイ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=NUI9c-D1IcA",
@@ -4268,9 +4605,7 @@ const initialData = [
     "曲名": "夢で逢えたら",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=LZUR5B2bVRw",
@@ -4278,9 +4613,7 @@ const initialData = [
     "曲名": "夢で逢えたら",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=2L5Yo6ww0aU",
@@ -4288,9 +4621,7 @@ const initialData = [
     "曲名": "ひだまりの詩",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1wxTksLZ1Mw",
@@ -4298,9 +4629,7 @@ const initialData = [
     "曲名": "粉雪",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=A5sFK9hj5y0",
@@ -4308,9 +4637,7 @@ const initialData = [
     "曲名": "別れても好きな人",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dZoNIahi69M",
@@ -4318,9 +4645,7 @@ const initialData = [
     "曲名": "悪魔くん OP",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9M3aJPz7BOc",
@@ -4328,9 +4653,7 @@ const initialData = [
     "曲名": "CAN YOU CELEBRATE?",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v4LFexW0-Js",
@@ -4338,9 +4661,7 @@ const initialData = [
     "曲名": "CAN YOU CELEBRATE?",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dsBk6kNyBQY",
@@ -4348,9 +4669,7 @@ const initialData = [
     "曲名": "悲しみにさよなら",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yiUuVRBaCy0",
@@ -4358,9 +4677,7 @@ const initialData = [
     "曲名": "CAT'S EYE",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=H9R1Hl6sJeE",
@@ -4368,9 +4685,7 @@ const initialData = [
     "曲名": "I Can't Stop The Loneliness",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mCCZDTgdoTs",
@@ -4378,9 +4693,7 @@ const initialData = [
     "曲名": "Make up Shadow",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dNS4rE2dKJA",
@@ -4388,9 +4701,7 @@ const initialData = [
     "曲名": "少年時代",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=HKOpvoaN0ps",
@@ -4398,9 +4709,7 @@ const initialData = [
     "曲名": "一休さん ED ～ははうえさま～",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=wa2vy3riKFw",
@@ -4408,9 +4717,7 @@ const initialData = [
     "曲名": "一休さんOP",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=TngUo1gDNOg",
@@ -4418,9 +4725,7 @@ const initialData = [
     "曲名": "ハナミズキ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BGVBlc1LOsg",
@@ -4428,9 +4733,7 @@ const initialData = [
     "曲名": "クリスマスキャロルの頃には",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=rJwLPcL2u3c",
@@ -4438,9 +4741,7 @@ const initialData = [
     "曲名": "Automatic",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=o1sUaVJUeB0",
@@ -4448,9 +4749,7 @@ const initialData = [
     "曲名": "First Love",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=h5ChaMdRniM",
@@ -4458,9 +4757,7 @@ const initialData = [
     "曲名": "ツッパリHigh School Rock'n Roll 登校編",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=A7ymSSPbewg",
@@ -4468,9 +4765,7 @@ const initialData = [
     "曲名": "男の勲章",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xfWnmxUP-PI",
@@ -4478,9 +4773,7 @@ const initialData = [
     "曲名": "Love Is Over",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BFMEvtbw-lI",
@@ -4488,9 +4781,7 @@ const initialData = [
     "曲名": "TOMORROW",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=w3-qKDP26xA",
@@ -4498,9 +4789,7 @@ const initialData = [
     "曲名": "仮面ライダーOP",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ooPAyvG5HIg",
@@ -4508,9 +4797,7 @@ const initialData = [
     "曲名": "お嫁においで",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=aLs0GTQjzXc",
@@ -4518,9 +4805,7 @@ const initialData = [
     "曲名": "君といつまでも",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=11Kv9v151_0",
@@ -4528,9 +4813,7 @@ const initialData = [
     "曲名": "蒼い星くず",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mHI4Eoc5r6Q",
@@ -4538,9 +4821,7 @@ const initialData = [
     "曲名": "夜空の星",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5TR1wJCimyk",
@@ -4548,9 +4829,7 @@ const initialData = [
     "曲名": "涙そうそう",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0gciVpfFh9Y",
@@ -4558,9 +4837,7 @@ const initialData = [
     "曲名": "科学忍者隊ガッチャマン　オープニング",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=caj402eymGU",
@@ -4568,9 +4845,7 @@ const initialData = [
     "曲名": "メトロポリタン美術館いまいずこ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Uxy9Keo_KVc",
@@ -4578,9 +4853,7 @@ const initialData = [
     "曲名": "酒と泪と男と女",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pMM6DbV4GpI",
@@ -4588,9 +4861,7 @@ const initialData = [
     "曲名": "怪物くん(1980) OP&ED",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DdO_dZyFsZg",
@@ -4598,9 +4869,7 @@ const initialData = [
     "曲名": "黒ネコのタンゴ (1969)",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=9-exu6mzKLE",
@@ -4608,9 +4877,7 @@ const initialData = [
     "曲名": "東京ブギウギ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pyc2tdcRfmM",
@@ -4618,9 +4885,7 @@ const initialData = [
     "曲名": "買物ブギ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lNbnYAyBKwY",
@@ -4628,9 +4893,7 @@ const initialData = [
     "曲名": "聖母たちのララバイ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=j0vpP976jZg",
@@ -4638,9 +4901,7 @@ const initialData = [
     "曲名": "タッチ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=uiFJhndmW4Q",
@@ -4648,9 +4909,7 @@ const initialData = [
     "曲名": "機動戦士ガンダム OP (1979) 翔べ! ガンダム",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=iyw6-KVmgow",
@@ -4658,9 +4917,7 @@ const initialData = [
     "曲名": "月光",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=4-YgVqpHTcc",
@@ -4668,9 +4925,7 @@ const initialData = [
     "曲名": "雪國",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5raK_iAFrn8",
@@ -4678,9 +4933,7 @@ const initialData = [
     "曲名": "異邦人",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YZ6wH-MqZvM",
@@ -4688,9 +4941,7 @@ const initialData = [
     "曲名": "LA･LA･LA LOVE SONG",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=oKXU7nFs8e4",
@@ -4698,9 +4949,7 @@ const initialData = [
     "曲名": "Missing",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=uDZeka8oKnE",
@@ -4708,9 +4957,7 @@ const initialData = [
     "曲名": "手のひらを太陽に",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1mUq1ulZtyE",
@@ -4718,9 +4965,7 @@ const initialData = [
     "曲名": "焼肉食べ放題",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IxLYjWLN6Rg",
@@ -4728,9 +4973,7 @@ const initialData = [
     "曲名": "2億4千万の瞳",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lmYmXbJ5t9Q",
@@ -4738,9 +4981,7 @@ const initialData = [
     "曲名": "GOLDFINGER '99",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=HAkUeMEOXzQ",
@@ -4748,9 +4989,7 @@ const initialData = [
     "曲名": "言えないよ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dHmtEIecXgg",
@@ -4758,9 +4997,7 @@ const initialData = [
     "曲名": "メロディー",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3X8ACv53TX4",
@@ -4768,9 +5005,7 @@ const initialData = [
     "曲名": "ギンギラギンにさりげなく",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=15MNHdubf3w",
@@ -4778,9 +5013,7 @@ const initialData = [
     "曲名": "奇跡の地球",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=duXT3U4ddNE",
@@ -4788,9 +5021,7 @@ const initialData = [
     "曲名": "夏をあきらめて",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=nFN3iZ2yrNM",
@@ -4798,9 +5029,7 @@ const initialData = [
     "曲名": "恋人よ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qllc2bYRFY4",
@@ -4808,9 +5037,7 @@ const initialData = [
     "曲名": "キューティーハニー",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=k5bKXXwqC1Q",
@@ -4818,9 +5045,7 @@ const initialData = [
     "曲名": "STAR LIGHT",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Mzw07euzYQ0",
@@ -4828,9 +5053,7 @@ const initialData = [
     "曲名": "ガラスの十代",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DhTqR99eGg4",
@@ -4838,9 +5061,7 @@ const initialData = [
     "曲名": "パラダイス銀河",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=VT1GnjxcwZc",
@@ -4848,9 +5069,7 @@ const initialData = [
     "曲名": "MUGO・ん・・・色っぽい",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Y-vtEQJTwI8",
@@ -4858,9 +5077,7 @@ const initialData = [
     "曲名": "慟哭",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yDgro0363DU",
@@ -4868,9 +5085,7 @@ const initialData = [
     "曲名": "ゲレンデがとけるほど恋したい",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=KqOlfF-VDLw",
@@ -4878,9 +5093,7 @@ const initialData = [
     "曲名": "ゲレンデがとけるほど恋したい",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=T8yZWCg85Cs",
@@ -4888,9 +5101,7 @@ const initialData = [
     "曲名": "ロマンスの神様",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AgfUewgwPOw",
@@ -4898,9 +5109,7 @@ const initialData = [
     "曲名": "ロマンスの神様",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=pG0bviOCSH0",
@@ -4908,9 +5117,7 @@ const initialData = [
     "曲名": "MajiでKoiする5秒前",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=o6wtDPVkKqI",
@@ -4918,9 +5125,7 @@ const initialData = [
     "曲名": "残酷な天使のテーゼ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=UR_OQTWoI2w",
@@ -4928,9 +5133,7 @@ const initialData = [
     "曲名": "ランバダ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gkS9F1oe7Z4",
@@ -4938,9 +5141,7 @@ const initialData = [
     "曲名": "チャチャチャ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=PRka5vlESV0",
@@ -4948,9 +5149,7 @@ const initialData = [
     "曲名": "PIECE OF MY WISH",
     "流行": "A",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=MWsUwoPxBms",
@@ -4958,9 +5157,7 @@ const initialData = [
     "曲名": "PRIDE",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zUYcZ3ZQoOg",
@@ -4968,9 +5165,7 @@ const initialData = [
     "曲名": "雨にキッスの花束を",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=_VNi7apme-w",
@@ -4978,9 +5173,7 @@ const initialData = [
     "曲名": "サボテンの花",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ip2U3w6b9rU",
@@ -4988,9 +5181,7 @@ const initialData = [
     "曲名": "上を向いて歩こう",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Z26VlA7OjS0",
@@ -4998,9 +5189,7 @@ const initialData = [
     "曲名": "いい日旅立ち",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DuErvJZomSw",
@@ -5008,9 +5197,7 @@ const initialData = [
     "曲名": "いい日旅立ち",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zl8syKdknrY",
@@ -5018,9 +5205,7 @@ const initialData = [
     "曲名": "プレイバック Part  2",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zrABEMNvrvA",
@@ -5028,9 +5213,7 @@ const initialData = [
     "曲名": "秋桜",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FUKotXlfmYk",
@@ -5038,9 +5221,7 @@ const initialData = [
     "曲名": "Get Along Together-愛を贈りたいから-",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=M4sWFgBYNbI",
@@ -5048,9 +5229,7 @@ const initialData = [
     "曲名": "セロリ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ipiUI2TBlnk",
@@ -5058,9 +5237,7 @@ const initialData = [
     "曲名": "どうにもとまらない",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Cfz3CcmTROY",
@@ -5068,9 +5245,7 @@ const initialData = [
     "曲名": "およげ たいやきくん",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=CQ5KhUyDSq4",
@@ -5078,9 +5253,7 @@ const initialData = [
     "曲名": "ほねほneワルツ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3ii96gUvUlM",
@@ -5088,9 +5261,7 @@ const initialData = [
     "曲名": "ルビーの指環 (1981)",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QGYfX8z4goE",
@@ -5098,9 +5269,7 @@ const initialData = [
     "曲名": "恋しさと せつなさと 心強さと",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=U_ZjULpq8oA",
@@ -5108,9 +5277,7 @@ const initialData = [
     "曲名": "高校三年生",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0nvnYwi6mQE",
@@ -5118,9 +5285,7 @@ const initialData = [
     "曲名": "あなたに会えてよかった",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=-BI6ePeBS90",
@@ -5128,9 +5293,7 @@ const initialData = [
     "曲名": "なんてったってアイドル",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Rowzun7Kv78",
@@ -5138,9 +5301,7 @@ const initialData = [
     "曲名": "なんてったってアイドル",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GTAVWhSPK90",
@@ -5148,9 +5309,7 @@ const initialData = [
     "曲名": "渚のはいから人魚",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=6lKTQbrM9RI",
@@ -5158,9 +5317,7 @@ const initialData = [
     "曲名": "今夜はブギー・バック",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=aSg-Iupw3yk",
@@ -5168,9 +5325,7 @@ const initialData = [
     "曲名": "たしかなこと",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=LDe0rbDromY",
@@ -5178,9 +5333,7 @@ const initialData = [
     "曲名": "ラブ・ストーリーは突然に",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Nn_OTqn1blw",
@@ -5188,19 +5341,15 @@ const initialData = [
     "曲名": "たしかなこと",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YPswF6FQBbU",
     "歌手名": "小野正利",
     "曲名": "You're the Only・・・",
-    "流行": "",
-    "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "流行": "S",
+    "評価": "S",
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vhSng8rgOw4",
@@ -5208,9 +5357,7 @@ const initialData = [
     "曲名": "あなたのキスを数えましょう～You were mine～",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WYNC8JzV5j8",
@@ -5218,9 +5365,7 @@ const initialData = [
     "曲名": "日立の樹 この木なんの木",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=alXL2lKYb9s",
@@ -5228,9 +5373,7 @@ const initialData = [
     "曲名": "もしかしてPARTⅡ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=CxiHVPqLf8s",
@@ -5238,9 +5381,7 @@ const initialData = [
     "曲名": "仮面舞踏会",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BxEf3vGTeWQ",
@@ -5248,9 +5389,7 @@ const initialData = [
     "曲名": "Yeah！めっちゃホリディ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=itBhCmIvtAA",
@@ -5258,9 +5397,7 @@ const initialData = [
     "曲名": "愛のメモリー",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WE_US-HXyMI",
@@ -5268,9 +5405,7 @@ const initialData = [
     "曲名": "SWEET MEMORIES",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OBRzwLgwalA",
@@ -5278,9 +5413,7 @@ const initialData = [
     "曲名": "青い珊瑚礁",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=KWyuHedBJJo",
@@ -5288,9 +5421,7 @@ const initialData = [
     "曲名": "赤いスイートピー（1982）",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=DU4hVxyGG2c",
@@ -5298,9 +5429,7 @@ const initialData = [
     "曲名": "天使のウィンク",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=jLqIUsQjQRQ",
@@ -5308,9 +5437,7 @@ const initialData = [
     "曲名": "抱いて・・・",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WojtxUZvuKA",
@@ -5318,9 +5445,7 @@ const initialData = [
     "曲名": "夏の扉",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=fYiNK4ZERlM",
@@ -5328,9 +5453,7 @@ const initialData = [
     "曲名": "風立ちぬ",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xK0alF1lkYI",
@@ -5338,9 +5461,7 @@ const initialData = [
     "曲名": "瞳はダイアモンド",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=-ZpQmBhxOT0",
@@ -5348,9 +5469,7 @@ const initialData = [
     "曲名": "リフレインが叫んでる",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=qX7pFYH9O04",
@@ -5358,9 +5477,7 @@ const initialData = [
     "曲名": "春よ、来い",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=fxTD_ZIAnH4",
@@ -5368,9 +5485,7 @@ const initialData = [
     "曲名": "真夏の夜の夢",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=kSrje0jehnw",
@@ -5378,9 +5493,7 @@ const initialData = [
     "曲名": "恋人がサンタクロース",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=Z2VoEN1iooE",
@@ -5388,9 +5501,7 @@ const initialData = [
     "曲名": "トイレの神様",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=0B_QUJRv6y0",
@@ -5398,9 +5509,7 @@ const initialData = [
     "曲名": "いつまでも変わらぬ愛を",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=hhu7_3gO58M",
@@ -5408,9 +5517,7 @@ const initialData = [
     "曲名": "襟裳岬",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OD11j9a5VpM",
@@ -5418,9 +5525,7 @@ const initialData = [
     "曲名": "さくら",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FdyOa2WIY6s",
@@ -5428,9 +5533,7 @@ const initialData = [
     "曲名": "今日の日はさようなら",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=a-rTnkz54NU",
@@ -5438,9 +5541,7 @@ const initialData = [
     "曲名": "サイレント・イヴ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=J2Ya8mWfulU",
@@ -5448,9 +5549,7 @@ const initialData = [
     "曲名": "HOME",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=V9RpKlzfSv0",
@@ -5458,9 +5557,7 @@ const initialData = [
     "曲名": "ヤングマン",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=RkyVwvaSTyE",
@@ -5468,9 +5565,7 @@ const initialData = [
     "曲名": "もしもピアノが弾けたなら",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=VCC4fjOln0o",
@@ -5478,9 +5573,7 @@ const initialData = [
     "曲名": "太陽がくれた季節",
     "流行": "S",
     "評価": "B",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=sXfDgY_GU2Y",
@@ -5488,9 +5581,7 @@ const initialData = [
     "曲名": "山口さんちのツトム君",
     "流行": "A",
     "評価": "A",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=9G82-cb5zUk",
@@ -5498,9 +5589,7 @@ const initialData = [
     "曲名": "歌うたいのバラッド（2008 Ver.）",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=Wc_-EpdVaZo",
@@ -5508,9 +5597,7 @@ const initialData = [
     "曲名": "CHA CHA CHA",
     "流行": "S",
     "評価": "A",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xuMKgVJQZkQ",
@@ -5518,9 +5605,7 @@ const initialData = [
     "曲名": "津軽海峡・冬景色",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=cwL09UKDqdI",
@@ -5528,9 +5613,7 @@ const initialData = [
     "曲名": "天城越え",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=ycbUJFRcTEc",
@@ -5538,9 +5621,7 @@ const initialData = [
     "曲名": "まちぶせ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=FlVIkrvF1MM",
@@ -5548,9 +5629,7 @@ const initialData = [
     "曲名": "山口さんちのツトム君",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GGeoyUI9xmU",
@@ -5558,9 +5637,7 @@ const initialData = [
     "曲名": "1/2",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=u0-iM590YYA",
@@ -5568,9 +5645,7 @@ const initialData = [
     "曲名": "Secret of my heart",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=TIwKI0qVJY0",
@@ -5578,9 +5653,7 @@ const initialData = [
     "曲名": "木綿のハンカチーフ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=QWEkq7i0W_A",
@@ -5588,9 +5661,7 @@ const initialData = [
     "曲名": "格好悪いふられ方",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=xUkQi4lV-Cs",
@@ -5598,9 +5669,7 @@ const initialData = [
     "曲名": "アタックNo.1",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=82IIgZrW1w8",
@@ -5608,9 +5677,7 @@ const initialData = [
     "曲名": "幸せな結末",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=upODO6OuOOk",
@@ -5618,9 +5685,7 @@ const initialData = [
     "曲名": "さくらんぼ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=uQFBQu-huD0",
@@ -5628,9 +5693,7 @@ const initialData = [
     "曲名": "さくらんぼ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=JhpwJNZSp2M",
@@ -5638,9 +5701,7 @@ const initialData = [
     "曲名": "プラネタリウム",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mAmUB7M0EkY",
@@ -5648,9 +5709,7 @@ const initialData = [
     "曲名": "卒業 1982",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EJBRg10e-es",
@@ -5658,9 +5717,7 @@ const initialData = [
     "曲名": "沢田聖子 See You Again",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=iDgrOv18fQM",
@@ -5668,9 +5725,7 @@ const initialData = [
     "曲名": "会いたい",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=y1VYG5PQq54",
@@ -5678,9 +5733,7 @@ const initialData = [
     "曲名": "飾りじゃないのよ涙は",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=0FxT-6ricE8",
@@ -5688,9 +5741,7 @@ const initialData = [
     "曲名": "City Hunter ～愛よ消えないで～",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AoToyjajWq0",
@@ -5698,9 +5749,7 @@ const initialData = [
     "曲名": "銀の龍の背に乗って",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=dxtE6iynsAY",
@@ -5708,9 +5757,7 @@ const initialData = [
     "曲名": "空と君のあいだに",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=78UwqbJnI18",
@@ -5718,9 +5765,7 @@ const initialData = [
     "曲名": "糸",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=aOOpDfmy7mw",
@@ -5728,9 +5773,7 @@ const initialData = [
     "曲名": "時代",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v2SlpjCz7uE",
@@ -5738,9 +5781,7 @@ const initialData = [
     "曲名": "地上の星",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=mF5Qq2YheTg",
@@ -5748,9 +5789,7 @@ const initialData = [
     "曲名": "中島美嘉雪の華",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jIe5GtVhD0k",
@@ -5758,9 +5797,7 @@ const initialData = [
     "曲名": "とんぼ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AoY2jZ6NBsU",
@@ -5768,9 +5805,7 @@ const initialData = [
     "曲名": "巡恋歌",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=_OWPJQ5N5vs",
@@ -5778,9 +5813,7 @@ const initialData = [
     "曲名": "兄弟船",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zldBTSx9JpE",
@@ -5788,9 +5821,7 @@ const initialData = [
     "曲名": "ギブス",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ECxBHhMc7oI",
@@ -5798,9 +5829,7 @@ const initialData = [
     "曲名": "本能",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=El6XFu_tyLY",
@@ -5808,9 +5837,7 @@ const initialData = [
     "曲名": "天才バカボン",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Sb_08h2nlLM",
@@ -5818,9 +5845,7 @@ const initialData = [
     "曲名": "天才バカボンのOP",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yH9nRTI_tZA",
@@ -5828,9 +5853,7 @@ const initialData = [
     "曲名": "Shangri-La",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zfcO3Y58m24",
@@ -5838,9 +5861,7 @@ const initialData = [
     "曲名": "My Revolution",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bEkhJPPfREM",
@@ -5848,9 +5869,7 @@ const initialData = [
     "曲名": "好きになった人",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bFm3uoHqhII",
@@ -5858,9 +5877,7 @@ const initialData = [
     "曲名": "人生いろいろ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=bFm3uoHqhII",
@@ -5868,9 +5885,7 @@ const initialData = [
     "曲名": "人生いろいろ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=1nOIWI4OzD0",
@@ -5878,9 +5893,7 @@ const initialData = [
     "曲名": "亜麻色の髪の乙女",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Loh2st9gMUE",
@@ -5888,9 +5901,7 @@ const initialData = [
     "曲名": "Another Orion",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IRV6G0M8Zjg",
@@ -5898,9 +5909,7 @@ const initialData = [
     "曲名": "True Love",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gz2DJWPLsq8",
@@ -5908,9 +5917,7 @@ const initialData = [
     "曲名": "45725",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=gdtCeInzr7g",
@@ -5918,9 +5925,7 @@ const initialData = [
     "曲名": "青い山脈",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=OGt31ml0EUU",
@@ -5928,9 +5933,7 @@ const initialData = [
     "曲名": "夢を信じて",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=P-20hyNYMt0",
@@ -5938,9 +5941,7 @@ const initialData = [
     "曲名": "男と女のラブゲーム",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=SlRDB8G-Q_U",
@@ -5948,9 +5949,7 @@ const initialData = [
     "曲名": "氷雨",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zwzoK4VWAHM",
@@ -5958,9 +5957,7 @@ const initialData = [
     "曲名": "アニソン 忍者ハットリくん OP 1981年",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=RwEh816XjUk",
@@ -5968,9 +5965,7 @@ const initialData = [
     "曲名": "夢芝居",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Ze00CIK79qY",
@@ -5978,9 +5973,7 @@ const initialData = [
     "曲名": "Runner",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yGI0QZ4Gk34",
@@ -5988,9 +5981,7 @@ const initialData = [
     "曲名": "舟唄",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=DGDz13sSN2c",
@@ -5998,9 +5989,7 @@ const initialData = [
     "曲名": "クリスマス・イブ",
     "流行": "S",
     "評価": "S",
-    "おすすめ": "◯",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": "◯"
   },
   {
     "URL": "https://www.youtube.com/watch?v=ZFaJX1aV8pM",
@@ -6008,9 +5997,7 @@ const initialData = [
     "曲名": "リンゴ追分",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IKSJvsvO6Yg",
@@ -6018,9 +6005,7 @@ const initialData = [
     "曲名": "真赤な太陽",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Pb-N5VPy-40",
@@ -6028,9 +6013,7 @@ const initialData = [
     "曲名": "川の流れのように",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=EzzKuWjjhZE",
@@ -6038,9 +6021,7 @@ const initialData = [
     "曲名": "川の流れのように",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3Xho-8tVA-E",
@@ -6048,9 +6029,7 @@ const initialData = [
     "曲名": "東京キッド",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=vRot2QZOH3w",
@@ -6058,9 +6037,7 @@ const initialData = [
     "曲名": "美少女戦士セーラームーンOP",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=5x_5yW6wpC8",
@@ -6068,9 +6045,7 @@ const initialData = [
     "曲名": "きよしのズンドコ節",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AuZSyBa6phU",
@@ -6078,9 +6053,7 @@ const initialData = [
     "曲名": "SEASONS",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=lHoEwxC3Fh8",
@@ -6088,9 +6061,7 @@ const initialData = [
     "曲名": "もうひとつの土曜日",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=jYAt0TivarE",
@@ -6098,9 +6069,7 @@ const initialData = [
     "曲名": "悲しみは雪のように",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=61AsEkHB-i0",
@@ -6108,9 +6077,7 @@ const initialData = [
     "曲名": "Poison",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WfMEHQjHdH4",
@@ -6118,9 +6085,7 @@ const initialData = [
     "曲名": "スリル",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=_WTGwwM4xws",
@@ -6128,9 +6093,7 @@ const initialData = [
     "曲名": "22才の別れ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=uRijaxetcso",
@@ -6138,9 +6101,7 @@ const initialData = [
     "曲名": "はしだのりひことシューベルツ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=AGYJ6jeu3p8",
@@ -6148,9 +6109,7 @@ const initialData = [
     "曲名": "桜坂",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Rhy7mmAWlsI",
@@ -6158,9 +6117,7 @@ const initialData = [
     "曲名": "瞳をとじて",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=IHdfnKBAf0E",
@@ -6168,9 +6125,7 @@ const initialData = [
     "曲名": "Jupiter",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v-WUxs_fgeE",
@@ -6178,9 +6133,7 @@ const initialData = [
     "曲名": "君がいるだけで",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=v-WUxs_fgeE",
@@ -6188,9 +6141,7 @@ const initialData = [
     "曲名": "君がいるだけで",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BDgUULLRVBU",
@@ -6198,9 +6149,7 @@ const initialData = [
     "曲名": "Shake Hip!(1986)",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=GB95xoPUDHU",
@@ -6208,9 +6157,7 @@ const initialData = [
     "曲名": "魔法使いサリー1989_op",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=XbCsY4-HV8M",
@@ -6218,9 +6165,7 @@ const initialData = [
     "曲名": "home",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=h5b-tBZfsT8",
@@ -6228,9 +6173,7 @@ const initialData = [
     "曲名": "Butterfly",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Y0FiEZNZLRg",
@@ -6238,9 +6181,7 @@ const initialData = [
     "曲名": "リルラ リルハ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=WRJSPkKjRqo",
@@ -6248,9 +6189,7 @@ const initialData = [
     "曲名": "My Sweet Darlin'",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=zy8QttfQz_o",
@@ -6258,9 +6197,7 @@ const initialData = [
     "曲名": "セーラー服と機関銃",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=3Z6ONLWEVGA",
@@ -6268,9 +6205,7 @@ const initialData = [
     "曲名": "妖怪人間ベム Opening ＆ Ending",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ErzjKsRwU4s",
@@ -6278,9 +6213,7 @@ const initialData = [
     "曲名": "違う、そうじゃない",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=BMmGR8qBzRQ",
@@ -6288,9 +6221,7 @@ const initialData = [
     "曲名": "ロンリー・チャップリン",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=U4MTW9ZcuQs",
@@ -6298,9 +6229,7 @@ const initialData = [
     "曲名": "One Night Carnival",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=CkjmCwqhe-g",
@@ -6308,9 +6237,7 @@ const initialData = [
     "曲名": "僕が一番欲しかったもの",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=b88pxLpMZKk",
@@ -6318,9 +6245,7 @@ const initialData = [
     "曲名": "どんなときも",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=ryBBU04OKus",
@@ -6328,9 +6253,7 @@ const initialData = [
     "曲名": "どんなときも。",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=Uo6JkQznzkM",
@@ -6338,9 +6261,7 @@ const initialData = [
     "曲名": "どんなときも。",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=naz0-szzYXk",
@@ -6348,9 +6269,7 @@ const initialData = [
     "曲名": "もう恋なんてしない",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=YHj8O_SKpBk",
@@ -6358,9 +6277,7 @@ const initialData = [
     "曲名": "遠く遠く",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=nLE6w_WJzRs",
@@ -6368,9 +6285,7 @@ const initialData = [
     "曲名": "世界に一つだけの花",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=yZt2XEjsduc",
@@ -6378,9 +6293,7 @@ const initialData = [
     "曲名": "冬がはじまるよ",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=16AOXal0ytw",
@@ -6388,9 +6301,7 @@ const initialData = [
     "曲名": "桜",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=hOrmu8X2A1g",
@@ -6398,9 +6309,7 @@ const initialData = [
     "曲名": "レイニーブルー",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=C7QVaahn44A",
@@ -6408,9 +6317,7 @@ const initialData = [
     "曲名": "壊れかけのRadio",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=c2AcM9iaPEw",
@@ -6418,9 +6325,7 @@ const initialData = [
     "曲名": "夢を信じて",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=NhRD-Y6yttw",
@@ -6428,9 +6333,7 @@ const initialData = [
     "曲名": "桃色吐息",
     "流行": "",
     "評価": "",
-    "おすすめ": "",
-    "花（XX/XX）": "",
-    "糸（XX/XX）": ""
+    "おすすめ": ""
   },
   {
     "URL": "https://www.youtube.com/watch?v=inu2N03AqTI",
@@ -6660,9 +6563,18 @@ const FIELD = {
     url: 'URL'
 };
 
-const DATA_STORAGE_KEY = 'hit_song_dashboard_data_v2';
-const LEGACY_EDITS_KEY = 'hit_song_edits';
-const LAST_PLAYED_STORAGE_KEY = 'hit_song_last_played_id';
+// `build.py --blank` defines STORAGE_SCOPE so the template copy never reads or
+// overwrites the personal dashboard's browser data. Chrome shares storage
+// across every file:// page, so without this both files would edit one list.
+const STORAGE_SUFFIX = typeof STORAGE_SCOPE === 'string' && STORAGE_SCOPE ? `__${STORAGE_SCOPE}` : '';
+const DATA_STORAGE_KEY = `hit_song_dashboard_data_v2${STORAGE_SUFFIX}`;
+const LEGACY_EDITS_KEY = `hit_song_edits${STORAGE_SUFFIX}`;
+const LAST_PLAYED_STORAGE_KEY = `hit_song_last_played_id${STORAGE_SUFFIX}`;
+// Columns left over from an older spreadsheet. They were always empty, so they
+// are dropped on load: this also clears them from data already in the browser
+// and stops exports from carrying them forward.
+const OBSOLETE_FIELDS = ['花（XX/XX）', '糸（XX/XX）'];
+
 const RECOMMENDED_MARK = '◯';
 const RANK_OPTIONS = ['', 'S', 'A', 'B', 'C'];
 const PUBLIC_APP_CONFIG = Object.freeze({
@@ -6676,9 +6588,9 @@ const PUBLIC_APP_CONFIG = Object.freeze({
 });
 
 const SYNC_ENDPOINT = '/api/songs';
-const SYNC_STATE_KEY = 'hit_song_sync_state_v1';
-const LOCAL_SNAPSHOT_KEY = 'hit_song_local_snapshot_v1';
-const EDIT_TOKEN_KEY = 'hit_song_edit_token_v1';
+const SYNC_STATE_KEY = `hit_song_sync_state_v1${STORAGE_SUFFIX}`;
+const LOCAL_SNAPSHOT_KEY = `hit_song_local_snapshot_v1${STORAGE_SUFFIX}`;
+const EDIT_TOKEN_KEY = `hit_song_edit_token_v1${STORAGE_SUFFIX}`;
 const SYNC_PUSH_DELAY = 1200;
 
 const baseData = typeof initialData !== 'undefined'
@@ -6709,6 +6621,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupSearchSort();
         setupModalEvents();
         refreshView();
+        renderBuildInfo();
         dashboardInitialized = true;
         hideStartupError();
         initServerSync().catch(error => console.warn('Server sync could not start:', error));
@@ -6741,6 +6654,7 @@ function normalizeSongs(data) {
 
 function normalizeSong(raw = {}, index = 0) {
     const item = { ...raw };
+    OBSOLETE_FIELDS.forEach(field => delete item[field]);
     item._id = item._id || createSongId(item, index);
     item[FIELD.artist] = cleanText(item[FIELD.artist] ?? item.artist ?? item.Artist);
     item[FIELD.title] = cleanText(item[FIELD.title] ?? item.title ?? item.Title);
@@ -6776,6 +6690,16 @@ function createNewSongId() {
         return `song-${globalThis.crypto.randomUUID()}`;
     }
     return `song-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+// Shows which release is running, so a report like "it broke on b03" maps to
+// an exact commit. BUILD_INFO comes from build.py (build_info.js in source).
+function renderBuildInfo() {
+    const target = document.getElementById('buildInfo');
+    if (!target || typeof BUILD_INFO === 'undefined') return;
+    const name = BUILD_INFO.tag || BUILD_INFO.version;
+    target.textContent = `${name} · ${BUILD_INFO.commit}`;
+    if (BUILD_INFO.builtAt) target.title = `ビルド日時 ${new Date(BUILD_INFO.builtAt).toLocaleString('ja-JP')}`;
 }
 
 function configurePublicMetadata() {
@@ -6851,7 +6775,11 @@ function loadStoredSongs() {
         try {
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed)) {
-                return normalizeSongs(parsed);
+                const songs = normalizeSongs(parsed);
+                // Write back once so the retired columns leave storage too.
+                const hadObsolete = parsed.some(row => row && OBSOLETE_FIELDS.some(field => field in row));
+                if (hadObsolete) persistData(songs, { silent: true });
+                return songs;
             }
         } catch (error) {
             console.warn('Saved song data could not be loaded:', error);
@@ -8025,6 +7953,8 @@ function playSong(item, rowElement = null) {
         // Playback should continue even if browser storage is unavailable.
     }
 
+    window.HitAmbience?.setSong(item);
+
     rowElement?.classList.add('played');
     document.querySelector(`tr[data-song-id="${escapeCssValue(item._id)}"]`)?.classList.add('played');
     openVideoModal(item[FIELD.url]);
@@ -8273,6 +8203,1266 @@ function startAutoPlayMonitoring() {
         }
     }, 1000);
 }
+    </script>
+    <script>
+/*
+ * Ambience - per-song atmosphere for the dashboard, plus the "演出" panel that
+ * switches it on and off.
+ *
+ *   背景演出  a blurred copy of the playing song's YouTube thumbnail, tinted
+ *             with colours sampled from that thumbnail
+ *   AIカラー  Chrome's on-device model (Prompt API / Gemini Nano) reads the
+ *             song's mood and chooses the palette instead
+ *
+ * Both start off. With the switches off, or on a browser without the Prompt
+ * API, the dashboard behaves exactly as it did before. The AI runs on the
+ * device: no API key, no charge, nothing is sent anywhere.
+ *
+ * Reads from script.js: FIELD, songsData, getYouTubeID, LAST_PLAYED_STORAGE_KEY,
+ * STORAGE_SUFFIX.
+ * script.js calls window.HitAmbience.setSong(item) whenever a song starts.
+ */
+(() => {
+    'use strict';
+
+    const SETTINGS_KEY = `hit_song_ambience_v1${STORAGE_SUFFIX}`;
+    const AI_CACHE_KEY = `hit_song_ambience_ai_cache_v1${STORAGE_SUFFIX}`;
+    const AI_CACHE_LIMIT = 400;
+    const AI_TIMEOUT_MS = 25000;
+    const CAPTION_MS = 7000;
+    const DEFAULT_PALETTE = ['#7c3aed', '#0ea5e9', '#1e1b4b'];
+
+    const AI_OPTIONS = Object.freeze({
+        expectedInputs: [{ type: 'text', languages: ['ja', 'en'] }],
+        expectedOutputs: [{ type: 'text', languages: ['ja'] }]
+    });
+
+    const AI_SCHEMA = Object.freeze({
+        type: 'object',
+        properties: {
+            mood: { type: 'string' },
+            colors: {
+                type: 'array',
+                items: { type: 'string', pattern: '^#[0-9a-fA-F]{6}$' },
+                minItems: 3,
+                maxItems: 3
+            }
+        },
+        required: ['mood', 'colors']
+    });
+
+    const AI_SYSTEM_PROMPT = [
+        'あなたは音楽と色彩に詳しいアートディレクターです。',
+        '曲の雰囲気を、暗い画面の背景に映える3色と、短い日本語の言葉で表します。',
+        '曲をよく知らない場合は、曲名とアーティスト名の言葉の印象と、サムネイルの色から判断してください。',
+        '曲についての事実は書かず、指定されたJSONだけを返してください。'
+    ].join('\n');
+
+    const ICONS = {
+        studio: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.2"/></svg>',
+        ambient: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c3-4 6-4 9 0s6 4 9 0"/><path d="M3 11c3-4 6-4 9 0s6 4 9 0" opacity=".55"/></svg>',
+        aiColor: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M18.5 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg>'
+    };
+
+    const FEATURES = [
+        {
+            key: 'ambient',
+            eyebrow: 'AMBIENCE',
+            title: '背景演出',
+            description: '再生中の曲のサムネイルから、画面に色と光をにじませます。'
+        },
+        {
+            key: 'aiColor',
+            eyebrow: 'AI MOOD',
+            title: 'AIカラー',
+            description: '曲の雰囲気をChrome内蔵のAIが読み取り、配色を選びます。処理は端末の中だけで行います。',
+            requires: 'ambient',
+            ai: true
+        }
+    ];
+
+    const state = {
+        settings: loadSettings(),
+        song: null,
+        thumb: '',
+        thumbPalette: DEFAULT_PALETTE.slice(),
+        palette: DEFAULT_PALETTE.slice(),
+        paletteSource: 'default',
+        mood: '',
+        artSlot: 0,
+        token: 0,
+        ai: { status: 'checking', progress: 0, message: '', busy: false },
+        aiSession: null,
+        aiSessionPromise: null,
+        aiController: null,
+        captionTimer: null
+    };
+
+    const els = { cards: {} };
+
+    // ----- settings -------------------------------------------------------
+
+    function loadSettings() {
+        const defaults = { ambient: false, aiColor: false };
+        try {
+            const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
+            return { ...defaults, ...(stored && typeof stored === 'object' ? stored : {}) };
+        } catch (_error) {
+            return defaults;
+        }
+    }
+
+    function saveSettings() {
+        try {
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+        } catch (_error) {
+            // Storage can be unavailable; the switch still works for this visit.
+        }
+    }
+
+    function isActive(key) {
+        const feature = FEATURES.find(item => item.key === key);
+        if (!feature || !state.settings[key]) return false;
+        if (feature.requires && !isActive(feature.requires)) return false;
+        if (feature.ai && state.ai.status === 'unavailable') return false;
+        return true;
+    }
+
+    // ----- DOM ------------------------------------------------------------
+
+    function buildDom() {
+        const layer = document.createElement('div');
+        layer.className = 'ambience';
+        layer.setAttribute('aria-hidden', 'true');
+        layer.innerHTML = '<div class="ambience-art"></div><div class="ambience-art"></div>'
+            + '<div class="ambience-tint"></div><div class="ambience-vignette"></div>';
+        document.body.prepend(layer);
+        els.art = [...layer.querySelectorAll('.ambience-art')];
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'studio-trigger';
+        trigger.setAttribute('aria-label', '演出の設定を開く');
+        trigger.setAttribute('aria-controls', 'studioPanel');
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.innerHTML = `<span class="studio-trigger-ring" aria-hidden="true"></span>${ICONS.studio}`;
+        trigger.addEventListener('click', () => (isPanelOpen() ? closePanel() : openPanel()));
+        els.trigger = trigger;
+
+        const caption = document.createElement('div');
+        caption.className = 'studio-caption';
+        caption.setAttribute('aria-live', 'polite');
+        caption.innerHTML = '<span class="studio-caption-dot" aria-hidden="true"></span>'
+            + '<span class="studio-caption-label">MOOD</span><span class="studio-caption-mood"></span>';
+        els.caption = caption;
+        els.captionMood = caption.querySelector('.studio-caption-mood');
+
+        const scrim = document.createElement('div');
+        scrim.className = 'studio-scrim';
+        scrim.addEventListener('click', closePanel);
+        els.scrim = scrim;
+
+        const panel = document.createElement('aside');
+        panel.id = 'studioPanel';
+        panel.className = 'studio-panel';
+        panel.setAttribute('aria-label', '演出の設定');
+        panel.inert = true;
+        panel.innerHTML = `
+            <div class="studio-head">
+                <div>
+                    <p class="studio-eyebrow">STUDIO</p>
+                    <h2 class="studio-title">演出</h2>
+                    <p class="studio-lead">画面の空気を、曲にあわせて。</p>
+                </div>
+                <button type="button" class="studio-close" aria-label="閉じる">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+            </div>
+            <div class="studio-features"></div>
+            <section class="studio-now" aria-label="いまの演出">
+                <div class="studio-now-art"></div>
+                <div class="studio-now-body">
+                    <p class="studio-eyebrow">NOW</p>
+                    <p class="studio-now-title"></p>
+                    <p class="studio-now-meta"></p>
+                    <div class="studio-swatches" aria-hidden="true"><span></span><span></span><span></span></div>
+                </div>
+            </section>
+            <p class="studio-foot">設定はこのブラウザにだけ保存されます</p>`;
+        panel.querySelector('.studio-close').addEventListener('click', closePanel);
+        els.panel = panel;
+        els.nowArt = panel.querySelector('.studio-now-art');
+        els.nowTitle = panel.querySelector('.studio-now-title');
+        els.nowMeta = panel.querySelector('.studio-now-meta');
+
+        const list = panel.querySelector('.studio-features');
+        FEATURES.forEach(feature => list.appendChild(buildCard(feature)));
+
+        document.body.append(scrim, panel, caption, trigger);
+    }
+
+    function buildCard(feature) {
+        const card = document.createElement('div');
+        card.className = 'studio-card';
+        card.dataset.feature = feature.key;
+        const titleId = `studio-${feature.key}-title`;
+        card.innerHTML = `
+            <span class="studio-card-icon">${ICONS[feature.key] || ''}</span>
+            <div class="studio-card-body">
+                <p class="studio-eyebrow">${feature.eyebrow}</p>
+                <p class="studio-card-title" id="${titleId}">${feature.title}</p>
+                <p class="studio-card-desc">${feature.description}</p>
+                <p class="studio-card-status"></p>
+            </div>
+            <button type="button" class="studio-switch" role="switch" aria-checked="false" aria-labelledby="${titleId}">
+                <span class="studio-switch-knob"></span>
+            </button>`;
+
+        const toggle = card.querySelector('.studio-switch');
+        toggle.addEventListener('click', event => {
+            event.stopPropagation();
+            toggleFeature(feature.key);
+        });
+        card.addEventListener('click', () => {
+            if (!toggle.disabled) toggleFeature(feature.key);
+        });
+
+        els.cards[feature.key] = {
+            card,
+            toggle,
+            status: card.querySelector('.studio-card-status')
+        };
+        return card;
+    }
+
+    function isPanelOpen() {
+        return els.panel?.classList.contains('is-open');
+    }
+
+    function openPanel() {
+        els.panel.inert = false;
+        els.panel.classList.add('is-open');
+        els.scrim.classList.add('is-open');
+        els.trigger.setAttribute('aria-expanded', 'true');
+        checkAiAvailability();
+        setTimeout(() => els.panel.querySelector('.studio-switch:not([disabled])')?.focus({ preventScroll: true }), 80);
+    }
+
+    function closePanel() {
+        if (!isPanelOpen()) return;
+        const hadFocus = els.panel.contains(document.activeElement);
+        els.panel.classList.remove('is-open');
+        els.scrim.classList.remove('is-open');
+        els.panel.inert = true;
+        els.trigger.setAttribute('aria-expanded', 'false');
+        if (hadFocus) els.trigger.focus({ preventScroll: true });
+    }
+
+    function render() {
+        FEATURES.forEach(feature => {
+            const { card, toggle, status } = els.cards[feature.key];
+            const parentOff = feature.requires && !isActive(feature.requires);
+            const aiMissing = feature.ai && state.ai.status === 'unavailable';
+            const disabled = Boolean(parentOff || aiMissing);
+            const on = isActive(feature.key);
+
+            card.classList.toggle('is-on', on);
+            card.classList.toggle('is-disabled', disabled);
+            toggle.disabled = disabled;
+            toggle.setAttribute('aria-checked', String(on));
+
+            const [text, tone] = describeFeature(feature, { parentOff, on });
+            status.textContent = text;
+            status.dataset.tone = tone;
+        });
+
+        els.trigger.classList.toggle('is-active', isActive('ambient'));
+        document.body.classList.toggle('ambience-on', isActive('ambient'));
+        renderNow();
+    }
+
+    function describeFeature(feature, { parentOff, on }) {
+        if (!feature.ai) return [on ? 'オン' : '', 'accent'];
+
+        const { status, progress, message, busy } = state.ai;
+        if (status === 'unavailable') return [message || 'このブラウザでは使えません', 'muted'];
+        if (parentOff) return ['背景演出をオンにすると使えます', 'muted'];
+        if (status === 'checking') return ['対応状況を確認しています', 'busy'];
+        if (status === 'downloading') return [`AIモデルを準備しています ${progress}%`, 'busy'];
+        if (status === 'download') return [message || '初回だけAIモデル(数GB)を取得します', message ? 'warn' : 'muted'];
+        if (message && on) return [message, 'warn'];
+        if (busy) return ['曲の雰囲気を読み取っています', 'busy'];
+        return [on ? '端末内のAIで配色しています' : '利用できます', on ? 'accent' : 'muted'];
+    }
+
+    function renderNow() {
+        const { song, thumb, paletteSource, mood } = state;
+        els.nowArt.style.backgroundImage = thumb ? `url("${thumb}")` : '';
+        if (!song) {
+            els.nowTitle.textContent = '曲を再生すると、ここに映ります';
+            els.nowMeta.textContent = '';
+            return;
+        }
+        els.nowTitle.textContent = song.title || '(曲名なし)';
+        let source;
+        if (!isActive('ambient')) source = '演出はオフ';
+        else if (paletteSource === 'ai') source = mood ? `AI · ${mood}` : 'AIの配色';
+        else if (paletteSource === 'thumbnail') source = 'サムネイルの色';
+        else source = '標準の色';
+        els.nowMeta.textContent = [song.artist, source].filter(Boolean).join(' — ');
+    }
+
+    function showCaption() {
+        clearTimeout(state.captionTimer);
+        if (!state.mood || !isActive('aiColor')) {
+            els.caption.classList.remove('is-visible');
+            return;
+        }
+        els.captionMood.textContent = state.mood;
+        els.caption.classList.add('is-visible');
+        state.captionTimer = setTimeout(() => els.caption.classList.remove('is-visible'), CAPTION_MS);
+    }
+
+    // ----- switches -------------------------------------------------------
+
+    function toggleFeature(key) {
+        const feature = FEATURES.find(item => item.key === key);
+        const next = !state.settings[key];
+
+        if (feature.ai && next && !startAi()) {
+            render();
+            return;
+        }
+
+        state.settings[key] = next;
+        saveSettings();
+        render();
+
+        if (key === 'ambient') {
+            if (next) refreshSong();
+            else showCaption();
+        } else if (key === 'aiColor') {
+            if (next) {
+                refreshAi();
+            } else {
+                state.aiController?.abort();
+                state.ai.message = '';
+                state.mood = '';
+                setPalette(state.thumbPalette, state.thumb ? 'thumbnail' : 'default');
+                showCaption();
+                render();
+            }
+        }
+    }
+
+    // ----- song & palette -------------------------------------------------
+
+    function toSong(item) {
+        return {
+            artist: String(item[FIELD.artist] ?? '').trim(),
+            title: String(item[FIELD.title] ?? '').trim(),
+            url: item[FIELD.url]
+        };
+    }
+
+    function setSong(item) {
+        if (!item) return;
+        state.song = toSong(item);
+        refreshSong();
+    }
+
+    function restoreLastPlayed() {
+        try {
+            const id = localStorage.getItem(LAST_PLAYED_STORAGE_KEY);
+            const item = id && Array.isArray(songsData) ? songsData.find(song => song._id === id) : null;
+            if (item) state.song = toSong(item);
+        } catch (_error) {
+            // No last-played song to show.
+        }
+    }
+
+    async function refreshSong() {
+        const song = state.song;
+        const token = ++state.token;
+        state.aiController?.abort();
+        state.ai.message = '';
+
+        if (!song || !isActive('ambient')) {
+            render();
+            return;
+        }
+
+        const rawId = typeof getYouTubeID === 'function' ? getYouTubeID(song.url) : null;
+        const videoId = rawId && /^[A-Za-z0-9_-]{11}$/.test(rawId) ? rawId : null;
+
+        if (!videoId) {
+            state.thumb = '';
+            state.thumbPalette = DEFAULT_PALETTE.slice();
+            showArt('');
+        } else {
+            const src = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+            let sampled = null;
+            try {
+                sampled = await sampleThumbnail(src);
+            } catch (_error) {
+                sampled = null;
+            }
+            if (token !== state.token) return;
+            state.thumb = src;
+            state.thumbPalette = sampled ? sampled.palette : DEFAULT_PALETTE.slice();
+            showArt(sampled ? sampled.art : src);
+        }
+
+        state.mood = '';
+        const cached = isActive('aiColor') ? readAiCache(song) : null;
+        if (cached) {
+            applyAi(cached);
+            return;
+        }
+        setPalette(state.thumbPalette, state.thumb ? 'thumbnail' : 'default');
+        showCaption();
+        render();
+        if (isActive('aiColor')) refreshAi();
+    }
+
+    function showArt(url) {
+        const incoming = els.art[1 - state.artSlot];
+        const outgoing = els.art[state.artSlot];
+        if (!url) {
+            els.art.forEach(layer => layer.classList.remove('is-visible'));
+            return;
+        }
+        // Both layers already exist at opacity 0, so the class swap alone
+        // crossfades. No requestAnimationFrame: it never fires in a hidden tab,
+        // and songs keep auto-advancing while the user is in another tab.
+        incoming.style.backgroundImage = `url("${url}")`;
+        incoming.classList.add('is-visible');
+        outgoing.classList.remove('is-visible');
+        state.artSlot = 1 - state.artSlot;
+    }
+
+    function setPalette(colors, source) {
+        state.palette = colors.slice(0, 3);
+        state.paletteSource = source;
+        const root = document.documentElement.style;
+        root.setProperty('--amb-1', state.palette[0]);
+        root.setProperty('--amb-2', state.palette[1]);
+        root.setProperty('--amb-3', state.palette[2]);
+    }
+
+    function sampleThumbnail(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.decoding = 'async';
+            img.onload = () => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 64;
+                    canvas.height = 36;
+                    const context = canvas.getContext('2d', { willReadFrequently: true });
+                    context.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+                    resolve({ palette: paletteFromPixels(pixels), art: canvas.toDataURL('image/jpeg', 0.85) });
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            img.onerror = () => reject(new Error('Thumbnail could not be loaded.'));
+            img.src = src;
+        });
+    }
+
+    function paletteFromPixels(pixels) {
+        const bins = new Map();
+        const total = { r: 0, g: 0, b: 0, n: 0 };
+
+        for (let i = 0; i < pixels.length; i += 4) {
+            const r = pixels[i];
+            const g = pixels[i + 1];
+            const b = pixels[i + 2];
+            total.r += r;
+            total.g += g;
+            total.b += b;
+            total.n += 1;
+
+            const [h, s, l] = rgbToHsl(r, g, b);
+            if (l < 0.1 || l > 0.92 || s < 0.18) continue;
+
+            const key = Math.round(h * 12) % 12;
+            const weight = s * (1 - Math.abs(l - 0.5));
+            const bin = bins.get(key) || { r: 0, g: 0, b: 0, w: 0 };
+            bin.r += r * weight;
+            bin.g += g * weight;
+            bin.b += b * weight;
+            bin.w += weight;
+            bins.set(key, bin);
+        }
+
+        const picks = [];
+        [...bins.entries()]
+            .filter(([, bin]) => bin.w > 0)
+            .sort((a, b) => b[1].w - a[1].w)
+            .forEach(([key, bin]) => {
+                if (picks.length >= 2) return;
+                if (picks.every(pick => hueDistance(pick.key, key) >= 2)) {
+                    picks.push({ key, rgb: [bin.r / bin.w, bin.g / bin.w, bin.b / bin.w] });
+                }
+            });
+
+        const average = total.n ? [total.r / total.n, total.g / total.n, total.b / total.n] : [30, 27, 75];
+        const first = picks[0]?.rgb || average;
+        const second = picks[1]?.rgb || rotateHue(first, 0.14);
+        return [tuneAccent(first), tuneAccent(second), tuneBase(average)];
+    }
+
+    // ----- on-device AI ---------------------------------------------------
+
+    async function checkAiAvailability() {
+        if (state.aiSession) {
+            setAiStatus('ready');
+            return;
+        }
+        if (state.ai.status === 'downloading') return;
+        if (!('LanguageModel' in self) || typeof self.LanguageModel?.availability !== 'function') {
+            setAiStatus('unavailable', 'このブラウザでは使えません(Chromeの内蔵AIが必要です)');
+            return;
+        }
+        try {
+            const result = await self.LanguageModel.availability(AI_OPTIONS);
+            if (result === 'available' || result === 'readily') setAiStatus('ready');
+            else if (result === 'downloadable' || result === 'after-download') setAiStatus('download');
+            else if (result === 'downloading') setAiStatus('downloading');
+            else setAiStatus('unavailable', 'この端末ではChromeの内蔵AIを使えません');
+        } catch (_error) {
+            setAiStatus('unavailable', 'Chromeの内蔵AIの状態を確認できませんでした');
+        }
+    }
+
+    function setAiStatus(status, message) {
+        state.ai.status = status;
+        if (message !== undefined) state.ai.message = message;
+        render();
+    }
+
+    // Called straight from the switch's click so the model download, which
+    // needs a user gesture, can start.
+    function startAi() {
+        if (state.ai.status === 'unavailable' || !('LanguageModel' in self)) {
+            setAiStatus('unavailable', state.ai.message || 'このブラウザでは使えません(Chromeの内蔵AIが必要です)');
+            return false;
+        }
+        state.ai.message = '';
+        ensureAiSession()
+            .then(() => {
+                setAiStatus('ready', '');
+                refreshAi();
+            })
+            .catch(error => {
+                console.warn('Ambience AI could not start:', error);
+                state.settings.aiColor = false;
+                saveSettings();
+                const status = state.ai.status === 'downloading' || state.ai.status === 'checking' ? 'download' : state.ai.status;
+                setAiStatus(status, 'AIを起動できませんでした。もう一度お試しください');
+            });
+        return true;
+    }
+
+    function ensureAiSession() {
+        if (state.aiSession) return Promise.resolve(state.aiSession);
+        if (state.aiSessionPromise) return state.aiSessionPromise;
+
+        state.aiSessionPromise = self.LanguageModel.create({
+            ...AI_OPTIONS,
+            initialPrompts: [{ role: 'system', content: AI_SYSTEM_PROMPT }],
+            monitor(monitor) {
+                monitor.addEventListener('downloadprogress', event => {
+                    const fraction = event.total ? event.loaded / event.total : event.loaded;
+                    state.ai.status = 'downloading';
+                    state.ai.progress = Math.max(0, Math.min(100, Math.round((fraction || 0) * 100)));
+                    render();
+                });
+            }
+        }).then(session => {
+            state.aiSession = session;
+            return session;
+        }).catch(error => {
+            state.aiSessionPromise = null;
+            throw error;
+        });
+
+        return state.aiSessionPromise;
+    }
+
+    // A reload with AIカラー left on may not have the gesture Chrome wants
+    // before it hands out a session, so try again on the next interaction.
+    function resumeAiOnInteraction() {
+        const retry = () => {
+            window.removeEventListener('pointerdown', retry, true);
+            window.removeEventListener('keydown', retry, true);
+            ensureAiSession()
+                .then(() => {
+                    setAiStatus('ready', '');
+                    refreshAi();
+                })
+                .catch(error => console.warn('Ambience AI could not resume:', error));
+        };
+        window.addEventListener('pointerdown', retry, true);
+        window.addEventListener('keydown', retry, true);
+    }
+
+    async function refreshAi() {
+        const song = state.song;
+        if (!song || !isActive('aiColor')) return;
+
+        const cached = readAiCache(song);
+        if (cached) {
+            applyAi(cached);
+            return;
+        }
+        if (!state.aiSession) return; // picked up again once the session is ready
+
+        state.aiController?.abort();
+        const controller = new AbortController();
+        state.aiController = controller;
+        const token = state.token;
+        let timedOut = false;
+        const timer = setTimeout(() => {
+            timedOut = true;
+            controller.abort();
+        }, AI_TIMEOUT_MS);
+        let session = null;
+
+        state.ai.busy = true;
+        state.ai.message = '';
+        render();
+
+        try {
+            session = await state.aiSession.clone({ signal: controller.signal });
+            const raw = await session.prompt(buildPrompt(song), {
+                responseConstraint: AI_SCHEMA,
+                signal: controller.signal
+            });
+            const result = parseAiResult(raw);
+            if (!result) throw new Error('Unreadable response from the model.');
+            writeAiCache(song, result);
+            if (token === state.token) applyAi(result);
+        } catch (error) {
+            // An abort caused by the next song starting is not a failure.
+            const superseded = controller.signal.aborted && !timedOut;
+            if (!superseded && token === state.token) {
+                state.ai.message = timedOut
+                    ? 'AIの応答が遅いので、サムネイルの色にしました'
+                    : 'AIで配色できなかったので、サムネイルの色にしました';
+                console.warn('Ambience AI colour failed:', error);
+            }
+        } finally {
+            clearTimeout(timer);
+            try {
+                session?.destroy();
+            } catch (_error) {
+                // Already gone.
+            }
+            if (state.aiController === controller) {
+                state.aiController = null;
+                state.ai.busy = false;
+            }
+            render();
+        }
+    }
+
+    function buildPrompt(song) {
+        return [
+            `曲名: ${song.title || '(不明)'}`,
+            `アーティスト: ${song.artist || '(不明)'}`,
+            `サムネイルの主な色: ${state.thumbPalette.join(', ')}`,
+            '',
+            'この曲の雰囲気に合う配色を3色(#RRGGBB)で選んでください。',
+            '1色目と2色目は光として映える色、3色目は背景の土台になる深い色にしてください。',
+            'moodには雰囲気を表す日本語の短い言葉(12文字以内)を入れてください。'
+        ].join('\n');
+    }
+
+    function parseAiResult(raw) {
+        let data = null;
+        try {
+            data = JSON.parse(raw);
+        } catch (_error) {
+            const match = String(raw).match(/\{[\s\S]*\}/);
+            if (!match) return null;
+            try {
+                data = JSON.parse(match[0]);
+            } catch (_nested) {
+                return null;
+            }
+        }
+
+        const colors = Array.isArray(data?.colors)
+            ? data.colors.filter(color => /^#[0-9a-f]{6}$/i.test(String(color)))
+            : [];
+        if (colors.length < 3) return null;
+
+        return {
+            mood: String(data.mood ?? '').replace(/\s+/g, ' ').trim().slice(0, 16),
+            colors: [
+                tuneAccent(hexToRgb(colors[0])),
+                tuneAccent(hexToRgb(colors[1])),
+                tuneBase(hexToRgb(colors[2]))
+            ]
+        };
+    }
+
+    function applyAi(result) {
+        state.mood = result.mood;
+        setPalette(result.colors, 'ai');
+        showCaption();
+        render();
+    }
+
+    function cacheKey(song) {
+        return JSON.stringify([song.artist, song.title]);
+    }
+
+    function readAiCache(song) {
+        try {
+            const all = JSON.parse(localStorage.getItem(AI_CACHE_KEY) || '{}');
+            const hit = all[cacheKey(song)];
+            return hit && Array.isArray(hit.colors) && hit.colors.length === 3 ? hit : null;
+        } catch (_error) {
+            return null;
+        }
+    }
+
+    function writeAiCache(song, result) {
+        try {
+            const all = JSON.parse(localStorage.getItem(AI_CACHE_KEY) || '{}');
+            all[cacheKey(song)] = { mood: result.mood, colors: result.colors, at: Date.now() };
+            const keys = Object.keys(all);
+            if (keys.length > AI_CACHE_LIMIT) {
+                keys.sort((a, b) => (all[a].at || 0) - (all[b].at || 0))
+                    .slice(0, keys.length - AI_CACHE_LIMIT)
+                    .forEach(key => delete all[key]);
+            }
+            localStorage.setItem(AI_CACHE_KEY, JSON.stringify(all));
+        } catch (_error) {
+            // A missing cache only means the AI is asked again next time.
+        }
+    }
+
+    // ----- colour maths ---------------------------------------------------
+
+    function rgbToHsl(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const l = (max + min) / 2;
+        if (max === min) return [0, 0, l];
+        const d = max - min;
+        const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        let h;
+        if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+        else if (max === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        return [h / 6, s, l];
+    }
+
+    function hslToHex(h, s, l) {
+        const hueToRgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        };
+        let r;
+        let g;
+        let b;
+        if (s === 0) {
+            r = g = b = l;
+        } else {
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hueToRgb(p, q, h + 1 / 3);
+            g = hueToRgb(p, q, h);
+            b = hueToRgb(p, q, h - 1 / 3);
+        }
+        return `#${[r, g, b].map(v => Math.round(v * 255).toString(16).padStart(2, '0')).join('')}`;
+    }
+
+    function hexToRgb(hex) {
+        const value = parseInt(String(hex).slice(1), 16);
+        return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+    }
+
+    function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+    }
+
+    // Keep every colour readable behind white text, whoever chose it.
+    function tuneAccent(rgb) {
+        const [h, s, l] = rgbToHsl(...rgb);
+        return hslToHex(h, clamp(s, 0.45, 0.9), clamp(l, 0.4, 0.6));
+    }
+
+    function tuneBase(rgb) {
+        const [h, s, l] = rgbToHsl(...rgb);
+        return hslToHex(h, clamp(s, 0.2, 0.6), clamp(l, 0.1, 0.2));
+    }
+
+    function rotateHue(rgb, amount) {
+        const [h, s, l] = rgbToHsl(...rgb);
+        return hexToRgb(hslToHex((h + amount) % 1, s, l));
+    }
+
+    function hueDistance(a, b) {
+        const d = Math.abs(a - b);
+        return Math.min(d, 12 - d);
+    }
+
+    // ----- start ----------------------------------------------------------
+
+    function init() {
+        try {
+            buildDom();
+            setPalette(DEFAULT_PALETTE, 'default');
+            restoreLastPlayed();
+            render();
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') closePanel();
+            });
+
+            checkAiAvailability().then(() => {
+                if (state.settings.aiColor && state.ai.status === 'ready') {
+                    ensureAiSession()
+                        .then(() => refreshAi())
+                        .catch(() => resumeAiOnInteraction());
+                }
+            });
+            refreshSong();
+        } catch (error) {
+            console.warn('Ambience could not start:', error);
+        }
+    }
+
+    window.HitAmbience = { setSong, open: openPanel, close: closePanel };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+    </script>
+    <script>
+/*
+ * ライブラリ診断 - looks over the song list and reports what needs a human.
+ *
+ *   リンク切れの疑い  the video's thumbnail is gone from YouTube
+ *   重複             the same video, or the same artist and title, twice
+ *   表記ゆれ         one artist spelled several ways
+ *   URLの問題        missing, or not a YouTube link
+ *
+ * It only reports. Nothing is changed, deleted or reordered here - each row
+ * links to the existing editor so the decision stays with the reader. No AI
+ * and no third-party service: the only requests are YouTube thumbnails.
+ *
+ * Reads from script.js: FIELD, songsData, getYouTubeID, openSongEditor.
+ */
+(() => {
+    'use strict';
+
+    const THUMB_CONCURRENCY = 8;
+    const THUMB_TIMEOUT_MS = 10000;
+
+    const els = {};
+    let running = false;
+    let cancelled = false;
+    let lastReport = null;
+
+    // ----- text helpers ---------------------------------------------------
+
+    // Fold the differences that are only spelling: width, case, spaces and the
+    // punctuation that drifts between entries ("Mr. Children" / "Mr.Children").
+    function fold(value) {
+        return String(value ?? '')
+            .normalize('NFKC')
+            .toLowerCase()
+            .replace(/[\s　]/g, '')
+            .replace(/[.,!?'"`´’”“\-–—~〜・･:;&＆]/g, '');
+    }
+
+    function songLabel(item) {
+        const artist = String(item[FIELD.artist] ?? '').trim() || '(歌手名なし)';
+        const title = String(item[FIELD.title] ?? '').trim() || '(曲名なし)';
+        return { artist, title };
+    }
+
+    // ----- checks that need no network ------------------------------------
+
+    function findDuplicateVideos(songs) {
+        const byVideo = new Map();
+        songs.forEach(item => {
+            const id = getYouTubeID(item[FIELD.url]);
+            if (!id) return;
+            if (!byVideo.has(id)) byVideo.set(id, []);
+            byVideo.get(id).push(item);
+        });
+        return [...byVideo.entries()]
+            .filter(([, items]) => items.length > 1)
+            .map(([id, items]) => ({ key: id, note: `同じ動画 (${id})`, items }));
+    }
+
+    function findDuplicateTitles(songs) {
+        const byName = new Map();
+        songs.forEach(item => {
+            const key = `${fold(item[FIELD.artist])} ${fold(item[FIELD.title])}`;
+            if (key === ' ') return;
+            if (!byName.has(key)) byName.set(key, []);
+            byName.get(key).push(item);
+        });
+        return [...byName.values()]
+            .filter(items => items.length > 1)
+            .map(items => {
+                const { artist, title } = songLabel(items[0]);
+                return { key: `${artist}/${title}`, note: `${artist} — ${title}`, items };
+            });
+    }
+
+    function findArtistVariants(songs) {
+        const byArtist = new Map();
+        songs.forEach(item => {
+            const raw = String(item[FIELD.artist] ?? '').trim();
+            if (!raw) return;
+            const key = fold(raw);
+            if (!key) return;
+            if (!byArtist.has(key)) byArtist.set(key, { spellings: new Map(), items: [] });
+            const group = byArtist.get(key);
+            group.spellings.set(raw, (group.spellings.get(raw) || 0) + 1);
+            group.items.push(item);
+        });
+        return [...byArtist.values()]
+            .filter(group => group.spellings.size > 1)
+            .map(group => ({
+                key: [...group.spellings.keys()].join('|'),
+                note: [...group.spellings.entries()].map(([name, count]) => `「${name}」${count}曲`).join(' / '),
+                items: group.items
+            }));
+    }
+
+    function findUrlProblems(songs) {
+        const missing = songs.filter(item => !String(item[FIELD.url] ?? '').trim());
+        const notYouTube = songs.filter(item => {
+            const url = String(item[FIELD.url] ?? '').trim();
+            return url && !getYouTubeID(url);
+        });
+        const groups = [];
+        if (missing.length) groups.push({ key: 'missing', note: 'URLが入っていません', items: missing });
+        if (notYouTube.length) groups.push({ key: 'not-youtube', note: 'YouTubeの動画URLとして読み取れません', items: notYouTube });
+        return groups;
+    }
+
+    // ----- thumbnail check ------------------------------------------------
+
+    // A missing thumbnail means the video is gone, private or region-locked -
+    // it is a suspicion to check by hand, not a verdict.
+    function checkThumbnail(videoId) {
+        return new Promise(resolve => {
+            const img = new Image();
+            let settled = false;
+            const finish = alive => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timer);
+                img.onload = null;
+                img.onerror = null;
+                img.src = '';
+                resolve(alive);
+            };
+            const timer = setTimeout(() => finish(true), THUMB_TIMEOUT_MS);
+            img.onload = () => finish(img.naturalWidth > 120);
+            img.onerror = () => finish(false);
+            img.src = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+        });
+    }
+
+    async function findDeadLinks(songs, onProgress) {
+        const targets = [];
+        songs.forEach(item => {
+            const id = getYouTubeID(item[FIELD.url]);
+            if (id) targets.push({ item, id });
+        });
+
+        const dead = [];
+        let done = 0;
+        let cursor = 0;
+
+        async function worker() {
+            while (cursor < targets.length && !cancelled) {
+                const target = targets[cursor];
+                cursor += 1;
+                const alive = await checkThumbnail(target.id);
+                if (!alive) dead.push(target.item);
+                done += 1;
+                onProgress(done, targets.length);
+            }
+        }
+
+        await Promise.all(Array.from({ length: Math.min(THUMB_CONCURRENCY, targets.length) }, worker));
+        return { dead, checked: done, total: targets.length };
+    }
+
+    // ----- report ---------------------------------------------------------
+
+    async function runCheck() {
+        if (running) return;
+        running = true;
+        cancelled = false;
+        els.run.disabled = true;
+        els.run.textContent = '診断中…';
+        els.cancel.hidden = false;
+        setProgress(0, 0, 'リンクを確認しています');
+
+        const songs = Array.isArray(songsData) ? songsData.slice() : [];
+        const links = await findDeadLinks(songs, (done, total) => setProgress(done, total, 'リンクを確認しています'));
+
+        lastReport = {
+            total: songs.length,
+            checked: links.checked,
+            cancelled,
+            sections: [
+                {
+                    id: 'dead',
+                    title: 'リンク切れの疑い',
+                    hint: 'YouTube側でサムネイルが見つかりません。削除・非公開・地域制限のいずれかの可能性があります。',
+                    groups: links.dead.length ? [{ key: 'dead', note: `${links.dead.length}曲`, items: links.dead }] : []
+                },
+                {
+                    id: 'dup-video',
+                    title: '同じ動画の重複',
+                    hint: '同じYouTube動画が複数の行に登録されています。',
+                    groups: findDuplicateVideos(songs)
+                },
+                {
+                    id: 'dup-title',
+                    title: '同じ曲名の重複',
+                    hint: '歌手名と曲名が実質同じ行です(動画は違うことがあります)。',
+                    groups: findDuplicateTitles(songs)
+                },
+                {
+                    id: 'variants',
+                    title: '歌手名の表記ゆれ',
+                    hint: '同じ歌手が複数の書き方で登録されています。検索や並び替えで分かれてしまいます。',
+                    groups: findArtistVariants(songs)
+                },
+                {
+                    id: 'url',
+                    title: 'URLの問題',
+                    hint: '再生できない行です。',
+                    groups: findUrlProblems(songs)
+                }
+            ]
+        };
+
+        running = false;
+        els.run.disabled = false;
+        els.run.textContent = 'もう一度診断';
+        els.cancel.hidden = true;
+        renderReport();
+    }
+
+    function setProgress(done, total, label) {
+        els.progress.hidden = false;
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        els.progressBar.style.width = `${pct}%`;
+        els.progressText.textContent = total ? `${label} ${done} / ${total}` : label;
+    }
+
+    function renderReport() {
+        els.progress.hidden = true;
+        els.body.textContent = '';
+
+        if (!lastReport) return;
+
+        const found = lastReport.sections.reduce((sum, section) => sum + section.groups.length, 0);
+        const summary = document.createElement('p');
+        summary.className = 'check-summary';
+        summary.textContent = lastReport.cancelled
+            ? `中断しました(${lastReport.checked}曲まで確認)`
+            : found === 0
+                ? `${lastReport.total}曲を確認しました。気になる点は見つかりませんでした。`
+                : `${lastReport.total}曲を確認しました。確認したい項目が ${found} 件あります。`;
+        els.body.appendChild(summary);
+
+        lastReport.sections.forEach(section => {
+            if (!section.groups.length) return;
+            els.body.appendChild(buildSection(section));
+        });
+    }
+
+    function buildSection(section) {
+        const wrap = document.createElement('section');
+        wrap.className = 'check-section';
+
+        const count = section.groups.reduce((sum, group) => sum + group.items.length, 0);
+        const head = document.createElement('div');
+        head.className = 'check-section-head';
+        head.innerHTML = `<h3>${section.title}</h3><span class="check-badge">${count}</span>`;
+        wrap.appendChild(head);
+
+        const hint = document.createElement('p');
+        hint.className = 'check-hint';
+        hint.textContent = section.hint;
+        wrap.appendChild(hint);
+
+        section.groups.forEach(group => {
+            const groupEl = document.createElement('div');
+            groupEl.className = 'check-group';
+
+            if (section.id !== 'dead') {
+                const note = document.createElement('p');
+                note.className = 'check-group-note';
+                note.textContent = group.note;
+                groupEl.appendChild(note);
+            }
+
+            group.items.forEach(item => groupEl.appendChild(buildRow(item)));
+            wrap.appendChild(groupEl);
+        });
+
+        return wrap;
+    }
+
+    function buildRow(item) {
+        const { artist, title } = songLabel(item);
+        const row = document.createElement('div');
+        row.className = 'check-row';
+
+        const text = document.createElement('div');
+        text.className = 'check-row-text';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'check-row-title';
+        titleEl.textContent = title;
+        const metaEl = document.createElement('p');
+        metaEl.className = 'check-row-meta';
+        metaEl.textContent = artist;
+        text.append(titleEl, metaEl);
+
+        const actions = document.createElement('div');
+        actions.className = 'check-row-actions';
+
+        const url = String(item[FIELD.url] ?? '').trim();
+        if (url) {
+            const open = document.createElement('a');
+            open.className = 'action-btn small-action';
+            open.href = url;
+            open.target = '_blank';
+            open.rel = 'noopener';
+            open.textContent = 'YouTube';
+            actions.appendChild(open);
+        }
+
+        const edit = document.createElement('button');
+        edit.type = 'button';
+        edit.className = 'action-btn small-action';
+        edit.textContent = '編集';
+        // The editor sits above this dialog, so the report is still here when
+        // it closes; re-run to see the effect of a change.
+        edit.addEventListener('click', () => openSongEditor(item._id));
+        actions.appendChild(edit);
+
+        row.append(text, actions);
+        return row;
+    }
+
+    // ----- dialog ---------------------------------------------------------
+
+    function buildDialog() {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay check-overlay hidden';
+        overlay.innerHTML = `
+            <div class="check-dialog glass-panel" role="dialog" aria-modal="true" aria-labelledby="checkTitle">
+                <div class="check-head">
+                    <div>
+                        <p class="check-eyebrow">LIBRARY CHECK</p>
+                        <h2 id="checkTitle">ライブラリ診断</h2>
+                        <p class="check-lead">リンク切れ・重複・表記ゆれを洗い出します。データは変更しません。</p>
+                    </div>
+                    <button type="button" class="close-btn check-close" aria-label="閉じる">×</button>
+                </div>
+                <div class="check-progress" hidden>
+                    <div class="check-progress-track"><div class="check-progress-bar"></div></div>
+                    <p class="check-progress-text"></p>
+                </div>
+                <div class="check-body"></div>
+                <div class="check-foot">
+                    <button type="button" class="action-btn check-cancel" hidden>中断</button>
+                    <span class="form-spacer"></span>
+                    <button type="button" class="action-btn primary-action check-run">診断する</button>
+                </div>
+            </div>`;
+
+        document.body.appendChild(overlay);
+
+        els.overlay = overlay;
+        els.body = overlay.querySelector('.check-body');
+        els.run = overlay.querySelector('.check-run');
+        els.cancel = overlay.querySelector('.check-cancel');
+        els.progress = overlay.querySelector('.check-progress');
+        els.progressBar = overlay.querySelector('.check-progress-bar');
+        els.progressText = overlay.querySelector('.check-progress-text');
+
+        els.run.addEventListener('click', runCheck);
+        els.cancel.addEventListener('click', () => {
+            cancelled = true;
+        });
+        overlay.querySelector('.check-close').addEventListener('click', close);
+        overlay.addEventListener('click', event => {
+            if (event.target === overlay) close();
+        });
+        document.addEventListener('keydown', event => {
+            // Leave Escape to the song editor when that is the dialog on top.
+            const editorOpen = !document.getElementById('editModal')?.classList.contains('hidden');
+            if (event.key === 'Escape' && !editorOpen) close();
+        });
+    }
+
+    function open() {
+        els.overlay.classList.remove('hidden');
+        requestAnimationFrame(() => els.overlay.classList.add('active'));
+        if (!lastReport && !running) {
+            els.body.innerHTML = '<p class="check-summary">「診断する」を押すと、登録されている曲を一通り確認します。'
+                + '曲数によっては十数秒かかります。</p>';
+        }
+        els.run.focus({ preventScroll: true });
+    }
+
+    function close() {
+        if (els.overlay.classList.contains('hidden')) return;
+        cancelled = true;
+        els.overlay.classList.remove('active');
+        setTimeout(() => els.overlay.classList.add('hidden'), 300);
+    }
+
+    function init() {
+        try {
+            buildDialog();
+            document.getElementById('checkLibraryBtn')?.addEventListener('click', open);
+        } catch (error) {
+            console.warn('Library check could not start:', error);
+        }
+    }
+
+    window.HitLibrary = { open, close };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
     </script>
 </body>
 
