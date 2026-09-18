@@ -122,6 +122,15 @@ body.mt-product-page :is(.cta-row, .actions, .links) { gap: 10px; }
 .card-web .button.secondary { color: var(--teal); border-color: rgba(15, 118, 110, .28); }
 .card-android .button.secondary { color: var(--green); border-color: rgba(21, 128, 61, .28); }
 
+/* 配布ファイルの更新日時。ページ本文の編集日時とは区別する。 */
+p.mt-release-info {
+  margin: 8px 0 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.mt-release-info time { display: inline-block; }
+
 @media (max-width: 640px) {
   .mt-sitebar__inner { width: min(100% - 28px, 1180px); min-height: 54px; }
   .mt-sitebar__mark { width: 28px; height: 28px; border-radius: 9px; }
