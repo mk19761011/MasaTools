@@ -11,7 +11,7 @@
 
 | 配布物 | 更新日時（日本時間） | 根拠コミット | 配布元 |
 | --- | --- | --- | --- |
-| AI Talk Notes v1.2.1 APK | 2026-08-01 23:56:45 | `f99dacc0724c83cb579a3b4323182f55b6a2cd60` | main / aitalknotes/download |
+| AI Talk Notes v1.2.2 APK | 2026-09-26 01:53:47 | `e30d13452165cabe07ac4c1cd90617d80b6fee7b` | main / aitalknotes/download |
 | 医療用語辞書 Android APK | 2026-08-01 23:56:45 | `f99dacc0724c83cb579a3b4323182f55b6a2cd60` | main / medicaldict/download |
 | 医療用語辞書 MS-IME TXT | 2026-07-14 09:26:09 | `fd25ce8f8a2605c97c3d336d9e071bd42eaed021` | main / medicaldict/download |
 | 医療用語辞書 Apple PLIST | 2026-07-10 19:41:51 | `4841633a510de2357d096534a8743057e7e72394` | main / medicaldict/download |
