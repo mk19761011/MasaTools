@@ -42,8 +42,29 @@
     .row .meta{min-width:0}
     .row .name{font-weight:700;font-size:16px;word-break:break-all}
     .row .sub{color:var(--muted);font-size:14px}
-    .button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;font-weight:700;font-size:15px;color:#fff;white-space:nowrap;background:linear-gradient(135deg,var(--accent),var(--accent-dark))}
+    .button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:0;border-radius:12px;font-family:inherit;font-weight:700;font-size:15px;color:#fff;white-space:nowrap;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent-dark))}
     .button svg{width:18px;height:18px}
+    .button:disabled{opacity:.55;cursor:default}
+    .button[hidden]{display:none}
+    .button.danger{background:#fff;color:#b91c1c;border:1px solid rgba(239,68,68,.35)}
+    .button.danger:hover:not(:disabled){background:rgba(239,68,68,.08)}
+    .button.small{min-height:36px;padding:0 14px;font-size:14px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .panel + .panel{margin-top:26px}
+    .drop{display:block;margin:22px 26px;padding:30px 20px;border:2px dashed rgba(37,99,235,.35);border-radius:16px;text-align:center;color:var(--muted);font-size:15px;cursor:pointer;background:rgba(37,99,235,.03);transition:background .15s,border-color .15s}
+    .drop:hover,.drop.over{background:rgba(37,99,235,.08);border-color:var(--accent)}
+    .drop strong{display:block;color:var(--text);font-size:16px;margin-bottom:4px}
+    .drop input{display:none}
+    .note{margin:-8px 26px 22px;color:var(--muted);font-size:13px}
+    .job{padding:14px 26px;border-top:1px solid var(--line)}
+    .job-top{display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .job .name{font-weight:700;font-size:15px;word-break:break-all}
+    .job .sub{color:var(--muted);font-size:13px}
+    .job.done .sub{color:#047857}
+    .job.failed .sub{color:#991b1b}
+    .bar{height:8px;margin-top:8px;border-radius:999px;background:rgba(30,41,59,.08);overflow:hidden}
+    .bar span{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--accent),#14b8a6);transition:width .2s}
+    .job.failed .bar span{background:#ef4444}
     .state{padding:34px 26px;text-align:center;color:var(--muted);font-size:15px}
     .state.error{color:#991b1b}
     .state code{font-size:13px;background:rgba(30,41,59,.07);padding:2px 6px;border-radius:6px}
@@ -77,6 +98,19 @@
 
     <section class="panel">
       <div class="panel-head">
+        <h2>アップロード</h2>
+      </div>
+      <label class="drop" id="drop">
+        <strong>ここにファイルをドラッグ＆ドロップ</strong>
+        またはクリックしてファイルを選択（複数可）
+        <input type="file" id="picker" multiple />
+      </label>
+      <p class="note">大きなファイルは自動で 50MB ずつに分けて送り、R2 上で 1 つのファイルに戻します。同じ名前のファイルがある場合は上書きの確認が出ます。</p>
+      <div id="jobs"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
         <h2>非公開アプリ</h2>
         <span class="count" id="count"></span>
       </div>
@@ -90,8 +124,21 @@
 
   <script>
     (function () {
+      var CHUNK_BYTES = 50 * 1024 * 1024;   // 1 回のリクエストで送る大きさ（上限 100MB より十分小さく）
+      var PART_RETRIES = 3;
+
       var list = document.getElementById('list');
       var count = document.getElementById('count');
+      var drop = document.getElementById('drop');
+      var picker = document.getElementById('picker');
+      var jobsBox = document.getElementById('jobs');
+
+      var currentFiles = [];
+      var queue = [];
+      var running = null;
+
+      var ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>';
+      var ICON_TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>';
 
       function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, function (c) {
@@ -115,51 +162,272 @@
         return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
       }
 
+      function fileUrl(key) {
+        return '/admin/files/' + key.split('/').map(encodeURIComponent).join('/');
+      }
+
       function showState(message, isError) {
         list.innerHTML = '<p class="state' + (isError ? ' error' : '') + '">' + message + '</p>';
       }
 
-      fetch('/admin/files/', { headers: { Accept: 'application/json' } })
-        .then(function (res) {
-          return res.json().then(function (body) { return { status: res.status, body: body }; });
-        })
-        .then(function (result) {
-          if (result.status === 503 && result.body.error === 'r2_not_bound') {
+      // 失敗時のレスポンスを日本語のメッセージにする
+      function describeFailure(status, body) {
+        if (status === 401) return 'ログインの有効期限が切れました。ページを再読み込みしてログインし直してください。';
+        if (body && body.message) return body.message + '（' + status + '）';
+        return 'サーバーエラー（' + status + '）';
+      }
+
+      /* ---------- 一覧 ---------- */
+
+      function loadList() {
+        return fetch('/admin/files/', { headers: { Accept: 'application/json' } })
+          .then(function (res) {
+            return res.json().then(function (body) { return { status: res.status, body: body }; });
+          })
+          .then(function (result) {
+            if (result.status === 503 && result.body.error === 'r2_not_bound') {
+              count.textContent = '';
+              showState('R2 バケットが未設定です。Cloudflare Pages の設定で <code>ADMIN_FILES</code> を R2 バケットにバインドしてください。', true);
+              return;
+            }
+            if (result.status !== 200) {
+              count.textContent = '';
+              showState('一覧を取得できませんでした（' + result.status + '）。', true);
+              return;
+            }
+
+            var files = result.body.files || [];
+            currentFiles = files;
+            count.textContent = files.length + ' 件';
+
+            if (files.length === 0) {
+              showState('まだファイルがありません。上の「アップロード」から追加すると、ここに並びます。');
+              return;
+            }
+
+            list.innerHTML = files.map(function (file) {
+              var sub = [formatSize(file.size), formatDate(file.uploaded)].filter(Boolean).join(' ・ ');
+              return '<div class="row">' +
+                '<div class="meta">' +
+                  '<div class="name">' + escapeHtml(file.name) + '</div>' +
+                  '<div class="sub">' + escapeHtml(sub) + '</div>' +
+                '</div>' +
+                '<div class="actions">' +
+                  '<a class="button" href="' + escapeHtml(file.url) + '">ダウンロード' + ICON_DOWNLOAD + '</a>' +
+                  '<button type="button" class="button danger" data-delete="' + escapeHtml(file.key) + '">削除' + ICON_TRASH + '</button>' +
+                '</div>' +
+              '</div>';
+            }).join('');
+          })
+          .catch(function () {
             count.textContent = '';
-            showState('R2 バケットが未設定です。Cloudflare Pages の設定で <code>ADMIN_FILES</code> を R2 バケットにバインドしてください。', true);
-            return;
-          }
-          if (result.status !== 200) {
-            count.textContent = '';
-            showState('一覧を取得できませんでした（' + result.status + '）。', true);
-            return;
-          }
+            showState('一覧を取得できませんでした。時間をおいて再読み込みしてください。', true);
+          });
+      }
 
-          var files = result.body.files || [];
-          count.textContent = files.length + ' 件';
+      /* ---------- 削除 ---------- */
 
-          if (files.length === 0) {
-            showState('まだファイルがありません。R2 バケットにアップロードすると、ここに自動で並びます。');
-            return;
-          }
+      list.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-delete]');
+        if (!button) return;
 
-          list.innerHTML = files.map(function (file) {
-            var sub = [formatSize(file.size), formatDate(file.uploaded)].filter(Boolean).join(' ・ ');
-            return '<div class="row">' +
-              '<div class="meta">' +
-                '<div class="name">' + escapeHtml(file.name) + '</div>' +
-                '<div class="sub">' + escapeHtml(sub) + '</div>' +
-              '</div>' +
-              '<a class="button" href="' + escapeHtml(file.url) + '">ダウンロード' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>' +
-              '</a>' +
-            '</div>';
-          }).join('');
-        })
-        .catch(function () {
-          count.textContent = '';
-          showState('一覧を取得できませんでした。時間をおいて再読み込みしてください。', true);
+        var key = button.getAttribute('data-delete');
+        if (!window.confirm('「' + key + '」を削除します。\n元に戻せません。よろしいですか？')) return;
+
+        button.disabled = true;
+        fetch(fileUrl(key), { method: 'DELETE', headers: { 'X-MT-Admin': '1' } })
+          .then(function (res) {
+            return res.json().catch(function () { return null; }).then(function (body) {
+              if (!res.ok && res.status !== 404) throw new Error(describeFailure(res.status, body));
+            });
+          })
+          .then(loadList)
+          .catch(function (err) {
+            button.disabled = false;
+            window.alert('削除できませんでした。\n' + err.message);
+          });
+      });
+
+      /* ---------- アップロード ---------- */
+
+      function api(method, key, query, body) {
+        var init = { method: method, headers: { 'X-MT-Admin': '1' } };
+        if (body !== undefined) {
+          init.headers['Content-Type'] = 'application/json';
+          init.body = JSON.stringify(body);
+        }
+        return fetch(fileUrl(key) + '?' + query, init).then(function (res) {
+          return res.json().catch(function () { return null; }).then(function (data) {
+            if (!res.ok) throw new Error(describeFailure(res.status, data));
+            return data;
+          });
         });
+      }
+
+      function sendPart(job, uploadId, partNumber, blob, onProgress) {
+        return new Promise(function (resolve, reject) {
+          var xhr = new XMLHttpRequest();
+          job.xhr = xhr;
+          xhr.open('PUT', fileUrl(job.key) + '?action=mpu-part&uploadId=' + encodeURIComponent(uploadId) + '&partNumber=' + partNumber);
+          xhr.setRequestHeader('X-MT-Admin', '1');
+          xhr.upload.onprogress = function (e) { onProgress(e.loaded); };
+          xhr.onload = function () {
+            job.xhr = null;
+            var data = null;
+            try { data = JSON.parse(xhr.responseText); } catch (e) { /* HTML のログイン画面などが返ってきた */ }
+            if (xhr.status === 200 && data && data.etag) resolve(data);
+            else reject(new Error(describeFailure(xhr.status, data)));
+          };
+          xhr.onerror = function () { job.xhr = null; reject(new Error('通信エラーが発生しました。')); };
+          xhr.onabort = function () { job.xhr = null; reject(new Error('キャンセルしました。')); };
+          xhr.send(blob);
+        });
+      }
+
+      function sendPartWithRetry(job, uploadId, partNumber, blob, onProgress, attempt) {
+        return sendPart(job, uploadId, partNumber, blob, onProgress).catch(function (err) {
+          if (job.cancelled || attempt >= PART_RETRIES) throw err;
+          onProgress(0);
+          return new Promise(function (r) { setTimeout(r, 1500 * attempt); })
+            .then(function () { return sendPartWithRetry(job, uploadId, partNumber, blob, onProgress, attempt + 1); });
+        });
+      }
+
+      function renderJob(job) {
+        var percent = job.file.size ? Math.floor(job.sent / job.file.size * 100) : 100;
+        job.el.className = 'job' + (job.state === 'done' ? ' done' : job.state === 'failed' ? ' failed' : '');
+        job.el.querySelector('.bar span').style.width = (job.state === 'done' ? 100 : percent) + '%';
+        job.el.querySelector('.sub').textContent =
+          job.state === 'waiting' ? '待機中 ・ ' + formatSize(job.file.size) :
+          job.state === 'running' ? formatSize(job.sent) + ' / ' + formatSize(job.file.size) + '（' + percent + '%）' +
+            (job.parts > 1 ? ' ・ 分割 ' + job.partIndex + '/' + job.parts : '') :
+          job.state === 'finishing' ? 'R2 上で結合しています…' :
+          job.state === 'done' ? 'アップロード完了' :
+          job.message;
+        var cancel = job.el.querySelector('button');
+        cancel.hidden = job.state === 'done' || job.state === 'failed';
+      }
+
+      function addJob(file) {
+        var job = { file: file, key: file.name, sent: 0, parts: Math.max(1, Math.ceil(file.size / CHUNK_BYTES)), partIndex: 0, state: 'waiting', cancelled: false };
+        job.el = document.createElement('div');
+        job.el.innerHTML =
+          '<div class="job-top"><div class="name">' + escapeHtml(file.name) + '</div>' +
+          '<button type="button" class="button danger small">キャンセル</button></div>' +
+          '<div class="bar"><span></span></div><div class="sub"></div>';
+        job.el.querySelector('button').addEventListener('click', function () { cancelJob(job); });
+        jobsBox.appendChild(job.el);
+        renderJob(job);
+        queue.push(job);
+      }
+
+      function cancelJob(job) {
+        job.cancelled = true;
+        if (job.xhr) job.xhr.abort();
+        if (job.state === 'waiting') {
+          queue.splice(queue.indexOf(job), 1);
+          finishJob(job, 'failed', 'キャンセルしました。');
+        }
+      }
+
+      function finishJob(job, state, message) {
+        job.state = state;
+        job.message = message || '';
+        renderJob(job);
+        if (state === 'done') {
+          setTimeout(function () { if (job.el.parentNode) job.el.parentNode.removeChild(job.el); }, 5000);
+        }
+      }
+
+      function runJob(job) {
+        var uploadId = null;
+        var etags = [];
+        job.state = 'running';
+        renderJob(job);
+
+        function nextPart(index) {
+          if (index >= job.parts) return Promise.resolve();
+          if (job.cancelled) return Promise.reject(new Error('キャンセルしました。'));
+          var start = index * CHUNK_BYTES;
+          var blob = job.file.slice(start, Math.min(start + CHUNK_BYTES, job.file.size));
+          job.partIndex = index + 1;
+          return sendPartWithRetry(job, uploadId, index + 1, blob, function (loaded) {
+            job.sent = start + loaded;
+            renderJob(job);
+          }, 1).then(function (part) {
+            etags.push({ partNumber: part.partNumber, etag: part.etag });
+            job.sent = start + blob.size;
+            return nextPart(index + 1);
+          });
+        }
+
+        return api('POST', job.key, 'action=mpu-create')
+          .then(function (data) { uploadId = data.uploadId; return nextPart(0); })
+          .then(function () {
+            job.state = 'finishing';
+            renderJob(job);
+            return api('POST', job.key, 'action=mpu-complete&uploadId=' + encodeURIComponent(uploadId), { parts: etags });
+          })
+          .then(function () { finishJob(job, 'done'); })
+          .catch(function (err) {
+            finishJob(job, 'failed', job.cancelled ? 'キャンセルしました。' : 'アップロードに失敗しました：' + err.message);
+            // 途中まで送った分割片を R2 に残さない
+            if (uploadId) api('DELETE', job.key, 'action=mpu-abort&uploadId=' + encodeURIComponent(uploadId)).catch(function () {});
+          });
+      }
+
+      function pump() {
+        if (running || queue.length === 0) return;
+        running = queue.shift();
+        runJob(running).then(function () {
+          running = null;
+          loadList();
+          pump();
+        });
+      }
+
+      function enqueue(fileList) {
+        var files = Array.prototype.slice.call(fileList || []);
+        var existing = currentFiles.map(function (f) { return f.key; });
+        var pending = queue.concat(running ? [running] : []).map(function (j) { return j.key; });
+
+        files.forEach(function (file) {
+          if (pending.indexOf(file.name) >= 0) {
+            window.alert('「' + file.name + '」はすでにアップロード待ちです。');
+            return;
+          }
+          if (existing.indexOf(file.name) >= 0 &&
+              !window.confirm('「' + file.name + '」は既にあります。上書きしますか？')) {
+            return;
+          }
+          addJob(file);
+          pending.push(file.name);
+        });
+        pump();
+      }
+
+      picker.addEventListener('change', function () {
+        enqueue(picker.files);
+        picker.value = '';
+      });
+
+      ['dragenter', 'dragover'].forEach(function (type) {
+        drop.addEventListener(type, function (e) { e.preventDefault(); drop.classList.add('over'); });
+      });
+      ['dragleave', 'drop'].forEach(function (type) {
+        drop.addEventListener(type, function (e) { e.preventDefault(); drop.classList.remove('over'); });
+      });
+      drop.addEventListener('drop', function (e) { enqueue(e.dataTransfer && e.dataTransfer.files); });
+
+      // ドロップ先を外したとき、ブラウザがファイルを開いてページを離れてしまわないようにする
+      window.addEventListener('dragover', function (e) { e.preventDefault(); });
+      window.addEventListener('drop', function (e) { e.preventDefault(); });
+
+      window.addEventListener('beforeunload', function (e) {
+        if (running || queue.length) { e.preventDefault(); e.returnValue = ''; }
+      });
+
+      loadList();
     })();
   </script>
 </body>
