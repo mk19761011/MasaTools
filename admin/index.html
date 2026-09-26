@@ -101,7 +101,25 @@
     .handle svg{width:18px;height:18px}
     .dragging{position:relative;z-index:1;background:#eef4ff !important;box-shadow:0 8px 24px rgba(15,23,42,.14)}
     body.drag-active{cursor:grabbing;user-select:none}
-    @media(max-width:860px){h1{font-size:26px}main{padding-top:32px}.row{align-items:flex-start;flex-direction:column}}
+    .files-panel{overflow:clip}
+    .selbar{position:sticky;top:58px;z-index:5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 26px;border-bottom:1px solid var(--line);background:rgba(248,250,253,.97);font-size:14px}
+    .selbar[hidden]{display:none}
+    .selbar.none .when-picked{display:none}
+    .picked-count{font-weight:800;color:var(--accent-dark)}
+    .bulk-status{color:var(--muted);font-size:13px}
+    .check{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:700}
+    input[type=checkbox]{width:20px;height:20px;margin:0;flex:none;accent-color:var(--accent);cursor:pointer}
+    .row.picked{background:rgba(37,99,235,.06)}
+    .edit-note{margin:0;padding:10px 26px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line);background:rgba(245,158,11,.07)}
+    .group-cont{color:var(--muted);font-size:13px;font-weight:400}
+    .pager{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;padding:22px 16px 18px;border-top:1px solid var(--line)}
+    .pager button{min-width:42px;height:42px;padding:0 13px;border:1px solid #d5d9d9;border-radius:8px;background:#fff;font:inherit;font-size:15px;color:var(--text);cursor:pointer;box-shadow:0 2px 5px rgba(15,17,17,.08)}
+    .pager button:hover:not(:disabled){background:#f7fafa}
+    .pager button.current{border:2px solid var(--text);font-weight:800;cursor:default}
+    .pager button:disabled:not(.current){color:#a1a7ad;background:#fafafa;box-shadow:none;cursor:default}
+    .pager .gap{min-width:24px;text-align:center;color:var(--muted)}
+    .pager-info{flex-basis:100%;text-align:center;color:var(--muted);font-size:13px;margin-top:6px}
+    @media(max-width:860px){h1{font-size:26px}main{padding-top:32px}.row{align-items:flex-start;flex-direction:column}.selbar{position:static;padding:10px 18px}.pager{gap:3px;padding:18px 8px 14px}.pager button{min-width:34px;padding:0 6px}.pager .gap{min-width:16px}.pager-word{display:none}}
   </style>
 </head>
 <body>
@@ -141,7 +159,7 @@
       <div id="jobs"></div>
     </section>
 
-    <section class="panel">
+    <section class="panel files-panel" id="files-panel">
       <div class="panel-head">
         <h2>非公開アプリ <span class="count" id="count"></span></h2>
         <div class="panel-tools">
@@ -150,9 +168,19 @@
           <button type="button" class="button secondary small" id="edit-toggle">並び替え・編集</button>
         </div>
       </div>
+      <div class="selbar" id="selbar" hidden>
+        <label class="check"><input type="checkbox" id="pick-all" /> すべて選択</label>
+        <span class="when-picked picked-count" id="picked-count"></span>
+        <button type="button" class="button secondary small when-picked" id="bulk-download">まとめてダウンロード</button>
+        <select class="when-picked" id="bulk-label" aria-label="選択したファイルのラベル"></select>
+        <button type="button" class="button danger small when-picked" id="bulk-delete">まとめて削除</button>
+        <button type="button" class="button secondary small when-picked" id="pick-clear">選択を解除</button>
+        <span class="bulk-status" id="bulk-status" aria-live="polite"></span>
+      </div>
       <div id="list">
         <p class="state">読み込み中…</p>
       </div>
+      <div id="pager"></div>
     </section>
   </main>
 
@@ -163,6 +191,8 @@
       var CHUNK_BYTES = 50 * 1024 * 1024;   // 1 回のリクエストで送る大きさ（上限 100MB より十分小さく）
       var PART_RETRIES = 3;
       var MAX_LABEL_NAME = 50;
+      var PAGE_SIZE = 40;
+      var UNLABELED_CHOICE = '__unlabeled__';
 
       var list = document.getElementById('list');
       var count = document.getElementById('count');
@@ -174,9 +204,17 @@
       var addLabelButton = document.getElementById('add-label');
       var editButton = document.getElementById('edit-toggle');
       var saveStatus = document.getElementById('save-status');
+      var filesPanel = document.getElementById('files-panel');
+      var pager = document.getElementById('pager');
+      var selbar = document.getElementById('selbar');
+      var pickAll = document.getElementById('pick-all');
+      var pickedCount = document.getElementById('picked-count');
+      var bulkLabel = document.getElementById('bulk-label');
+      var bulkStatus = document.getElementById('bulk-status');
 
       // files: R2 にある実ファイル / layout: ラベルと並び順（/admin/layout）
-      var state = { loaded: false, files: [], layout: { labels: [], unlabeled: [] }, etag: null, editing: false, collapsed: {} };
+      // selected: チェックを付けたファイル（ページをまたいで保持） / page: 表示中のページ（1 始まり）
+      var state = { loaded: false, files: [], layout: { labels: [], unlabeled: [] }, etag: null, editing: false, collapsed: {}, selected: {}, page: 1, pages: [] };
       var queue = [];
       var running = null;
 
@@ -348,6 +386,17 @@
         commit(layout);
       }
 
+      // 複数のファイルを、今の並び順のまま別のラベル（'' は未分類）の末尾へ移す
+      function moveKeys(keys, labelId) {
+        var layout = currentLayout();
+        var target = labelId ? findLabel(layout, labelId) : null;
+        if (labelId && !target) return;
+        keys.forEach(function (key) { removeKey(layout, key); });
+        var into = target ? target.files : layout.unlabeled;
+        keys.forEach(function (key) { into.push(key); });
+        commit(layout);
+      }
+
       function askLabelName(message, initial) {
         var name = window.prompt(message, initial || '');
         if (name === null) return null;
@@ -421,56 +470,101 @@
 
       /* ---------- 表示 ---------- */
 
+      // ラベルの並びどおりにファイルを 40 件ずつのページへ割り付ける。
+      // 閉じているラベルと空のラベルは見出しだけなので件数に数えない。
+      // 1 つのラベルがページをまたぐときは、次のページにも見出しを（続き）付きで出す。
+      function paginate(sections) {
+        var pages = [[]];
+        var used = 0;
+        sections.forEach(function (section) {
+          if ((!section.plain && state.collapsed[section.id]) || section.files.length === 0) {
+            pages[pages.length - 1].push({ section: section, files: [], start: 0 });
+            return;
+          }
+          var index = 0;
+          while (index < section.files.length) {
+            if (used === PAGE_SIZE) { pages.push([]); used = 0; }
+            var take = Math.min(PAGE_SIZE - used, section.files.length - index);
+            pages[pages.length - 1].push({ section: section, files: section.files.slice(index, index + take), start: index });
+            used += take;
+            index += take;
+          }
+        });
+        return pages;
+      }
+
       function render() {
         if (!state.loaded) return;
         var groups = buildGroups();
 
-        count.textContent = state.files.length + ' 件';
+        pruneSelection();
+        count.textContent = '全 ' + state.files.length + ' 件';
         list.classList.toggle('editing', state.editing);
         editButton.textContent = state.editing ? '完了' : '並び替え・編集';
         editButton.classList.toggle('active', state.editing);
         renderUploadLabels(groups.labels);
+        renderSelectionBar(groups.labels);
 
-        if (groups.labels.length === 0) {
-          if (state.files.length === 0) {
-            showState('まだファイルがありません。上の「アップロード」から追加すると、ここに並びます。');
-            return;
-          }
-          // ラベルがまだ 1 つも無いときは見出しなしで並べる
-          list.innerHTML = '<div class="group plain"><div class="group-body">' +
-            groups.unlabeled.map(function (file) { return rowHtml(file, '', groups.labels); }).join('') +
-            '</div></div>';
+        if (groups.labels.length === 0 && state.files.length === 0) {
+          showState('まだファイルがありません。上の「アップロード」から追加すると、ここに並びます。');
+          pager.innerHTML = '';
           return;
         }
 
-        var html = groups.labels.map(function (label) { return groupHtml(label, true, groups.labels); }).join('');
-        if (groups.unlabeled.length) {
-          html += groupHtml({ id: '', name: '未分類', files: groups.unlabeled }, false, groups.labels);
+        // ラベルがまだ 1 つも無いときは見出しなしで並べる
+        var sections = groups.labels.length === 0
+          ? [{ id: '', name: '', files: groups.unlabeled, plain: true }]
+          : groups.labels.map(function (label) { return { id: label.id, name: label.name, files: label.files, sortable: true }; });
+        if (groups.labels.length && groups.unlabeled.length) {
+          sections.push({ id: '', name: '未分類', files: groups.unlabeled });
         }
-        list.innerHTML = html;
+
+        // 並び替え・編集中はドラッグ先が全部見えるよう、ページに分けない
+        var pages = state.editing
+          ? [sections.map(function (section) {
+              return { section: section, files: state.collapsed[section.id] ? [] : section.files, start: 0 };
+            })]
+          : paginate(sections);
+
+        state.pages = pages;
+        // 編集モードの 1 ページ表示で上書きしないよう、通常表示のときだけページ番号を範囲内に収める
+        if (!state.editing) state.page = Math.min(Math.max(1, state.page), pages.length);
+        var shown = state.editing ? pages[0] : pages[state.page - 1];
+
+        list.innerHTML =
+          (state.editing && state.files.length > PAGE_SIZE ? '<p class="edit-note">並び替え・編集中は、ページに分けずに全件を表示しています。</p>' : '') +
+          shown.map(function (part) { return partHtml(part, groups.labels); }).join('');
+        syncGroupChecks();
+        renderPager();
       }
 
-      function groupHtml(label, sortable, labels) {
-        var collapsed = !!state.collapsed[label.id];
-        var rows = label.files.map(function (file) { return rowHtml(file, label.id, labels); }).join('');
-        return '<div class="group' + (collapsed ? ' collapsed' : '') + '" data-label="' + escapeHtml(label.id) + '"' + (sortable ? ' data-sortable' : '') + '>' +
+      function partHtml(part, labels) {
+        var section = part.section;
+        var rows = part.files.map(function (file) { return rowHtml(file, section.id, labels); }).join('');
+        if (section.plain) return '<div class="group plain"><div class="group-body">' + rows + '</div></div>';
+
+        var collapsed = !!state.collapsed[section.id];
+        var sortable = section.sortable && !part.start;
+        return '<div class="group' + (collapsed ? ' collapsed' : '') + '" data-label="' + escapeHtml(section.id) + '"' + (sortable ? ' data-sortable' : '') + '>' +
           '<div class="group-head">' +
             (sortable ? '<span class="handle edit-only" data-drag="group" title="ドラッグで並び替え">' + ICON_GRIP + '</span>' : '') +
+            (section.files.length ? '<input type="checkbox" data-pick-group="' + escapeHtml(section.id) + '" aria-label="「' + escapeHtml(section.name) + '」のファイルをすべて選択" title="このラベルのファイルをすべて選択">' : '') +
             '<button type="button" class="group-toggle" data-toggle aria-expanded="' + !collapsed + '">' + ICON_CHEVRON +
-              '<span class="group-name">' + escapeHtml(label.name) + '</span>' +
-              '<span class="group-count">' + label.files.length + ' 件</span>' +
+              '<span class="group-name">' + escapeHtml(section.name) + (part.start ? ' <span class="group-cont">（続き）</span>' : '') + '</span>' +
+              '<span class="group-count">' + section.files.length + ' 件</span>' +
             '</button>' +
             (sortable ? '<span class="group-tools edit-only">' +
               '<button type="button" class="button secondary small" data-rename>名前を変更</button>' +
               '<button type="button" class="button danger small" data-remove-label>ラベルを削除</button>' +
             '</span>' : '') +
           '</div>' +
-          '<div class="group-body">' + (rows || '<p class="group-empty">このラベルにはまだファイルがありません。</p>') + '</div>' +
+          '<div class="group-body">' + (rows || (collapsed ? '' : '<p class="group-empty">このラベルにはまだファイルがありません。</p>')) + '</div>' +
         '</div>';
       }
 
       function rowHtml(file, labelId, labels) {
         var sub = [formatSize(file.size), formatDate(file.uploaded)].filter(Boolean).join(' ・ ');
+        var picked = !!state.selected[file.key];
         var select = '';
         if (labels.length) {
           select = '<select class="edit-only" data-move="' + escapeHtml(file.key) + '" aria-label="ラベル">' +
@@ -480,8 +574,9 @@
             }).join('') +
           '</select>';
         }
-        return '<div class="row" data-key="' + escapeHtml(file.key) + '">' +
+        return '<div class="row' + (picked ? ' picked' : '') + '" data-key="' + escapeHtml(file.key) + '">' +
           '<div class="row-main">' +
+            '<input type="checkbox" data-pick="' + escapeHtml(file.key) + '"' + (picked ? ' checked' : '') + ' aria-label="' + escapeHtml(file.name) + ' を選択">' +
             '<span class="handle edit-only" data-drag="file" title="ドラッグで並び替え">' + ICON_GRIP + '</span>' +
             '<div class="meta">' +
               '<div class="name">' + escapeHtml(file.name) + '</div>' +
@@ -506,6 +601,207 @@
         uploadLabel.value = labels.some(function (label) { return label.id === previous; }) ? previous : '';
       }
 
+      /* ---------- ページ送り（Amazon 風：‹ 前へ 1 … 4 5 6 … 20 次へ ›） ---------- */
+
+      function pageNumbers(current, total) {
+        if (total <= 7) {
+          var all = [];
+          for (var n = 1; n <= total; n += 1) all.push(n);
+          return all;
+        }
+        var from = Math.max(2, current - 1);
+        var to = Math.min(total - 1, current + 1);
+        if (current <= 3) { from = 2; to = 4; }
+        if (current >= total - 2) { from = total - 3; to = total - 1; }
+        var out = [1];
+        if (from > 2) out.push('…');
+        for (var p = from; p <= to; p += 1) out.push(p);
+        if (to < total - 1) out.push('…');
+        out.push(total);
+        return out;
+      }
+
+      function renderPager() {
+        var total = state.pages.length;
+        if (state.editing || total <= 1) {
+          pager.className = '';
+          pager.innerHTML = '';
+          return;
+        }
+        var current = state.page;
+        var visible = 0;
+        var before = 0;
+        state.pages.forEach(function (page, index) {
+          var n = page.reduce(function (sum, part) { return sum + part.files.length; }, 0);
+          if (index < current - 1) before += n;
+          if (index === current - 1) visible = n;
+        });
+
+        pager.className = 'pager';
+        pager.setAttribute('aria-label', 'ページ');
+        pager.innerHTML =
+          '<button type="button" data-page="' + (current - 1) + '"' + (current === 1 ? ' disabled' : '') + ' aria-label="前のページ">‹<span class="pager-word"> 前へ</span></button>' +
+          pageNumbers(current, total).map(function (n) {
+            if (n === '…') return '<span class="gap">…</span>';
+            return '<button type="button" data-page="' + n + '"' + (n === current ? ' class="current" aria-current="page" disabled' : '') + '>' + n + '</button>';
+          }).join('') +
+          '<button type="button" data-page="' + (current + 1) + '"' + (current === total ? ' disabled' : '') + ' aria-label="次のページ"><span class="pager-word">次へ </span>›</button>' +
+          '<div class="pager-info">' + (visible ? (before + 1) + '〜' + (before + visible) + ' 件目を表示' : '') + '（全 ' + state.files.length + ' 件）</div>';
+      }
+
+      pager.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-page]');
+        if (!button || button.disabled) return;
+        state.page = Number(button.getAttribute('data-page'));
+        render();
+        var top = filesPanel.getBoundingClientRect().top + window.scrollY - 70;
+        if (window.scrollY > top) window.scrollTo(0, top);
+      });
+
+      /* ---------- 選択とまとめて操作 ---------- */
+
+      function selectedKeys() {
+        // 画面の並び順（ラベル順 → ラベル内の順）で返す
+        var groups = buildGroups();
+        var ordered = [];
+        groups.labels.forEach(function (label) { ordered = ordered.concat(label.files); });
+        ordered = ordered.concat(groups.unlabeled);
+        return ordered.map(function (file) { return file.key; }).filter(function (key) { return state.selected[key]; });
+      }
+
+      function pruneSelection() {
+        var exists = {};
+        state.files.forEach(function (file) { exists[file.key] = true; });
+        Object.keys(state.selected).forEach(function (key) { if (!exists[key]) delete state.selected[key]; });
+      }
+
+      function renderSelectionBar(labels) {
+        var picked = Object.keys(state.selected).length;
+        selbar.hidden = state.files.length === 0;
+        selbar.classList.toggle('none', picked === 0);
+        pickedCount.textContent = picked + ' 件を選択中';
+        pickAll.checked = picked > 0 && picked === state.files.length;
+        pickAll.indeterminate = picked > 0 && picked < state.files.length;
+
+        bulkLabel.hidden = labels.length === 0;
+        bulkLabel.innerHTML = '<option value="" disabled selected>ラベルに移動…</option>' +
+          '<option value="' + UNLABELED_CHOICE + '">未分類</option>' +
+          labels.map(function (label) {
+            return '<option value="' + escapeHtml(label.id) + '">' + escapeHtml(label.name) + '</option>';
+          }).join('');
+      }
+
+      // ラベル見出しのチェックは、そのラベルの全ファイル（他のページの分も含む）が対象
+      function syncGroupChecks() {
+        var groups = buildGroups();
+        Array.prototype.forEach.call(list.querySelectorAll('[data-pick-group]'), function (box) {
+          var id = box.getAttribute('data-pick-group');
+          var label = null;
+          groups.labels.forEach(function (l) { if (l.id === id) label = l; });
+          var files = label ? label.files : groups.unlabeled;
+          var n = files.filter(function (file) { return state.selected[file.key]; }).length;
+          box.checked = n > 0 && n === files.length;
+          box.indeterminate = n > 0 && n < files.length;
+        });
+      }
+
+      function setPicked(keys, on) {
+        keys.forEach(function (key) {
+          if (on) state.selected[key] = true;
+          else delete state.selected[key];
+        });
+        render();
+      }
+
+      var lastPicked = null;
+
+      pickAll.addEventListener('change', function () {
+        setPicked(state.files.map(function (file) { return file.key; }), pickAll.checked);
+      });
+
+      document.getElementById('pick-clear').addEventListener('click', function () {
+        state.selected = {};
+        render();
+      });
+
+      bulkLabel.addEventListener('change', function () {
+        var target = bulkLabel.value === UNLABELED_CHOICE ? '' : bulkLabel.value;
+        var name = bulkLabel.options[bulkLabel.selectedIndex].textContent;
+        var keys = selectedKeys();
+        if (!keys.length) { render(); return; }
+        moveKeys(keys, target);
+        setBulkStatus(keys.length + ' 件を「' + name + '」に移動しました', true);
+      });
+
+      document.getElementById('bulk-download').addEventListener('click', function () {
+        var keys = selectedKeys();
+        if (!keys.length) return;
+        if (keys.length > 1 && !window.confirm(keys.length + ' 件のファイルを順番にダウンロードします。\n\nブラウザに「複数ファイルのダウンロード」の許可を求められたら「許可」を選んでください。')) return;
+
+        var index = 0;
+        (function next() {
+          if (index >= keys.length) {
+            setBulkStatus(keys.length + ' 件のダウンロードを開始しました', true);
+            return;
+          }
+          setBulkStatus('ダウンロード中… ' + (index + 1) + ' / ' + keys.length);
+          var a = document.createElement('a');
+          a.href = fileUrl(keys[index]);
+          a.download = keys[index].split('/').pop();
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          index += 1;
+          setTimeout(next, 900);
+        })();
+      });
+
+      document.getElementById('bulk-delete').addEventListener('click', function () {
+        var keys = selectedKeys();
+        if (!keys.length) return;
+        var preview = keys.slice(0, 10).map(function (k) { return '・' + k; }).join('\n') + (keys.length > 10 ? '\n…ほか ' + (keys.length - 10) + ' 件' : '');
+        if (!window.confirm(keys.length + ' 件のファイルを削除します。元に戻せません。\n\n' + preview + '\n\nよろしいですか？')) return;
+
+        var failed = [];
+        var done = 0;
+        var cursor = 0;
+        busy(true);
+
+        function worker() {
+          if (cursor >= keys.length) return Promise.resolve();
+          var key = keys[cursor];
+          cursor += 1;
+          return fetch(fileUrl(key), { method: 'DELETE', headers: { 'X-MT-Admin': '1' } })
+            .then(function (res) { if (!res.ok && res.status !== 404) failed.push(key + '（' + res.status + '）'); })
+            .catch(function () { failed.push(key + '（通信エラー）'); })
+            .then(function () {
+              done += 1;
+              setBulkStatus('削除中… ' + done + ' / ' + keys.length);
+              return worker();
+            });
+        }
+
+        Promise.all([worker(), worker(), worker(), worker()])
+          .then(refreshFiles)
+          .then(function () {
+            busy(false);
+            commit(currentLayout());   // レイアウトからも消しておく
+            setBulkStatus((keys.length - failed.length) + ' 件を削除しました', true);
+            if (failed.length) window.alert('削除できなかったファイルがあります。\n' + failed.join('\n'));
+          });
+      });
+
+      function busy(on) {
+        Array.prototype.forEach.call(selbar.querySelectorAll('button, select, input'), function (el) { el.disabled = on; });
+      }
+
+      var bulkStatusTimer = null;
+      function setBulkStatus(text, fade) {
+        clearTimeout(bulkStatusTimer);
+        bulkStatus.textContent = text;
+        if (fade) bulkStatusTimer = setTimeout(function () { bulkStatus.textContent = ''; }, 4000);
+      }
+
       /* ---------- 一覧の操作 ---------- */
 
       editButton.addEventListener('click', function () {
@@ -523,13 +819,37 @@
       });
 
       list.addEventListener('click', function (event) {
+        var pick = event.target.closest('[data-pick]');
+        if (pick) {
+          var key = pick.getAttribute('data-pick');
+          var keys = [key];
+          // Shift を押しながらクリックすると、前回クリックした行までまとめて選ぶ
+          if (event.shiftKey && lastPicked && lastPicked !== key) {
+            var onPage = Array.prototype.map.call(list.querySelectorAll('[data-pick]'), function (el) { return el.getAttribute('data-pick'); });
+            var a = onPage.indexOf(lastPicked);
+            var b = onPage.indexOf(key);
+            if (a >= 0 && b >= 0) keys = onPage.slice(Math.min(a, b), Math.max(a, b) + 1);
+          }
+          lastPicked = key;
+          setPicked(keys, pick.checked);
+          return;
+        }
+
+        var pickGroup = event.target.closest('[data-pick-group]');
+        if (pickGroup) {
+          var groups = buildGroups();
+          var id = pickGroup.getAttribute('data-pick-group');
+          var files = groups.unlabeled;
+          groups.labels.forEach(function (l) { if (l.id === id) files = l.files; });
+          setPicked(files.map(function (file) { return file.key; }), pickGroup.checked);
+          return;
+        }
+
         var toggle = event.target.closest('[data-toggle]');
         if (toggle) {
-          var group = toggle.closest('.group');
-          var id = group.getAttribute('data-label');
-          state.collapsed[id] = !state.collapsed[id];
-          group.classList.toggle('collapsed', state.collapsed[id]);
-          toggle.setAttribute('aria-expanded', String(!state.collapsed[id]));
+          var groupId = toggle.closest('.group').getAttribute('data-label');
+          state.collapsed[groupId] = !state.collapsed[groupId];
+          render();
           return;
         }
 
