@@ -31,6 +31,7 @@ const MAX_LIST = 1000;
 const MAX_PART_BYTES = 95 * 1024 * 1024;   // リクエスト本文の上限 100MB より少し下
 const MAX_PARTS = 10000;                   // R2 マルチパートの上限
 const MAX_KEY_BYTES = 1024;                // R2 のキー長上限
+const SYSTEM_PREFIX = '.admin/';           // 管理用データ（functions/admin/layout.js のラベル設定など）。一覧に出さず、ここからは触らせない
 
 const CONTENT_TYPES = {
     apk: 'application/vnd.android.package-archive',
@@ -60,6 +61,7 @@ export async function onRequest(context) {
 
     if (method === 'GET' || method === 'HEAD') {
         if (!key) return listFiles(bucket);
+        if (key.startsWith(SYSTEM_PREFIX)) return json({ error: 'not_found', key }, 404);
         return sendFile(bucket, key, request);
     }
 
@@ -99,6 +101,7 @@ async function listFiles(bucket) {
     do {
         const page = await bucket.list({ limit: MAX_LIST, cursor });
         for (const object of page.objects) {
+            if (object.key.startsWith(SYSTEM_PREFIX)) continue;
             files.push({
                 key: object.key,
                 name: object.key.split('/').pop(),
@@ -214,6 +217,7 @@ async function abortUpload(bucket, key, url) {
 // 書き込み・削除に使うキーの検査。問題があれば理由を返す。
 function checkKey(key) {
     if (!key) return 'ファイル名がありません。';
+    if (key.startsWith(SYSTEM_PREFIX)) return 'この名前は管理用に予約されています。';
     if (new TextEncoder().encode(key).length > MAX_KEY_BYTES) return 'ファイル名が長すぎます。';
     if (/[\u0000-\u001f\u007f\\]/.test(key)) return 'ファイル名に使えない文字が含まれています。';
     return null;

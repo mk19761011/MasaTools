@@ -36,7 +36,7 @@
     .panel{border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.82);box-shadow:var(--shadow);overflow:hidden}
     .panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:22px 26px;border-bottom:1px solid var(--line)}
     .panel-head h2{margin:0;font-size:20px;letter-spacing:-.02em}
-    .panel-head .count{color:var(--muted);font-size:14px}
+    .panel-head .count{color:var(--muted);font-size:14px;font-weight:400;margin-left:6px;letter-spacing:0}
     .row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 26px;border-bottom:1px solid var(--line)}
     .row:last-child{border-bottom:0}
     .row .meta{min-width:0}
@@ -73,6 +73,34 @@
     .footer a:hover{color:var(--accent)}
     .quicklinks{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 34px}
     .button.secondary{background:#fff;color:var(--accent-dark);border:1px solid var(--line);box-shadow:none}
+    .button.secondary.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .panel-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .save-status{color:var(--muted);font-size:13px}
+    select{min-height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:14px;color:var(--text);max-width:100%}
+    .upload-opts{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 26px 0;font-size:14px;font-weight:700}
+    .upload-opts[hidden]{display:none}
+    .upload-opts + .drop{margin-top:14px}
+    .edit-only{display:none !important}
+    #list.editing .edit-only{display:inline-flex !important}
+    .group{border-bottom:1px solid var(--line)}
+    .group:last-child{border-bottom:0}
+    .group-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 26px 8px 18px;background:rgba(37,99,235,.05);border-bottom:1px solid var(--line)}
+    .group.collapsed .group-head{border-bottom:0}
+    .group.collapsed .group-body{display:none}
+    .group-toggle{flex:1 1 200px;display:flex;align-items:center;gap:10px;min-width:0;min-height:44px;padding:0;border:0;background:none;font:inherit;color:var(--text);cursor:pointer;text-align:left}
+    .group-toggle svg{width:20px;height:20px;flex:none;color:var(--muted);transition:transform .15s}
+    .group.collapsed .group-toggle svg{transform:rotate(-90deg)}
+    .group-name{font-weight:800;font-size:16px;word-break:break-all}
+    .group-count{color:var(--muted);font-size:13px;white-space:nowrap}
+    .group-tools{gap:8px;flex-wrap:wrap}
+    .group-empty{margin:0;padding:18px 26px;color:var(--muted);font-size:14px}
+    .row-main{display:flex;align-items:center;gap:10px;min-width:0}
+    .row-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .handle{align-items:center;justify-content:center;width:32px;height:36px;flex:none;border-radius:8px;color:var(--muted);cursor:grab;touch-action:none;user-select:none}
+    .handle:hover{background:rgba(30,41,59,.07)}
+    .handle svg{width:18px;height:18px}
+    .dragging{position:relative;z-index:1;background:#eef4ff !important;box-shadow:0 8px 24px rgba(15,23,42,.14)}
+    body.drag-active{cursor:grabbing;user-select:none}
     @media(max-width:860px){h1{font-size:26px}main{padding-top:32px}.row{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
@@ -100,6 +128,10 @@
       <div class="panel-head">
         <h2>アップロード</h2>
       </div>
+      <div class="upload-opts" id="upload-opts" hidden>
+        <label for="upload-label">アップロード先のラベル</label>
+        <select id="upload-label"></select>
+      </div>
       <label class="drop" id="drop">
         <strong>ここにファイルをドラッグ＆ドロップ</strong>
         またはクリックしてファイルを選択（複数可）
@@ -111,8 +143,12 @@
 
     <section class="panel">
       <div class="panel-head">
-        <h2>非公開アプリ</h2>
-        <span class="count" id="count"></span>
+        <h2>非公開アプリ <span class="count" id="count"></span></h2>
+        <div class="panel-tools">
+          <span class="save-status" id="save-status" aria-live="polite"></span>
+          <button type="button" class="button secondary small" id="add-label">＋ ラベルを追加</button>
+          <button type="button" class="button secondary small" id="edit-toggle">並び替え・編集</button>
+        </div>
       </div>
       <div id="list">
         <p class="state">読み込み中…</p>
@@ -126,19 +162,28 @@
     (function () {
       var CHUNK_BYTES = 50 * 1024 * 1024;   // 1 回のリクエストで送る大きさ（上限 100MB より十分小さく）
       var PART_RETRIES = 3;
+      var MAX_LABEL_NAME = 50;
 
       var list = document.getElementById('list');
       var count = document.getElementById('count');
       var drop = document.getElementById('drop');
       var picker = document.getElementById('picker');
       var jobsBox = document.getElementById('jobs');
+      var uploadOpts = document.getElementById('upload-opts');
+      var uploadLabel = document.getElementById('upload-label');
+      var addLabelButton = document.getElementById('add-label');
+      var editButton = document.getElementById('edit-toggle');
+      var saveStatus = document.getElementById('save-status');
 
-      var currentFiles = [];
+      // files: R2 にある実ファイル / layout: ラベルと並び順（/admin/layout）
+      var state = { loaded: false, files: [], layout: { labels: [], unlabeled: [] }, etag: null, editing: false, collapsed: {} };
       var queue = [];
       var running = null;
 
       var ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>';
       var ICON_TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>';
+      var ICON_CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+      var ICON_GRIP = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></svg>';
 
       function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, function (c) {
@@ -177,47 +222,41 @@
         return 'サーバーエラー（' + status + '）';
       }
 
-      /* ---------- 一覧 ---------- */
+      function getJson(url) {
+        return fetch(url, { headers: { Accept: 'application/json' } }).then(function (res) {
+          return res.json().catch(function () { return null; }).then(function (body) {
+            return { status: res.status, body: body };
+          });
+        });
+      }
 
-      function loadList() {
-        return fetch('/admin/files/', { headers: { Accept: 'application/json' } })
-          .then(function (res) {
-            return res.json().then(function (body) { return { status: res.status, body: body }; });
-          })
-          .then(function (result) {
-            if (result.status === 503 && result.body.error === 'r2_not_bound') {
+      /* ---------- 読み込み ---------- */
+
+      function loadAll() {
+        return Promise.all([getJson('/admin/files/'), getJson('/admin/layout')])
+          .then(function (results) {
+            var files = results[0];
+            var layout = results[1];
+            if (files.status === 503 && files.body && files.body.error === 'r2_not_bound') {
               count.textContent = '';
               showState('R2 バケットが未設定です。Cloudflare Pages の設定で <code>ADMIN_FILES</code> を R2 バケットにバインドしてください。', true);
               return;
             }
-            if (result.status !== 200) {
+            if (files.status !== 200 || !files.body) {
               count.textContent = '';
-              showState('一覧を取得できませんでした（' + result.status + '）。', true);
+              showState(escapeHtml('一覧を取得できませんでした。' + describeFailure(files.status, files.body)), true);
               return;
             }
-
-            var files = result.body.files || [];
-            currentFiles = files;
-            count.textContent = files.length + ' 件';
-
-            if (files.length === 0) {
-              showState('まだファイルがありません。上の「アップロード」から追加すると、ここに並びます。');
+            if (layout.status !== 200 || !layout.body) {
+              count.textContent = '';
+              showState(escapeHtml('ラベルの設定を取得できませんでした。' + describeFailure(layout.status, layout.body)), true);
               return;
             }
-
-            list.innerHTML = files.map(function (file) {
-              var sub = [formatSize(file.size), formatDate(file.uploaded)].filter(Boolean).join(' ・ ');
-              return '<div class="row">' +
-                '<div class="meta">' +
-                  '<div class="name">' + escapeHtml(file.name) + '</div>' +
-                  '<div class="sub">' + escapeHtml(sub) + '</div>' +
-                '</div>' +
-                '<div class="actions">' +
-                  '<a class="button" href="' + escapeHtml(file.url) + '">ダウンロード' + ICON_DOWNLOAD + '</a>' +
-                  '<button type="button" class="button danger" data-delete="' + escapeHtml(file.key) + '">削除' + ICON_TRASH + '</button>' +
-                '</div>' +
-              '</div>';
-            }).join('');
+            state.files = files.body.files || [];
+            state.layout = layout.body.layout;
+            state.etag = layout.body.etag;
+            state.loaded = true;
+            render();
           })
           .catch(function () {
             count.textContent = '';
@@ -225,12 +264,311 @@
           });
       }
 
-      /* ---------- 削除 ---------- */
+      function refreshFiles() {
+        return getJson('/admin/files/').then(function (result) {
+          if (result.status === 200 && result.body) {
+            state.files = result.body.files || [];
+            render();
+          }
+        }).catch(function () {});
+      }
+
+      /* ---------- レイアウト（ラベルと並び順） ---------- */
+
+      // 実ファイルとレイアウトを突き合わせて表示用のグループを作る。
+      // どこにも載っていないファイルは「未分類」の末尾に、消えたファイルは無視する。
+      function buildGroups() {
+        var byKey = {};
+        var placed = {};
+        state.files.forEach(function (file) { byKey[file.key] = file; });
+
+        function take(keys) {
+          var out = [];
+          keys.forEach(function (key) {
+            if (byKey[key] && !placed[key]) { placed[key] = true; out.push(byKey[key]); }
+          });
+          return out;
+        }
+
+        var labels = state.layout.labels.map(function (label) {
+          return { id: label.id, name: label.name, files: take(label.files) };
+        });
+        var unlabeled = take(state.layout.unlabeled);
+        state.files.forEach(function (file) {
+          if (!placed[file.key]) { placed[file.key] = true; unlabeled.push(file); }
+        });
+        return { labels: labels, unlabeled: unlabeled };
+      }
+
+      // 今の表示状態をそのまま保存用のレイアウトにしたもの（変更はこれを書き換えて commit する）
+      function currentLayout() {
+        var groups = buildGroups();
+        function keys(files) { return files.map(function (file) { return file.key; }); }
+        return {
+          labels: groups.labels.map(function (label) { return { id: label.id, name: label.name, files: keys(label.files) }; }),
+          unlabeled: keys(groups.unlabeled)
+        };
+      }
+
+      function findLabel(layout, id) {
+        for (var i = 0; i < layout.labels.length; i += 1) {
+          if (layout.labels[i].id === id) return layout.labels[i];
+        }
+        return null;
+      }
+
+      function labelOf(layout, key) {
+        for (var i = 0; i < layout.labels.length; i += 1) {
+          if (layout.labels[i].files.indexOf(key) >= 0) return layout.labels[i].id;
+        }
+        return '';
+      }
+
+      function removeKey(layout, key) {
+        layout.labels.forEach(function (label) {
+          label.files = label.files.filter(function (k) { return k !== key; });
+        });
+        layout.unlabeled = layout.unlabeled.filter(function (k) { return k !== key; });
+      }
+
+      function commit(layout) {
+        state.layout = layout;
+        render();
+        saveLayout();
+      }
+
+      // ファイルを別のラベル（'' は未分類）の末尾へ移す
+      function moveKey(key, labelId) {
+        var layout = currentLayout();
+        if (labelOf(layout, key) === labelId) return;
+        var target = labelId ? findLabel(layout, labelId) : null;
+        if (labelId && !target) return;
+        removeKey(layout, key);
+        (target ? target.files : layout.unlabeled).push(key);
+        commit(layout);
+      }
+
+      function askLabelName(message, initial) {
+        var name = window.prompt(message, initial || '');
+        if (name === null) return null;
+        name = name.trim();
+        if (!name) return null;
+        if (name.length > MAX_LABEL_NAME) {
+          window.alert('ラベル名は ' + MAX_LABEL_NAME + ' 文字以内にしてください。');
+          return null;
+        }
+        var clash = state.layout.labels.some(function (label) { return label.name === name && label.name !== initial; });
+        if (clash) {
+          window.alert('「' + name + '」というラベルは既にあります。');
+          return null;
+        }
+        return name;
+      }
+
+      function newLabelId() {
+        return 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      }
+
+      /* ---------- 保存（連続した変更はまとめて、1 つずつ順番に送る） ---------- */
+
+      var saveQueued = false;
+      var saveRunning = false;
+      var saveStatusTimer = null;
+
+      function setSaveStatus(text) {
+        clearTimeout(saveStatusTimer);
+        saveStatus.textContent = text;
+        if (text === '保存しました') {
+          saveStatusTimer = setTimeout(function () { saveStatus.textContent = ''; }, 2500);
+        }
+      }
+
+      function saveLayout() {
+        saveQueued = true;
+        if (!saveRunning) flushSave();
+      }
+
+      function flushSave() {
+        if (!saveQueued) {
+          saveRunning = false;
+          setSaveStatus('保存しました');
+          return;
+        }
+        saveQueued = false;
+        saveRunning = true;
+        setSaveStatus('保存中…');
+
+        fetch('/admin/layout', {
+          method: 'PUT',
+          headers: { 'X-MT-Admin': '1', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ layout: state.layout, etag: state.etag })
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return null; }).then(function (body) {
+              if (!res.ok || !body) throw new Error(describeFailure(res.status, body));
+              state.etag = body.etag;
+            });
+          })
+          .then(flushSave)
+          .catch(function (err) {
+            saveRunning = false;
+            saveQueued = false;
+            setSaveStatus('');
+            window.alert('ラベルと並び順を保存できませんでした。\n' + err.message + '\n\n最新の状態を読み込み直します。');
+            loadAll();
+          });
+      }
+
+      /* ---------- 表示 ---------- */
+
+      function render() {
+        if (!state.loaded) return;
+        var groups = buildGroups();
+
+        count.textContent = state.files.length + ' 件';
+        list.classList.toggle('editing', state.editing);
+        editButton.textContent = state.editing ? '完了' : '並び替え・編集';
+        editButton.classList.toggle('active', state.editing);
+        renderUploadLabels(groups.labels);
+
+        if (groups.labels.length === 0) {
+          if (state.files.length === 0) {
+            showState('まだファイルがありません。上の「アップロード」から追加すると、ここに並びます。');
+            return;
+          }
+          // ラベルがまだ 1 つも無いときは見出しなしで並べる
+          list.innerHTML = '<div class="group plain"><div class="group-body">' +
+            groups.unlabeled.map(function (file) { return rowHtml(file, '', groups.labels); }).join('') +
+            '</div></div>';
+          return;
+        }
+
+        var html = groups.labels.map(function (label) { return groupHtml(label, true, groups.labels); }).join('');
+        if (groups.unlabeled.length) {
+          html += groupHtml({ id: '', name: '未分類', files: groups.unlabeled }, false, groups.labels);
+        }
+        list.innerHTML = html;
+      }
+
+      function groupHtml(label, sortable, labels) {
+        var collapsed = !!state.collapsed[label.id];
+        var rows = label.files.map(function (file) { return rowHtml(file, label.id, labels); }).join('');
+        return '<div class="group' + (collapsed ? ' collapsed' : '') + '" data-label="' + escapeHtml(label.id) + '"' + (sortable ? ' data-sortable' : '') + '>' +
+          '<div class="group-head">' +
+            (sortable ? '<span class="handle edit-only" data-drag="group" title="ドラッグで並び替え">' + ICON_GRIP + '</span>' : '') +
+            '<button type="button" class="group-toggle" data-toggle aria-expanded="' + !collapsed + '">' + ICON_CHEVRON +
+              '<span class="group-name">' + escapeHtml(label.name) + '</span>' +
+              '<span class="group-count">' + label.files.length + ' 件</span>' +
+            '</button>' +
+            (sortable ? '<span class="group-tools edit-only">' +
+              '<button type="button" class="button secondary small" data-rename>名前を変更</button>' +
+              '<button type="button" class="button danger small" data-remove-label>ラベルを削除</button>' +
+            '</span>' : '') +
+          '</div>' +
+          '<div class="group-body">' + (rows || '<p class="group-empty">このラベルにはまだファイルがありません。</p>') + '</div>' +
+        '</div>';
+      }
+
+      function rowHtml(file, labelId, labels) {
+        var sub = [formatSize(file.size), formatDate(file.uploaded)].filter(Boolean).join(' ・ ');
+        var select = '';
+        if (labels.length) {
+          select = '<select class="edit-only" data-move="' + escapeHtml(file.key) + '" aria-label="ラベル">' +
+            '<option value=""' + (labelId === '' ? ' selected' : '') + '>未分類</option>' +
+            labels.map(function (label) {
+              return '<option value="' + escapeHtml(label.id) + '"' + (label.id === labelId ? ' selected' : '') + '>' + escapeHtml(label.name) + '</option>';
+            }).join('') +
+          '</select>';
+        }
+        return '<div class="row" data-key="' + escapeHtml(file.key) + '">' +
+          '<div class="row-main">' +
+            '<span class="handle edit-only" data-drag="file" title="ドラッグで並び替え">' + ICON_GRIP + '</span>' +
+            '<div class="meta">' +
+              '<div class="name">' + escapeHtml(file.name) + '</div>' +
+              '<div class="sub">' + escapeHtml(sub) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="row-tools">' + select +
+            '<div class="actions">' +
+              '<a class="button" href="' + escapeHtml(file.url) + '">ダウンロード' + ICON_DOWNLOAD + '</a>' +
+              '<button type="button" class="button danger" data-delete="' + escapeHtml(file.key) + '">削除' + ICON_TRASH + '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }
+
+      function renderUploadLabels(labels) {
+        var previous = uploadLabel.value;
+        uploadOpts.hidden = labels.length === 0;
+        uploadLabel.innerHTML = '<option value="">未分類（ラベルなし）</option>' + labels.map(function (label) {
+          return '<option value="' + escapeHtml(label.id) + '">' + escapeHtml(label.name) + '</option>';
+        }).join('');
+        uploadLabel.value = labels.some(function (label) { return label.id === previous; }) ? previous : '';
+      }
+
+      /* ---------- 一覧の操作 ---------- */
+
+      editButton.addEventListener('click', function () {
+        state.editing = !state.editing;
+        render();
+      });
+
+      addLabelButton.addEventListener('click', function () {
+        if (!state.loaded) return;
+        var name = askLabelName('新しいラベルの名前');
+        if (!name) return;
+        var layout = currentLayout();
+        layout.labels.push({ id: newLabelId(), name: name, files: [] });
+        commit(layout);
+      });
 
       list.addEventListener('click', function (event) {
-        var button = event.target.closest('[data-delete]');
-        if (!button) return;
+        var toggle = event.target.closest('[data-toggle]');
+        if (toggle) {
+          var group = toggle.closest('.group');
+          var id = group.getAttribute('data-label');
+          state.collapsed[id] = !state.collapsed[id];
+          group.classList.toggle('collapsed', state.collapsed[id]);
+          toggle.setAttribute('aria-expanded', String(!state.collapsed[id]));
+          return;
+        }
 
+        var rename = event.target.closest('[data-rename]');
+        if (rename) {
+          var layout = currentLayout();
+          var label = findLabel(layout, rename.closest('.group').getAttribute('data-label'));
+          if (!label) return;
+          var name = askLabelName('ラベルの新しい名前', label.name);
+          if (!name || name === label.name) return;
+          label.name = name;
+          commit(layout);
+          return;
+        }
+
+        var remove = event.target.closest('[data-remove-label]');
+        if (remove) {
+          var layout2 = currentLayout();
+          var target = findLabel(layout2, remove.closest('.group').getAttribute('data-label'));
+          if (!target) return;
+          var message = 'ラベル「' + target.name + '」を削除します。';
+          if (target.files.length) message += '\n中の ' + target.files.length + ' 件のファイルは削除されず、「未分類」に移ります。';
+          if (!window.confirm(message)) return;
+          layout2.labels = layout2.labels.filter(function (l) { return l !== target; });
+          layout2.unlabeled = layout2.unlabeled.concat(target.files);
+          commit(layout2);
+          return;
+        }
+
+        var button = event.target.closest('[data-delete]');
+        if (button) deleteFile(button);
+      });
+
+      list.addEventListener('change', function (event) {
+        var select = event.target.closest('[data-move]');
+        if (select) moveKey(select.getAttribute('data-move'), select.value);
+      });
+
+      function deleteFile(button) {
         var key = button.getAttribute('data-delete');
         if (!window.confirm('「' + key + '」を削除します。\n元に戻せません。よろしいですか？')) return;
 
@@ -241,11 +579,84 @@
               if (!res.ok && res.status !== 404) throw new Error(describeFailure(res.status, body));
             });
           })
-          .then(loadList)
+          .then(refreshFiles)
+          .then(function () { commit(currentLayout()); })   // レイアウトからも消しておく
           .catch(function (err) {
             button.disabled = false;
             window.alert('削除できませんでした。\n' + err.message);
           });
+      }
+
+      /* ---------- ドラッグで並び替え（マウスとタッチの両方で動くよう Pointer Events を使う） ---------- */
+
+      list.addEventListener('pointerdown', function (event) {
+        var handle = event.target.closest('[data-drag]');
+        if (!handle || event.button > 0) return;
+
+        var isGroup = handle.getAttribute('data-drag') === 'group';
+        var item = handle.closest(isGroup ? '.group' : '.row');
+        var container = item.parentNode;
+        var selector = isGroup ? '.group[data-sortable]' : '.row';
+        var before = orderOf();
+
+        function orderOf() {
+          return Array.prototype.map.call(container.querySelectorAll(':scope > ' + selector), function (el) {
+            return el.getAttribute(isGroup ? 'data-label' : 'data-key');
+          }).join('\n');
+        }
+
+        function onMove(e) {
+          if (e.clientY < 70) window.scrollBy(0, -14);
+          else if (e.clientY > window.innerHeight - 70) window.scrollBy(0, 14);
+
+          var siblings = Array.prototype.filter.call(container.children, function (el) {
+            return el !== item && el.matches(selector);
+          });
+          var next = null;
+          for (var i = 0; i < siblings.length; i += 1) {
+            var rect = siblings[i].getBoundingClientRect();
+            if (e.clientY < rect.top + rect.height / 2) { next = siblings[i]; break; }
+          }
+          if (next) {
+            if (item.nextElementSibling !== next) container.insertBefore(item, next);
+          } else if (siblings.length) {
+            var last = siblings[siblings.length - 1];
+            if (last.nextElementSibling !== item) container.insertBefore(item, last.nextSibling);
+          }
+        }
+
+        function onEnd() {
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onEnd);
+          window.removeEventListener('pointercancel', onEnd);
+          item.classList.remove('dragging');
+          document.body.classList.remove('drag-active');
+          if (orderOf() === before) return;
+
+          var layout = currentLayout();
+          if (isGroup) {
+            layout.labels = Array.prototype.map.call(container.querySelectorAll(':scope > .group[data-sortable]'), function (el) {
+              return findLabel(layout, el.getAttribute('data-label'));
+            });
+          } else {
+            var keys = Array.prototype.map.call(container.querySelectorAll(':scope > .row'), function (el) {
+              return el.getAttribute('data-key');
+            });
+            var label = findLabel(layout, item.closest('.group').getAttribute('data-label') || '');
+            if (label) label.files = keys;
+            else layout.unlabeled = keys;
+          }
+          commit(layout);
+        }
+
+        // ポインターキャプチャが効かない環境もあるので、移動と終了は window で受ける
+        event.preventDefault();
+        try { handle.setPointerCapture(event.pointerId); } catch (e) { /* 無くても動く */ }
+        item.classList.add('dragging');
+        document.body.classList.add('drag-active');
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onEnd);
+        window.addEventListener('pointercancel', onEnd);
       });
 
       /* ---------- アップロード ---------- */
@@ -308,8 +719,8 @@
         cancel.hidden = job.state === 'done' || job.state === 'failed';
       }
 
-      function addJob(file) {
-        var job = { file: file, key: file.name, sent: 0, parts: Math.max(1, Math.ceil(file.size / CHUNK_BYTES)), partIndex: 0, state: 'waiting', cancelled: false };
+      function addJob(file, labelId) {
+        var job = { file: file, key: file.name, label: labelId, sent: 0, parts: Math.max(1, Math.ceil(file.size / CHUNK_BYTES)), partIndex: 0, state: 'waiting', cancelled: false };
         job.el = document.createElement('div');
         job.el.innerHTML =
           '<div class="job-top"><div class="name">' + escapeHtml(file.name) + '</div>' +
@@ -379,17 +790,24 @@
       function pump() {
         if (running || queue.length === 0) return;
         running = queue.shift();
-        runJob(running).then(function () {
-          running = null;
-          loadList();
-          pump();
-        });
+        var job = running;
+        runJob(job)
+          .then(refreshFiles)
+          .then(function () {
+            // ラベルを選んでいたら、そのラベルの末尾へ入れる（未分類なら元の場所のまま）
+            if (job.state === 'done' && job.label && state.loaded) moveKey(job.key, job.label);
+          })
+          .then(function () {
+            running = null;
+            pump();
+          });
       }
 
       function enqueue(fileList) {
         var files = Array.prototype.slice.call(fileList || []);
-        var existing = currentFiles.map(function (f) { return f.key; });
+        var existing = state.files.map(function (f) { return f.key; });
         var pending = queue.concat(running ? [running] : []).map(function (j) { return j.key; });
+        var labelId = uploadLabel.value;
 
         files.forEach(function (file) {
           if (pending.indexOf(file.name) >= 0) {
@@ -400,7 +818,7 @@
               !window.confirm('「' + file.name + '」は既にあります。上書きしますか？')) {
             return;
           }
-          addJob(file);
+          addJob(file, labelId);
           pending.push(file.name);
         });
         pump();
@@ -424,10 +842,10 @@
       window.addEventListener('drop', function (e) { e.preventDefault(); });
 
       window.addEventListener('beforeunload', function (e) {
-        if (running || queue.length) { e.preventDefault(); e.returnValue = ''; }
+        if (running || queue.length || saveRunning) { e.preventDefault(); e.returnValue = ''; }
       });
 
-      loadList();
+      loadAll();
     })();
   </script>
 </body>
