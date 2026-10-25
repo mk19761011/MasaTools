@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Volume Area Controller Google Play クローズドテスト参加ガイド">
+  <meta name="description" content="音量エリアコントローラー（Volume Area Controller）Google Play クローズドテスト参加ガイド">
   <!-- 検索結果に出さない。テスターへURLを直接伝えて使うページのため。
        一般公開したくなった場合はこの1行を削除する。 -->
   <meta name="robots" content="noindex,nofollow">
-  <title>Volume Area Controller テスト参加ガイド</title>
+  <title>音量エリアコントローラー テスト参加ガイド</title>
   <style>
     :root {
       --bg: #f4f7fb;
@@ -375,6 +375,118 @@
       font-size: .92em;
     }
 
+
+    .link-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f6f9fd;
+      border: 1px dashed var(--border);
+      word-break: break-all;
+      font-size: .92rem;
+    }
+
+    .step .button-primary,
+    .contact-card .button-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .step .actions { margin-top: 14px; }
+
+    .video-wrap {
+      position: relative;
+      max-width: 360px;
+      margin: 0 auto;
+      aspect-ratio: 9 / 16;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+    }
+    .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+    /* 絶対に読んでほしい注意（赤系で目立たせる） */
+    .must {
+      border: 2px solid #e5484d;
+      background: #fff5f5;
+      border-radius: 16px;
+      padding: 18px 20px;
+    }
+    .must h2 { color: #b42318; font-size: clamp(1.2rem, 3.6vw, 1.5rem); margin-bottom: 10px; }
+    .must ul { margin: 0; padding-left: 1.3em; }
+    .must li { margin: 8px 0; }
+    .must strong { color: #b42318; }
+
+    .step-note {
+      margin-top: 8px;
+      font-size: .95rem;
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* これで完了 */
+    .done {
+      text-align: center;
+      background: var(--accent);
+      border: 2px solid #9fd8b2;
+      border-radius: 18px;
+      padding: 22px;
+    }
+    .done h2 { color: var(--primary-dark); margin-bottom: 8px; }
+    .done .big { font-size: 1.15rem; font-weight: 800; }
+    /* 問い合わせ先のメールアドレス（タップで選択しやすく） */
+    .mail-box {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .mail-address {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      user-select: all;
+      word-break: break-all;
+    }
+    .copy-btn {
+      font: inherit;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--primary);
+      background: #fff;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* 安心してもらうための一文：赤字＋波線 */
+    .reassure {
+      color: #c62828;
+      text-decoration: underline wavy #c62828;
+      text-underline-offset: 4px;
+      text-decoration-thickness: 1.5px;
+    }
+
+    /* 詳細はこちら（押すと開く） */
+    .more > summary {
+      cursor: pointer;
+      list-style: none;
+      text-align: center;
+      font-weight: 800;
+      color: var(--primary);
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+    }
+    .more > summary::-webkit-details-marker { display: none; }
+    .more > summary::after { content: " ▼"; font-size: .8em; }
+    .more[open] > summary::after { content: " ▲"; }
+    .more-body { margin-top: 16px; display: grid; gap: 18px; }
+    .more-body h3 { margin-top: 4px; }
+    .more-body p, .more-body li { color: var(--muted); }
+
     @media (max-width: 720px) {
       .hero { padding-top: 22px; }
       .hero-card { border-radius: 20px; }
@@ -393,387 +505,181 @@
 </head>
 <body>
   <!--
-    ============================================================
-    編集する場所
-    ============================================================
-    1. 下部の CONFIG に各URL・日付・連絡先を入力してください。
-    2. images 内のSVG（手順1〜3）は実際の画面キャプチャに差し替えられます。
-       ファイル名を同じにすればHTML側の修正は不要です。
-    3. アプリの実際のデータ処理に合わせて、プライバシー欄を確認してください。
+    編集するのは、いちばん下の CONFIG だけ。
+    ・ショート動画ができたら videoId に YouTube の動画ID を入れる
   -->
 
   <header class="hero">
     <div class="container">
       <div class="hero-card">
         <p class="eyebrow">Google Play クローズドテスト</p>
-        <h1>Volume Area Controller<br>テスト参加ガイド</h1>
+        <h1>音量エリアコントローラー<br>テスト参加ガイド</h1>
         <p class="lead">
-          Google Playでの一般公開に向けて、Volume Area Controllerを実際にお試しいただくテスターを募集しています。
-          参加からインストール、テスト期間中のお願いまで、このページだけで確認できます。
+          Androidアプリのテストへのご協力、ありがとうございます。やることは、下の3つだけです。わからなくなったら、いつでもこのページを見直してください。
         </p>
-
-        <div class="badges" aria-label="参加概要">
-          <span class="badge">参加無料</span>
-          <span class="badge">Android 10以降の端末が必要</span>
-          <span class="badge">初回設定 約5分</span>
-          <span class="badge">参加状態を14日間維持</span>
-        </div>
-
-        <div class="hero-actions">
-          <a class="button button-primary js-config-link" data-config="signupUrl" href="#participate">
-            テスターに申し込む
-          </a>
-          <a class="button button-secondary" href="#steps">参加手順を見る</a>
-        </div>
       </div>
     </div>
   </header>
 
   <main class="container">
-    <section aria-labelledby="about-title">
-      <div class="card">
-        <h2 id="about-title">このテストについて</h2>
-        <p>
-          Volume Area Controllerは、自宅や職場など登録した場所への出入りを検知して、
-          着信・通知・アラームの音量やマナーモードを自動で切り替えるAndroidアプリです。
-          音声の録音や会話の記録は一切行いません。
-          現在は、Google Playで誰でも検索できる一般公開の前段階として、
-          招待された方だけが参加できる「クローズドテスト」を行います。
-        </p>
 
-        <div class="important">
-          <div class="important-icon" aria-hidden="true">📌</div>
-          <div>
-            <strong>14日間、毎日長時間使う必要はありません。</strong><br>
-            テスト参加を解除せず、期間中に数回、登録した場所へ実際に出入りする
-            （または「場所」タブのテスト入場・退場ボタンで試す）操作にご協力ください。
-            短い感想や不具合報告にもご協力をお願いします。
-          </div>
-        </div>
+    <section aria-labelledby="must-title">
+      <div class="must">
+        <h2 id="must-title">⚠️ 参加する前に、必ずお読みください</h2>
+        <ul>
+          <li>参加すると、あなたのGoogleアカウントの<strong>メールアドレスが開発者（私）だけに見えます</strong>。ほかの参加者には見えません。テストの管理以外には使わず、本番公開後にグループは削除します。<strong>気になる方はサブのGoogleアカウントでご参加ください。</strong></li>
+          <li>①〜③は、<strong>すべて同じGoogleアカウント</strong>で行ってください。スマホのPlayストアと同じアカウントでないと、③でアプリが見つかりません。</li>
+        </ul>
       </div>
     </section>
 
     <section id="steps" aria-labelledby="steps-title">
       <div class="card">
-        <h2 id="steps-title">参加からインストールまで</h2>
+        <h2 id="steps-title">やることは3つだけ</h2>
 
         <div class="steps">
           <article class="step">
             <div class="step-number" aria-hidden="true">1</div>
             <div>
-              <h3>参加を申し込む</h3>
-              <p>
-                申込フォームに、Google Playで使用しているGoogleアカウント（メールアドレス）と、
-                お使いの端末などを入力します。スマートフォンのGoogle Playで実際にログインしている
-                アカウントをご記入ください。別のアカウントだと、参加リンクを開いてもインストールできません。
-              </p>
-              <figure class="figure">
-                <img src="images/step-1-application.svg"
-                     alt="テスター参加申込フォームの画像を配置する枠">
-                <figcaption>画像予定：テスター参加申込フォーム</figcaption>
-              </figure>
+              <h3>グループに参加する</h3>
+              <p>ボタンを押して、「グループに参加」を押します。確認画面が出たら、もう一度「グループに参加」を押します。</p>
+              <p class="step-note">グループの中でしていただくことは、特にはありません。</p>
+              <div class="actions">
+                <a class="button button-primary js-config-link" data-config="groupUrl" href="https://groups.google.com/g/masatools-volumeac-testers" target="_blank" rel="noopener noreferrer">① グループに参加する</a>
+              </div>
             </div>
           </article>
 
           <article class="step">
             <div class="step-number" aria-hidden="true">2</div>
             <div>
-              <h3>専用の参加リンクを開く</h3>
-              <p>
-                登録完了の案内が届いたら、申込時と同じGoogleアカウントで参加リンクを開きます。
-                複数のGoogleアカウントを使っている場合は、画面右上のアカウントをご確認ください。
-              </p>
-              <figure class="figure">
-                <img src="images/step-2-opt-in.svg"
-                     alt="Google Playのテスター参加画面の画像を配置する枠">
-                <figcaption>画像予定：Google Playの参加ページと「テスターになる」ボタン</figcaption>
-              </figure>
+              <h3>「テスターになる」を押す</h3>
+              <p>ボタンを押して、開いたページの「テスターになる」を押します。</p>
+              <p class="step-note">①だけでは参加になりません。必ず②まで押してください。</p>
+              <div class="actions">
+                <a class="button button-primary js-config-link" data-config="optInUrl" href="https://play.google.com/apps/testing/com.masatools.volumeac" target="_blank" rel="noopener noreferrer">② テスターになる</a>
+              </div>
             </div>
           </article>
 
           <article class="step">
             <div class="step-number" aria-hidden="true">3</div>
             <div>
-              <h3>「テスターになる」を押す</h3>
-              <p>
-                参加ページでテスター登録を完了します。
-                登録しただけではインストールされないため、続けてGoogle Playのアプリページへ進みます。
-              </p>
-            </div>
-          </article>
-
-          <article class="step">
-            <div class="step-number" aria-hidden="true">4</div>
-            <div>
-              <h3>Google Playからインストールする</h3>
-              <p>
-                Google PlayのVolume Area Controllerページで「インストール」を押します。
-                通常の検索には表示されない場合があるため、必ず案内されたリンクから開いてください。
-              </p>
-              <figure class="figure">
-                <img src="images/step-3-install.svg"
-                     alt="Google Playのインストール画面の画像を配置する枠">
-                <figcaption>画像予定：Volume Area ControllerのGoogle Playページ</figcaption>
-              </figure>
-            </div>
-          </article>
-
-          <article class="step">
-            <div class="step-number" aria-hidden="true">5</div>
-            <div>
-              <h3>初回セットアップと、最初の場所を登録する</h3>
-              <p>
-                初回起動時、案内に沿って位置情報の権限を許可します。
-                途中で出てくる「アプリを開いている間の位置情報」「アプリを閉じている間の位置情報（常に許可）」は
-                どちらも必須です。両方を許可しないと、自動切替がうまく動きません。
-                続けて、自宅など実際によく行く場所を1件登録してください（正確な住所を教えていただく必要はありません）。
-              </p>
-              <figure class="figure">
-                <img src="images/step-4-first-use.jpg"
-                     alt="Volume Area Controllerの実際の画面。左がホーム画面（いま鳴るかどうかの表示）、右が場所タブ（登録済みの場所の一覧）">
-                <figcaption>実際の画面（左：ホーム画面／右：場所タブ）</figcaption>
-              </figure>
+              <h3>アプリをインストールする</h3>
+              <p>Androidスマホでボタンを押し、Google Playの「インストール」を押します。</p>
+              <div class="actions">
+                <a class="button button-primary js-config-link" data-config="installUrl" href="https://play.google.com/store/apps/details?id=com.masatools.volumeac" target="_blank" rel="noopener noreferrer">③ Google Playで開く</a>
+              </div>
             </div>
           </article>
         </div>
       </div>
     </section>
 
-    <section aria-labelledby="request-title">
-      <div class="card">
-        <h2 id="request-title">テスターの方へのお願い</h2>
+    <section aria-labelledby="done-title">
+      <div class="done">
+        <h2 id="done-title">🎉 これで参加完了です</h2>
+        <p class="big">あとは、アプリを消さずに14日間すごすだけです。</p>
+        <p>毎日使ったり、報告したりする必要はありません。<br>
+          もしよければ、よく行く場所を1つでも登録してみてください。<br>
+          <span class="reassure">（アプリ内のすべての情報は端末内にしか登録されませんのでご安心ください。）</span></p>
+      </div>
+    </section>
 
-        <div class="two-column">
-          <div class="mini-card good">
-            <h3>必ずお願いしたいこと</h3>
-            <ul class="checklist">
-              <li>申込時と同じGoogleアカウントを使用する</li>
-              <li>参加リンクでテスター登録を完了する</li>
-              <li>Google PlayからVolume Area Controllerをインストールする</li>
-              <li>初回セットアップで、位置情報の権限を2つとも許可する</li>
-              <li>自宅など、実際によく行く場所を1件以上登録する</li>
-              <li>14日間はテスト参加を解除しない</li>
-              <li>期間中に数回、登録した場所への出入りを試す</li>
-              <li>最後に短いアンケートへ回答する</li>
-            </ul>
+    <section aria-labelledby="more-title">
+      <details class="more">
+        <summary id="more-title">詳細はこちら（うまくいかないとき・アプリの説明など）</summary>
+        <div class="more-body">
+
+          <div class="card faq">
+            <h3>うまくいかないとき</h3>
+            <details>
+              <summary>③を開いても「アプリが見つかりません」と出る</summary>
+              <p>①②と、スマホのPlayストアで、別のGoogleアカウントを使っている可能性があります。Playストア右上のアイコンからアカウントを確認してください。同じアカウントでも、②のあと表示されるまで少し時間がかかることがあります。</p>
+            </details>
+            <details>
+              <summary>Google Playで検索しても見つからない</summary>
+              <p>テスト中は検索に出てこないことがあります。このページの③のボタンから開いてください。</p>
+            </details>
+            <details>
+              <summary>③で「インストールできません」と出る</summary>
+              <p>以前にGoogle Play以外（ホームページなど）からこのアプリを入れたことがある場合は、そのアプリを一度削除してから、もう一度③を押してください。</p>
+            </details>
+            <details>
+              <summary>ボタンが押せない・リンクを直接開きたい</summary>
+              <p>① <span class="js-config-text" data-config="groupUrl">https://groups.google.com/g/masatools-volumeac-testers</span><br>
+                ② <span class="js-config-text" data-config="optInUrl">https://play.google.com/apps/testing/com.masatools.volumeac</span><br>
+                ③ <span class="js-config-text" data-config="installUrl">https://play.google.com/store/apps/details?id=com.masatools.volumeac</span></p>
+            </details>
+            <details>
+              <summary>途中でやめたくなったら</summary>
+              <p>無理に続ける必要はありません。できれば、やめた後でも良いのでひとことご連絡頂けますと助かります（連絡先は、この下の「感想・お問い合わせ」にあります）。</p>
+            </details>
           </div>
 
-          <div class="mini-card notice">
-            <h3>必要ありません</h3>
-            <ul class="checklist">
-              <li>毎日アプリを開いて操作すること</li>
-              <li>専門的なテスト知識や開発経験</li>
-              <li>Google Playで公開レビューを書くこと</li>
-              <li>正確な自宅住所などをこちらへ伝えること</li>
-              <li>有料サービスへ申し込むこと</li>
-              <li>必ず高評価を付けること</li>
-            </ul>
+          <div class="card">
+            <h3>どんなアプリ？</h3>
+            <p>自宅や職場など、登録した場所に着くと、着信・通知・アラーム・音楽の音量を自動で切り替えるAndroidアプリです（Android 10以降）。無料で、広告もありません。</p>
+            <div id="video-section" hidden>
+              <div class="video-wrap" id="video-wrap" style="margin-top:12px"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>位置情報について</h3>
+            <p>登録した場所に出入りしたかを知るためだけに使います。位置情報はスマホの中だけで使い、外部や開発者に送ることはありません。アプリを閉じていても切り替えるには、はじめの設定で「常に許可」まで許可してください。</p>
+            <p>プライバシーポリシーは、Google Playのアプリのページから確認できます。</p>
+          </div>
+
+          <div class="card">
+            <h3>なぜ14日間？</h3>
+            <p>Google Playで一般公開するには、「12人以上が14日間テストに参加していること」がGoogleの決まりになっているためです。テスト期間：<span id="test-period">テストが始まったらお知らせします</span></p>
+          </div>
+
+          <div class="card contact-card">
+            <h3>感想・お問い合わせ（任意）</h3>
+            <p>気づいたことがあれば、下のアドレスへ気軽にお知らせください。自宅の住所などは送らないでください。</p>
+            <div class="mail-box">
+              <span class="mail-address" id="contact-text">masatools.info@gmail.com</span>
+              <button type="button" class="copy-btn" id="copy-mail">コピー</button>
+            </div>
+            <p class="small-note" style="margin-top:12px">
+              Googleフォームからも送れます：<a class="js-config-link" data-config="feedbackUrl" href="https://docs.google.com/forms/d/e/1FAIpQLSfjLZKa76H_3PzYtIXto4YluaZgmkntJ3Tc8DNAOj7Sc3sqZw/viewform" target="_blank" rel="noopener noreferrer">感想・不具合フォーム</a>
+            </p>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section aria-labelledby="schedule-title">
-      <div class="card">
-        <h2 id="schedule-title">14日間の進め方</h2>
-        <p>
-          すべて短時間で構いません。アプリの状態に応じて、内容を変更してお願いする場合があります。
-        </p>
-
-        <div class="schedule" role="table" aria-label="テスト予定">
-          <div class="day" role="rowheader">初日</div>
-          <div role="cell">参加登録、インストール、初回セットアップ（権限の許可・最初の場所の登録）</div>
-
-          <div class="day" role="rowheader">4～6日目</div>
-          <div role="cell">登録した場所への出入りを試す（実際の移動、または「テスト入場」「テスト退場」ボタン）</div>
-
-          <div class="day" role="rowheader">8～11日目</div>
-          <div role="cell">普段の生活の中で、自動切替が期待どおりに動くかを確認</div>
-
-          <div class="day" role="rowheader">13～14日目</div>
-          <div role="cell">最終確認と、簡単なアンケート・不具合報告</div>
-        </div>
-
-        <p class="small-note" style="margin-top:14px">
-          テスト期間：<strong id="test-period">日程調整中</strong>
-        </p>
-      </div>
-    </section>
-
-    <section aria-labelledby="privacy-title">
-      <div class="card privacy">
-        <h2 id="privacy-title">位置情報について</h2>
-        <p>
-          Volume Area Controllerは、登録した場所への出入りを検知するために位置情報を使用しますが、
-          音声の録音や会話の記録は一切行いません。取得した位置情報は端末内でのみ処理し、
-          外部のサーバーへ送信することはありません。広告SDK・解析SDKも使用していません。
-        </p>
-        <p>
-          アプリが取り扱うデータや保存の仕組みなど、正式な内容は下記のプライバシーポリシーでご確認ください。
-        </p>
-        <p>
-          <strong>お申し込みでいただく情報について：</strong>
-          申込フォームでご記入いただくメールアドレス・お名前・端末情報は、
-          Google Playのテスター登録とご連絡にのみ使用します。第三者へ提供することはありません。
-          テスト終了後3か月以内に削除します。
-        </p>
-        <div class="actions">
-          <a class="button button-primary js-config-link"
-             data-config="privacyUrl" href="#">
-            プライバシーポリシーを見る
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <section aria-labelledby="faq-title">
-      <div class="card faq">
-        <h2 id="faq-title">よくある質問</h2>
-
-        <details>
-          <summary>費用はかかりますか？</summary>
-          <p>
-            テスト参加とアプリのインストールは無料です。
-          </p>
-        </details>
-
-        <details>
-          <summary>14日間、毎日使う必要がありますか？</summary>
-          <p>
-            毎日長時間使う必要はありません。14日間はテスト参加を解除せず、
-            このページの予定を目安に数回お試しください。
-          </p>
-        </details>
-
-        <details>
-          <summary>参加した日とインストール日が違ってもよいですか？</summary>
-          <p>
-            できるだけ参加登録と同じ日にインストールしてください。
-            すぐにインストールできなかった場合は、案内された連絡先へお知らせください。
-          </p>
-        </details>
-
-        <details>
-          <summary>Google Playで検索しても見つかりません。</summary>
-          <p>
-            クローズドテスト中は、通常の検索に表示されない場合があります。
-            登録完了の案内に記載された専用リンクから開いてください。
-          </p>
-        </details>
-
-        <details>
-          <summary>「このアカウントはテストに参加できません」と表示されます。</summary>
-          <p>
-            申込時とは別のGoogleアカウントで開いている可能性があります。
-            Google Playとブラウザーのアカウントをご確認ください。解決しない場合は、
-            表示画面のスクリーンショットを添えてご連絡ください。
-          </p>
-        </details>
-
-        <details>
-          <summary>位置情報の許可を求められますが、何に使われますか？</summary>
-          <p>
-            登録した場所（自宅・職場など）への出入りを判定するためだけに使います。
-            取得した位置情報は端末内だけで処理し、外部のサーバーやアプリ開発者へ送信することはありません。
-            「常に許可」まで許可しないと、アプリを閉じている間は自動切替が動きませんので、
-            初回セットアップで2つとも許可していただくようお願いしています。
-          </p>
-        </details>
-
-        <details>
-          <summary>バッテリーを多く消費しませんか？</summary>
-          <p>
-            常時GPSを使い続けるのではなく、Google Play開発者サービスの省電力な位置検知（ジオフェンス）に
-            依存しています。気になる場合は、権限タブの「電池の最適化から除外」の項目もご確認ください
-            （除外しないと、自動切替が途中で止まることがあります）。
-          </p>
-        </details>
-
-        <details>
-          <summary>途中で不具合が起きた場合はどうしますか？</summary>
-          <p>
-            アプリのバージョン、端末名、Androidのバージョン、行った操作、
-            表示されたメッセージをフィードバックフォームからお知らせください。
-            正確な自宅住所などの個人情報は送らないでください。
-          </p>
-        </details>
-
-        <details>
-          <summary>テストを途中でやめたい場合は？</summary>
-          <p>
-            参加解除の前に、可能であれば担当者へご連絡ください。
-            端末の問題などご不安がある場合は、無理に継続する必要はありません。
-          </p>
-        </details>
-      </div>
-    </section>
-
-    <section id="participate" aria-labelledby="participate-title">
-      <div class="card contact-card">
-        <h2 id="participate-title">テストに参加する</h2>
-        <p>
-          ご協力いただける方は、申込フォームからご登録ください。
-          登録内容を確認後、Google Playのテスト参加リンクをご案内します。
-        </p>
-
-        <div class="actions" style="justify-content:center">
-          <a class="button button-primary js-config-link"
-             data-config="signupUrl" href="#">
-            参加申込フォーム
-          </a>
-          <a class="button button-secondary js-config-link"
-             data-config="feedbackUrl" href="#">
-            不具合・感想を送る
-          </a>
-        </div>
-
-        <p class="small-note" style="margin-top:16px">
-          お問い合わせ：<span id="contact-text">連絡先準備中</span>
-        </p>
-      </div>
+      </details>
     </section>
   </main>
 
   <footer>
     <div class="container">
-      <strong>Volume Area Controller クローズドテスト</strong>
-      <div class="links">
-        <a href="https://support.google.com/googleplay/android-developer/answer/9845334?hl=ja"
-           target="_blank" rel="noopener noreferrer">
-          Google公式：テストの設定について
-        </a>
-        <a href="https://support.google.com/googleplay/android-developer/answer/14151465?hl=ja"
-           target="_blank" rel="noopener noreferrer">
-          Google公式：個人デベロッパーのテスト要件
-        </a>
-      </div>
-      <p class="small-note" style="margin-top:14px">
-        最終更新：<span id="updated-date">未設定</span>
-      </p>
+      <strong>音量エリアコントローラー クローズドテスト</strong>
+      <p class="small-note" style="margin-top:8px">最終更新：<span id="updated-date">未設定</span></p>
     </div>
   </footer>
 
   <script>
     /*
       ==========================================================
-      ここだけ編集すれば、リンク・日付・連絡先を変更できます。
+      ここだけ編集すれば、状況・リンク・日付・動画を変更できます。
       URLが空欄のボタンを押すと「準備中」と表示されます。
       ==========================================================
     */
     const CONFIG = {
-      signupUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdLUQuL_uKbR7ZyBEUbJgYOPy6Bp4UcGHptR8Xllnzn2CEW0w/viewform",
+      groupUrl: "https://groups.google.com/g/masatools-volumeac-testers",
+      optInUrl: "https://play.google.com/apps/testing/com.masatools.volumeac",
+      installUrl: "https://play.google.com/store/apps/details?id=com.masatools.volumeac",
       feedbackUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfjLZKa76H_3PzYtIXto4YluaZgmkntJ3Tc8DNAOj7Sc3sqZw/viewform",
-      privacyUrl: "https://masatools.pages.dev/volumeac/privacy/",
       contact: "masatools.info@gmail.com",
-      testStartDate: "",   // 例: "2026年9月20日"
-      testEndDate: "",     // 例: "2026年10月3日"
-      updatedDate: "2026年9月18日"
+      videoId: "",         // ショート動画ができたら YouTube の動画ID（例: "hHxcxcZMMz8"）
+      testStartDate: "",   // 例: "2026年11月1日"
+      testEndDate: "",     // 例: "2026年11月15日"
+      updatedDate: "2026年10月25日"
     };
 
     document.querySelectorAll(".js-config-link").forEach((link) => {
-      const key = link.dataset.config;
-      const url = CONFIG[key];
-
+      const url = CONFIG[link.dataset.config];
       if (url) {
         link.href = url;
         link.target = "_blank";
@@ -782,21 +688,51 @@
         link.href = "#";
         link.addEventListener("click", (event) => {
           event.preventDefault();
-          alert("このリンクは現在準備中です。公開前に管理者がURLを設定します。");
+          alert("このリンクは現在準備中です。");
         });
       }
     });
 
-    const testPeriod = document.getElementById("test-period");
-    if (CONFIG.testStartDate && CONFIG.testEndDate) {
-      testPeriod.textContent = `${CONFIG.testStartDate} ～ ${CONFIG.testEndDate}`;
+    document.querySelectorAll(".js-config-text").forEach((el) => {
+      el.textContent = CONFIG[el.dataset.config] || "準備中";
+    });
+
+
+    if (CONFIG.videoId) {
+      const iframe = document.createElement("iframe");
+      iframe.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(CONFIG.videoId);
+      iframe.title = "音量エリアコントローラーの紹介動画";
+      iframe.allow = "accelerometer; encrypted-media; gyroscope; picture-in-picture";
+      iframe.allowFullscreen = true;
+      document.getElementById("video-wrap").appendChild(iframe);
+      document.getElementById("video-section").hidden = false;
     }
 
-    document.getElementById("contact-text").textContent =
-      CONFIG.contact || "連絡先準備中";
+    if (CONFIG.testStartDate && CONFIG.testEndDate) {
+      document.getElementById("test-period").textContent =
+        `${CONFIG.testStartDate} ～ ${CONFIG.testEndDate}`;
+    }
 
-    document.getElementById("updated-date").textContent =
-      CONFIG.updatedDate || "未設定";
+    document.getElementById("contact-text").textContent = CONFIG.contact || "連絡先準備中";
+
+    // メールアドレスのコピー
+    document.getElementById("copy-mail").addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      try {
+        await navigator.clipboard.writeText(CONFIG.contact);
+        button.textContent = "コピーしました";
+      } catch (e) {
+        // コピーできない環境では、アドレスを選択状態にする
+        const range = document.createRange();
+        range.selectNodeContents(document.getElementById("contact-text"));
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        button.textContent = "長押しでコピーしてください";
+      }
+      setTimeout(() => { button.textContent = "コピー"; }, 2500);
+    });
+    document.getElementById("updated-date").textContent = CONFIG.updatedDate || "未設定";
   </script>
 </body>
 </html>

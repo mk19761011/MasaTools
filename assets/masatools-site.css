@@ -143,3 +143,6 @@ p.mt-release-info {
     margin-right: 0;
   }
 }
+
+/* 一覧から来た人にだけ出す「ツール一覧へ戻る」（masatools-nav.js が表示を切り替える） */
+[data-mt-list-link][hidden] { display: none !important; }

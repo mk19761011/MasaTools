@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MasaTools</title>
-  <meta name="description" content="MasaToolsで公開しているWindowsアプリ・Webサービス・Androidアプリを一覧で紹介するページです。" />
+  <meta name="description" content="MasaToolsで公開しているWindowsアプリを紹介するページです。" />
   <style>
     :root {
       --bg:#f3f7fb; --bg-soft:#edf4f6; --text:#1f2937; --muted:#5f6f82;
@@ -53,7 +53,7 @@
   </style>
   <link rel="stylesheet" href="/assets/masatools-site.css" />
 </head>
-<body>
+<body data-mt-list-page>
   <header class="site-header">
     <div class="header-inner">
       <a class="logo" href="#top" aria-label="MasaTools トップへ"><span class="logo-mark" aria-hidden="true"></span><span>MasaTools</span></a>
@@ -66,39 +66,12 @@
       <div class="intro-text">
         <div class="badge">公開ツール・サービス</div>
         <h1>公開しているツール一覧</h1>
-        <p>MasaToolsで公開しているWindowsアプリ・Webサービス・Androidアプリです。気になるものを選んでご利用ください。</p>
+        <p>MasaToolsで公開しているWindowsアプリです。気になるものを選んでご利用ください。</p>
       </div>
       <div class="qr-card"><div id="qr" aria-label="MasaTools"></div><div class="qr-caption"><a href="https://masatools.pages.dev">https://masatools.pages.dev</a></div></div>
     </section>
 
     <div class="cards">
-      <article class="card card-android">
-        <div class="card-top"><span class="card-icon icon-image" aria-hidden="true"><img src="/aitalknotes/assets/icon-512.png" alt=""></span><span class="label">Androidアプリ</span></div>
-        <h3>AI Talk Notes</h3>
-        <p class="desc">AIで会話を文字起こしして5分単位で保存し、必要なログだけをAIに相談できるアプリ。会議や面談のメモ作成・論点整理に。アプリ自体は無料ですが、文字起こし・AI相談にはご自身のAPIキー（OpenAIまたはGemini）が必要で、API利用料金が別途かかります。</p>
-        <div class="chips"><span class="chip">AI文字起こし</span><span class="chip">AI相談</span><span class="chip">音声読み上げ</span><span class="chip">アプリ無料</span><span class="chip">OpenAI / Gemini連携</span><span class="chip">要APIキー（有料）</span><span class="chip">Android 10以上</span></div>
-        <div class="button-row"><a class="button" href="/aitalknotes/">詳細・ダウンロード <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-        <p class="mt-release-info" title="公開リポジトリに配布ファイルを登録・差し替えた日時">配布ファイル更新：<time datetime="2026-09-26T01:53:47+09:00">2026/09/26 01:53</time>（日本時間）</p>
-      </article>
-
-      <article class="card card-android">
-        <div class="card-top"><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></span><span class="label">複数OS対応</span></div>
-        <h3><img class="name-icon" src="/medicaldict/icon.png" alt="">医療用語辞書</h3>
-        <p class="desc">スマホやパソコンでの文字入力に医療用語・薬剤名・略語を追加できる辞書データ。AndroidのGboard、WindowsのMicrosoft IMEに対応し、Mac・iPhoneでも試験的に利用できます。42,436語を収録しています。</p>
-        <div class="chips"><span class="chip">無料</span><span class="chip">42,436語</span><span class="chip">Android</span><span class="chip">Windows</span><span class="chip">Mac・iPhone（試験版）</span></div>
-        <div class="button-row"><a class="button" href="/medicaldict/">詳細・ダウンロード <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-        <p class="mt-release-info" title="公開リポジトリに配布ファイルを登録・差し替えた日時">配布ファイル更新（Android）：<time datetime="2026-08-01T23:56:45+09:00">2026/08/01 23:56</time>（日本時間）</p>
-      </article>
-
-      <article class="card card-android">
-        <div class="card-top"><span class="card-icon" aria-hidden="true" style="background:none;padding:0"><img src="/volumeac/icon.svg" alt="" width="38" height="38" style="width:38px;height:38px;border-radius:11px"></span><span class="label">Androidアプリ</span></div>
-        <h3>Volume Area Controller</h3>
-        <p class="desc">現在地に応じて着信・通知・アラーム・メディア音量を自動で切り替えるアプリ。会社・病院・図書館では音を抑え、自宅では着信や通知音が鳴る状態に戻すなど、お好みの設定が可能です。</p>
-        <div class="chips"><span class="chip">無料</span><span class="chip">位置連動で音量切替</span><span class="chip">Android 10以上</span></div>
-        <div class="button-row"><a class="button" href="/volumeac/">詳細・ダウンロード <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-        <p class="mt-release-info" title="公開リポジトリに配布ファイルを登録・差し替えた日時">配布ファイル更新：<time datetime="2026-10-21T23:38:51+09:00">2026/10/21 23:38</time>（日本時間）</p>
-      </article>
-
       <article class="card card-app">
         <div class="card-top"><span class="card-icon icon-image" aria-hidden="true"><img src="/multiliblink/help_assets/icon-192.png" alt=""></span><span class="label">Windowsアプリ</span></div>
         <h3>MultiLibLink</h3>
@@ -123,14 +96,6 @@
         <p class="mt-release-info" title="公開リポジトリに配布ファイルを登録・差し替えた日時">配布ファイル更新：<time datetime="2026-08-14T11:49:00+09:00">2026/08/14 11:49</time>（日本時間）</p>
       </article>
 
-      <article class="card card-web">
-        <div class="card-top"><span class="card-icon icon-image" aria-hidden="true"><img src="/IQ-Test/assets/self-analysis-icon.png" alt=""></span><span class="label">Webサービス</span></div>
-        <h3>自己分析サイト</h3>
-        <p class="desc">質問に答えながら、自分の特性や考え方の傾向を整理するためのWebサイト。自己理解のきっかけとして使えます。</p>
-        <div class="chips"><span class="chip">無料</span><span class="chip">ブラウザですぐ</span><span class="chip">スマホ・PC対応</span><span class="chip">登録不要</span></div>
-        <div class="button-row"><a class="button" href="/IQ-Test/">サイトを開く <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-      </article>
-
     </div>
 
     <p class="mt-release-info">更新日時は、公開リポジトリに配布ファイルを登録・差し替えた日時です。</p>
@@ -141,11 +106,12 @@
     </section>
   </main>
 
-  <footer class="footer"><small>&copy; 2026 MasaTools. All rights reserved. &nbsp;|&nbsp; <a href="/admin/">管理者</a></small></footer>
+  <footer class="footer"><small>&copy; 2026 MasaTools. All rights reserved.</small></footer>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script>
     (function(){var el=document.getElementById('qr');if(!el||typeof QRCode==='undefined')return;new QRCode(el,{text:window.location.origin+window.location.pathname,width:128,height:128,colorDark:'#1f2937',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});})();
   </script>
+  <script src="/assets/masatools-nav.js" defer></script>
 </body>
 </html>
 

@@ -145,7 +145,7 @@
   <link rel="stylesheet" href="/assets/masatools-site.css" />
 </head>
 <body class="mt-product-page">
-  <nav class="mt-sitebar" aria-label="MasaTools 共通メニュー"><div class="mt-sitebar__inner"><a class="mt-sitebar__brand" href="/"><span class="mt-sitebar__mark" aria-hidden="true"></span>MasaTools</a><a class="mt-sitebar__back" href="/">ツール一覧へ戻る</a></div></nav>
+  <nav class="mt-sitebar" aria-label="MasaTools 共通メニュー"><div class="mt-sitebar__inner"><span class="mt-sitebar__brand"><span class="mt-sitebar__mark" aria-hidden="true"></span>MasaTools</span><a class="mt-sitebar__back" href="#" data-mt-list-link hidden>ツール一覧へ戻る</a></div></nav>
 
   <main>
     <section class="hero">
@@ -308,9 +308,10 @@
   </main>
 
   <footer class="footer">
-    <small>&copy; 2026 MasaTools. All rights reserved. &nbsp;|&nbsp; <a href="/">ツール一覧へ戻る</a></small>
+    <small>&copy; 2026 MasaTools. All rights reserved. <span data-mt-list-link hidden>&nbsp;|&nbsp; <a href="#">ツール一覧へ戻る</a></span></small>
   </footer>
   <script src="/analytics/count.js" defer></script>
+<script src="/assets/masatools-nav.js" defer></script>
 </body>
 </html>
 

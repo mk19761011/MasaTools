@@ -201,7 +201,7 @@ function loginPage(target, failed) {
         '<input id="password" name="password" type="password" autocomplete="current-password" autofocus required>' +
         '<button type="submit">ログイン</button>' +
         '</form>' +
-        '<a class="back" href="/">MasaTools トップへ戻る</a>'
+        '<a class="back" href="/fiwi4mz8sba/">MasaTools トップへ戻る</a>'
     );
 }
 
@@ -210,6 +210,6 @@ function setupPage() {
         '<div class="mark" aria-hidden="true"></div>' +
         '<h1>設定が未完了です</h1>' +
         '<p>Cloudflare Pages のプロジェクト設定で、環境変数 <code>ADMIN_PASSWORD</code> をシークレットとして登録してください。登録するまで、このページは開けません。</p>' +
-        '<a class="back" href="/">MasaTools トップへ戻る</a>'
+        '<a class="back" href="/fiwi4mz8sba/">MasaTools トップへ戻る</a>'
     );
 }
