@@ -15,9 +15,10 @@
 | 医療用語辞書 Android APK | 2026-08-01 23:56:45 | `f99dacc0724c83cb579a3b4323182f55b6a2cd60` | main / medicaldict/download |
 | 医療用語辞書 MS-IME TXT | 2026-07-14 09:26:09 | `fd25ce8f8a2605c97c3d336d9e071bd42eaed021` | main / medicaldict/download |
 | 医療用語辞書 Apple PLIST | 2026-07-10 19:41:51 | `4841633a510de2357d096534a8743057e7e72394` | main / medicaldict/download |
-| Volume Area Controller v1.5.58 APK | 2026-10-21 23:38:51 | （この公開コミット） | main / volumeac/download |
 | MultiLibLink v1.2 EXE | 2026-09-16 01:21:42 | `ba8a7f51af6a76f2bac64f3c8630a03e1f9ff93c` | tag: multiliblink-v1.2 |
 | WinTimeLock v1.6 EXE | 2026-08-14 11:49:00 | `e39ba315210ede3fc8da3713b4621e1ecf3c80f3` | tag: wintimelock-v1.6 |
+
+Volume Area Controller のAPK配布は 2026-10-30 に停止した（今後はGoogle Playのみ）。古いAPKのURLは `_redirects` で紹介ページへ転送する。
 
 次回配布時は `git log -1 --format=%cI <配布元のブランチまたはタグ> -- <配布ファイル>` で確認し、
 トップページ・紹介ページ内の全ダウンロードボタン・専用ダウンロードページの日時を同時に更新してください。

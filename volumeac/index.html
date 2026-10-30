@@ -56,6 +56,15 @@
   .shot { margin: 0; text-align: center; }
   .shot img { width: 100%; height: auto; border-radius: 20px; border: 1px solid #d3e8d8; box-shadow: 0 12px 28px rgba(15,23,42,.12); cursor: zoom-in; }
   .shot figcaption { margin-top: 10px; font-size: 0.82rem; color: #666; }
+  /* YouTubeショート（縦長）。広い画面では2本を横に並べ、狭い画面では1本ずつ縦に並べる */
+  .video-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; max-width: 598px; margin: 20px auto; }
+  .video { margin: 0; text-align: center; }
+  .video-frame { position: relative; width: 100%; aspect-ratio: 9 / 16; border-radius: 20px; overflow: hidden; border: 1px solid #d3e8d8; background: #0f3d37; box-shadow: 0 12px 28px rgba(15,23,42,.12); }
+  .video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .video figcaption { margin-top: 10px; font-size: 0.82rem; color: #666; }
+  @media (max-width: 520px) {
+    .video-row { grid-template-columns: minmax(0, 320px); justify-content: center; }
+  }
   .lightbox { position: fixed; inset: 0; background: rgba(15,23,42,.82); display: none; align-items: center; justify-content: center; padding: 24px; z-index: 1001; cursor: zoom-out; }
   .lightbox.is-open { display: flex; }
   .lightbox img { max-width: min(90vw, 480px); max-height: 90vh; width: auto; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
@@ -90,15 +99,30 @@
   </header>
 
   <p class="links">
-    <a class="mt-primary-action" data-mt-download="volumeac" href="download/VolumeAC-1.5.58-release.apk">APKをダウンロード（v1.5.58）</a>
     <a class="secondary mt-secondary-action" href="https://forms.gle/yFWhTHNNPJrsjLVu6" target="_blank" rel="noopener noreferrer">匿名アンケートに答える</a>
   </p>
-  <p class="mt-release-info" title="公開リポジトリに配布ファイルを登録・差し替えた日時">配布ファイル更新：<time datetime="2026-10-21T23:38:51+09:00">2026/10/21 23:38</time>（日本時間）</p>
+  <p class="muted">Google Playで公開する準備をしています。</p>
 
   <p>
     音量エリアコントローラー（Volume Area Controller）は、いる場所に合わせて、スマホの音量を自動で切り替えるAndroidアプリです。
     たとえば「職場ではマナーモード、家に帰ったら音が鳴るように」といった切り替えを、アプリが代わりにやってくれます。
   </p>
+
+  <h2>動画で見る</h2>
+  <div class="video-row">
+    <figure class="video">
+      <div class="video-frame">
+        <iframe src="https://www.youtube-nocookie.com/embed/AAI937DSYZM?rel=0&amp;playsinline=1" title="Volume Area Controller 使う場面の紹介動画（YouTubeショート）" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+      <figcaption>こんなときに便利</figcaption>
+    </figure>
+    <figure class="video">
+      <div class="video-frame">
+        <iframe src="https://www.youtube-nocookie.com/embed/Hp4vERDxgeo?rel=0&amp;playsinline=1" title="Volume Area Controller アプリ画面の紹介動画（YouTubeショート）" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+      <figcaption>アプリの画面</figcaption>
+    </figure>
+  </div>
 
   <div class="shot-row">
     <figure class="shot">
@@ -142,29 +166,12 @@
     無料です（広告・アプリ内課金はありません）。
   </p>
 
-  <h2>ダウンロード（Android）</h2>
+  <h2>入手方法（Android）</h2>
   <p>
-    下のボタンから無料でダウンロードできます。
+    Google Playで公開する準備をしています。公開したら、ここにリンクをのせます。
   </p>
-  <p class="links">
-    <a id="dlBtn" class="mt-primary-action" data-mt-download="volumeac" href="download/VolumeAC-1.5.58-release.apk">APKをダウンロード（v1.5.58）</a>
-  </p>
-  <p class="mt-release-info" title="公開リポジトリに配布ファイルを登録・差し替えた日時">配布ファイル更新：<time datetime="2026-10-21T23:38:51+09:00">2026/10/21 23:38</time>（日本時間）</p>
   <p class="muted">
     対象：Android 10 以降（Google Play 開発者サービスが入っている端末）
-  </p>
-
-  <h2>インストール方法</h2>
-  <ol>
-    <li>上のボタンからAPKをダウンロードします。</li>
-    <li>ダウンロードしたファイルを開きます。</li>
-    <li>「不明なアプリのインストール」の許可を求められたら許可して、インストールします。</li>
-  </ol>
-  <p class="muted">
-    ※インストールのときに警告が出ることがあります。提供元がこのサイト（masatools.pages.dev）であることを確かめてから進めてください。
-  </p>
-  <p class="muted">
-    ※新しい版は、いま入っているアプリの上からそのままインストールできます。登録した設定も引き継がれます。
   </p>
 
   <h2>使う権限</h2>
