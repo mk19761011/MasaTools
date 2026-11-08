@@ -1,0 +1,9 @@
+{
+  "version": "1.3.8",
+  "build_number": 10,
+  "git_commit": "33dff101096665f7a925aa0211db990916b362d6",
+  "git_tag": "v1.3.8-b10",
+  "built_at": "2026-11-08T20:50:24.780736+09:00",
+  "installer_sha256": "1e75a4a6036e7f5f93c66a897000ccc82bbcb9596e68f30177508f1afba025d3",
+  "published_at": "2026-11-08T20:54:09+09:00"
+}
