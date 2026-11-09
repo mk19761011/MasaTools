@@ -638,11 +638,8 @@
 
           <div class="card contact-card">
             <h3>感想・お問い合わせ（任意）</h3>
-            <p>気づいたことがあれば、下のアドレスへ気軽にお知らせください。自宅の住所などは送らないでください。</p>
-            <div class="mail-box">
-              <span class="mail-address" id="contact-text">masatools.info@gmail.com</span>
-              <button type="button" class="copy-btn" id="copy-mail">コピー</button>
-            </div>
+            <p>気づいたことがあれば、お問い合わせフォームから気軽にお知らせください。自宅の住所などは送らないでください。</p>
+            <a class="button-primary" href="/contact/?app=volumeac">お問い合わせフォームを開く</a>
             <p class="small-note" style="margin-top:12px">
               Googleフォームからも送れます：<a class="js-config-link" data-config="feedbackUrl" href="https://docs.google.com/forms/d/e/1FAIpQLSfjLZKa76H_3PzYtIXto4YluaZgmkntJ3Tc8DNAOj7Sc3sqZw/viewform" target="_blank" rel="noopener noreferrer">感想・不具合フォーム</a>
             </p>
@@ -671,7 +668,6 @@
       optInUrl: "https://play.google.com/apps/testing/com.masatools.volumeac",
       installUrl: "https://play.google.com/store/apps/details?id=com.masatools.volumeac",
       feedbackUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfjLZKa76H_3PzYtIXto4YluaZgmkntJ3Tc8DNAOj7Sc3sqZw/viewform",
-      contact: "masatools.info@gmail.com",
       videoId: "",         // ショート動画ができたら YouTube の動画ID（例: "hHxcxcZMMz8"）
       testStartDate: "",   // 例: "2026年11月1日"
       testEndDate: "",     // 例: "2026年11月15日"
@@ -713,25 +709,6 @@
         `${CONFIG.testStartDate} ～ ${CONFIG.testEndDate}`;
     }
 
-    document.getElementById("contact-text").textContent = CONFIG.contact || "連絡先準備中";
-
-    // メールアドレスのコピー
-    document.getElementById("copy-mail").addEventListener("click", async (event) => {
-      const button = event.currentTarget;
-      try {
-        await navigator.clipboard.writeText(CONFIG.contact);
-        button.textContent = "コピーしました";
-      } catch (e) {
-        // コピーできない環境では、アドレスを選択状態にする
-        const range = document.createRange();
-        range.selectNodeContents(document.getElementById("contact-text"));
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        button.textContent = "長押しでコピーしてください";
-      }
-      setTimeout(() => { button.textContent = "コピー"; }, 2500);
-    });
     document.getElementById("updated-date").textContent = CONFIG.updatedDate || "未設定";
   </script>
 </body>

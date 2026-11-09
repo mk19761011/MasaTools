@@ -282,7 +282,7 @@ WinTimeLock はフリーソフトとして無償で提供しています。
 /================================/
 【作者】MasaTools
 【紹介】自分の困りごとを中心にアプリ開発しています。公開できそうなものはしていこうと思っています。
-【連絡先】masatools.info@gmail.com
+【お問い合わせ】https://masatools.pages.dev/contact/?app=wintimelock
 
 
 /================================/

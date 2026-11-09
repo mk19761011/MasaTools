@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MultiLibLink | MasaTools</title>
-  <meta name="description" content="MultiLibLinkは、図書館の貸出状況・予約状況・読書履歴を取得し、アプリの「確認・予約」画面で状況確認から予約までサポートするWindowsツールです。最新版v1.3.8-b11をダウンロードできます。" />
+  <title>MultiLibLink（図書館 連携ツール） | MasaTools</title>
+  <meta name="description" content="MultiLibLink（図書館 連携ツール）は、家族分の利用者カードをまとめて管理。貸出・予約・読書履歴の確認から、シリーズの次巻の予約までサポートするWindowsアプリです。最新版v1.3.8-b11をダウンロードできます。" />
   <style>
     :root {
       --bg: #f3f7fb;
@@ -149,11 +149,11 @@
 
   <main>
     <section class="hero">
-      <img class="hero-icon" src="help_assets/icon-192.png" alt="MultiLibLink アプリアイコン" />
+      <img class="hero-icon" src="help_assets/icon-192.png" alt="MultiLibLink（図書館 連携ツール） アプリアイコン" />
       <div class="hero-text">
         <span class="hero-label">Windowsアプリ</span>
-        <h1>MultiLibLink</h1>
-        <p>図書館の貸出状況・予約状況・読書履歴を取得し、アプリの「確認・予約」画面で状況確認から予約までサポートするWindowsツールです。</p>
+        <h1>MultiLibLink（図書館 連携ツール）</h1>
+        <p>家族分の利用者カードをまとめて管理。貸出・予約・読書履歴の確認から、シリーズの次巻の予約までサポートするWindowsアプリです。</p>
       </div>
     </section>
 
@@ -175,83 +175,30 @@
     <p class="mt-release-info" title="公開リポジトリに配布ファイルを登録・差し替えた日時">配布ファイル更新：<time datetime="2026-11-09T08:41:37+09:00">2026/11/09 08:41</time>（日本時間）</p>
     <p class="status-note">Windows 10 / 11 対応。最新版 v1.3.8-b11 をこのページからダウンロードできます。</p>
 
-    <section class="block"><h2>現行画面の使い方</h2><div class="grid">
-<div class="feature"><h3>1. 実行</h3><p>「今すぐ取得」で最新状況を取得。「確認・予約」で管理画面へ進みます。「取得を中止」で取得を止められます。</p></div>
-<div class="feature"><h3>2. 図書館設定</h3><p>図書館を選択・追加・編集し、利用者カードの登録・接続確認・並び替えを行います。</p></div>
-<div class="feature"><h3>3. メール設定</h3><p>メール監視と任意の結果通知を設定します。設定したメールアドレスを開発者が収集することはありません。</p></div>
-<div class="feature"><h3>4. その他</h3><p>セットアップ、ヘルプ、アプリのバージョン・ビルド・コミットを確認できます。</p></div>
-</div><div class="note-card"><h3>「確認・予約」から予約するには</h3><p>予約候補の□を選択 → 作品行で開始巻・冊数・カードを確認 → 「予約実行（○冊）」 → 確認画面で「予約を実行」。チェックや画面を開くだけでは申込みません。</p><p>予約候補・補欠・貸出中・予約中・読書履歴をアプリ内で確認できます。操作の詳細は<a href="help/#reserve">予約・貸出管理のヘルプ</a>をご覧ください。</p></div></section>
-
     <section class="block">
       <h2>主な機能</h2>
       <div class="grid">
-        <div class="feature">
-          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/><path d="M21 4v5h-5"/></svg>一括で情報取得</h3>
-          <p>登録ユーザーの貸出状況・予約状況・読書履歴を図書館サイトから取得し、PC内に保存し、アプリの管理画面で確認。複数のユーザー（家族）も登録できます。</p>
-        </div>
-        <div class="feature">
-          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>アプリで確認・予約</h3>
-          <p>「確認・予約」で候補を選び、開始巻・冊数・カードを確認して予約します。申込み前に対象を確認できます。</p>
-        </div>
-        <div class="feature">
-          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>読書履歴の整理</h3>
-          <p>直近の読書履歴・貸出中・予約中の本を組み合わせ、同じシリーズを自動でまとめて「次に予約する巻」を分かりやすく提示します。</p>
-        </div>
-        <div class="feature">
-          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>メール監視・バックアップ</h3>
-          <p>図書館からの通知メールを受信したときだけ自動で情報取得（任意）。取得データや設定はデータフォルダに自動バックアップされます。</p>
-        </div>
+        <div class="feature"><h3>家族の利用状況をひとまとめに</h3><p>複数の図書館や家族分のカードを登録できます。普段ブラウザーで確認している図書館のWebサイトへ、アプリが登録済みのカード番号とパスワードでログインし、貸出・予約・読書履歴をまとめて取得します。</p></div>
+        <div class="feature"><h3>シリーズの続きが見つかる</h3><p>読書履歴や現在の貸出・予約状況から、次に読む巻を予約候補として表示します。あとで読みたい作品は「補欠」に残しておけます。</p></div>
+        <div class="feature"><h3>読みたい本をまとめて予約</h3><p>予約したい作品とカードを選べます。1冊の予約に加え、複数巻を同じカードで巻数順の受取りに指定する「順番予約」にも対応しています。</p></div>
+        <div class="feature"><h3>貸出・予約の確認と見直し</h3><p>貸出中・予約中の本をアプリ内で一覧表示。読書履歴の検索、貸出期間の延長、予約の取消もできます。延長や予約の可否は、図書館の利用条件や資料の状況によります。</p></div>
+        <div class="feature"><h3>取得した情報を手元に保存</h3><p>取得結果はPC内に保存され、アプリで確認できます。Excel形式でも保存されるため、ExcelやLibreOfficeで開くこともできます。</p></div>
+        <div class="feature"><h3>メールで最新情報を確認</h3><p>図書館からの通知メールをきっかけに、自動で利用状況を取得できます。取得結果をメールで受け取ることもできます。どちらも任意で使える機能です。</p></div>
       </div>
     </section>
 
     <section class="block">
-      <h2>対応図書館</h2>
-      <div class="note-card">
-        <ul>
-          <li>主に確認しているのは<strong>大阪市立図書館</strong>の蔵書検索・予約システムです。URLに <code>licsxp-opac</code> を含む LICS-XP / iLis 系の画面構成を前提としています。</li>
-          <li>LibraXX・Calista など他のOPACは画面構成やボタン名が異なる場合があるため、そのまま対応できるとは限りません。</li>
-          <li>新しい図書館を追加する場合は、図書館設定にログインURLとユーザー情報を登録し、接続確認でログインできるかをご確認ください。</li>
-        </ul>
-      </div>
+      <h2>利用できる図書館について</h2>
+      <div class="note-card"><p>図書館のWebサイトの仕組みや画面構成によっては、利用できない場合があります。また、図書館側の変更により、一時的に利用できなくなることがあります。</p></div>
     </section>
 
     <section class="block">
       <h2>動作報告・情報提供のお願い</h2>
       <div class="help-card">
-        <p class="lead">
-          現在、動作を確認できているのは<strong>大阪市立図書館のみ</strong>で、それ以外の図書館で正しく動くかどうかはまだ分かっていません。
-          もしお住まいの地域の図書館で試していただける方がいらっしゃいましたら、ぜひ下記の情報をお寄せいただけると嬉しいです。
-          いただいた内容は、対応図書館を増やしたり不具合を直したりするために活用させていただきます。
-        </p>
-        <ul class="ask-list">
-          <li>
-            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-            <span><b>図書館の所在地</b> — 都道府県・市区町村（例：兵庫県西宮市）</span>
-          </li>
-          <li>
-            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
-            <span><b>図書館名</b> — 利用された図書館の名称（例：西宮市立図書館。蔵書検索・予約システムのURLが分かれば、なお助かります）</span>
-          </li>
-          <li>
-            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
-            <span><b>使用の可否</b> — 情報取得や予約ができたか、それとも途中でエラーになったか</span>
-          </li>
-          <li>
-            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-            <span><b>使用した環境</b> — Windows のバージョン（10 / 11）など</span>
-          </li>
-          <li>
-            <span class="ask-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
-            <span><b>うまくいかなかった場合</b> — 表示されたエラーメッセージや、止まってしまった操作の状況。ログ・画像を送る場合は、メールアドレス、カード番号、パスワード、書名・読書履歴を削除し、必要なエラー概要だけをお送りください</span>
-          </li>
-        </ul>
-        <div class="contact-row">
-          <a class="button" href="mailto:masatools.info@gmail.com?subject=MultiLibLink%20%E5%8B%95%E4%BD%9C%E5%A0%B1%E5%91%8A">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-            メールで動作報告を送る
-          </a>
-          <span class="status-note">件名はそのままで大丈夫です。お名前の記載は不要で、メールでご連絡いただく場合は送信元アドレスが伝わります。分かる範囲のご記入で結構です。</span>
-        </div>
+        <p class="lead">ご利用の図書館で使えた機能や、うまく動かなかった点を、<a href="/contact/?app=multiliblink">お問い合わせフォーム</a>からお知らせください。対応する図書館を増やしたり、アプリを改善したりするために役立てます。</p>
+        <p>図書館名、蔵書検索・予約サイトのURL、アプリのバージョン、操作した内容や困っている状況を、分かる範囲でご記入ください。</p>
+        <p class="status-note">お問い合わせフォームは現在、受付準備中です。受付開始後に情報をお寄せください。</p>
+        <p class="status-note">カード番号、パスワード、実際の書名や読書履歴は記入しないでください。お名前と返信先は任意です。返信をご希望の場合のみ、受信できるメールアドレスをご入力ください。</p>
       </div>
     </section>
 
@@ -260,7 +207,7 @@
       <div class="note-card">
         <ul>
           <li>Windows 10 / 11 を想定しています。</li>
-          <li>必要なライブラリを同梱したインストーラーとして配布していますので、別途 .NET ランタイムや Python をインストールする必要はありません。</li>
+          <li>インストーラーから、画面の案内に従ってセットアップできます。</li>
           <li>図書館サイトへの接続および情報の取得にはインターネット接続が必要です。</li>
         </ul>
       </div>
@@ -285,7 +232,7 @@
     <section class="block">
       <h2>もっと詳しく</h2>
       <div class="note-card">
-        <p style="margin:0 0 14px; color:#334155;">セットアップ手順、ボタンの意味、予約候補の作られ方、メール監視やバックアップなどの詳細は、ヘルプページにまとめています。</p>
+        <p style="margin:0 0 14px; color:#334155;">初期設定や詳しい操作方法は、ヘルプをご覧ください。</p>
         <a class="button" href="help/">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           ヘルプページを開く
