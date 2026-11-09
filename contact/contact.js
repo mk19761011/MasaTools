@@ -9,6 +9,7 @@
   function error(message) {
     result.textContent = message; result.hidden = false; result.focus();
   }
+  function canSend() {return config?.ready === true && Boolean(config.sitekey);}
   function addReview(title, content) {
     const dt = document.createElement('dt'), dd = document.createElement('dd');
     dt.textContent = title; dd.textContent = content; byId('review').append(dt, dd);
@@ -46,6 +47,9 @@
       ['バージョン', draft.version || '未記入'], ['件名', draft.subject], ['お問い合わせ内容', draft.message],
     ]) addReview(label, value);
     form.hidden = true; confirmation.hidden = false; confirmation.scrollIntoView({block: 'start'});
+    byId('preview-notice').hidden = canSend();
+    byId('send').textContent = canSend() ? 'この内容で送信する' : '送信受付は準備中です';
+    if (!canSend()) {byId('send').disabled = true; return;}
     try {await challenge();} catch {error('送信確認を読み込めませんでした。「入力に戻る」からお試しください。');}
   });
   byId('edit').addEventListener('click', () => {
@@ -55,7 +59,7 @@
     byId('subject').focus();
   });
   byId('send').addEventListener('click', async () => {
-    if (busy || !draft) return;
+    if (busy || !draft || !canSend()) return;
     const token = window.turnstile?.getResponse(widget);
     if (!token) return error('送信確認が完了するまでお待ちください。');
     busy = true; byId('send').disabled = true; byId('edit').disabled = true;
@@ -77,10 +81,11 @@
       busy = false; byId('edit').disabled = false; byId('send').textContent = 'この内容で送信する';
     }
   });
+  byId('fields').disabled = false;
   fetch('/api/contact', {cache: 'no-store'}).then(async (response) => {
     if (!response.ok) throw new Error('configuration');
     config = await response.json();
-    if (!config.ready || !config.sitekey) {notice.textContent = '現在、メール受付の準備をしています。受付開始までお待ちください。'; return;}
-    byId('fields').disabled = false; notice.hidden = true;
-  }).catch(() => {notice.textContent = '送信の準備を確認できませんでした。時間をおいてページを開き直してください。';});
+    if (!canSend()) {notice.textContent = '現在は入力・内容確認のみお試しいただけます。送信はまだできません。入力内容はこの画面内だけで扱われます。'; return;}
+    notice.hidden = true;
+  }).catch(() => {notice.textContent = '送信の準備を確認できませんでした。入力・内容確認はお試しいただけますが、送信はできません。';});
 })();
