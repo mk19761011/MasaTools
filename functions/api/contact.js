@@ -16,7 +16,7 @@ function ready(env) {
   return env.CONTACT_ENABLED === 'true' && configured(env);
 }
 function configured(env) {
-  return Boolean(env.CONTACT_RECIPIENT && env.RESEND_API_KEY && env.CONTACT_EMAIL_FROM && env.CONTACT_TURNSTILE_SECRET && env.CONTACT_TURNSTILE_SITEKEY);
+  return Boolean(env.CONTACT_RELAY_SECRET && /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(env.CONTACT_RELAY_URL || '') && env.CONTACT_TURNSTILE_SECRET && env.CONTACT_TURNSTILE_SITEKEY);
 }
 function testReady(env) {
   return env.CONTACT_TEST_ENABLED === 'true' && configured(env);
@@ -67,20 +67,20 @@ export async function onRequestPost({request, env}) {
     } : {
       subject: `[MasaTools] ${app}：${subject}`,
       text: `アプリ：${app}\n種類：${kind}\nお名前：${name || '未記入'}\n返信先：${email || '未記入'}\nバージョン：${version || '未記入'}\n件名：${subject}\n\n${message}`,
-      ...(email ? {reply_to: email} : {}),
+      ...(email ? {replyTo: email} : {}),
     };
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST', headers: {'Content-Type': 'application/json', Authorization: 'Bearer ' + env.RESEND_API_KEY, 'Idempotency-Key': 'contact-' + await tokenKey(token)},
-      body: JSON.stringify({from: env.CONTACT_EMAIL_FROM, to: [env.CONTACT_RECIPIENT], ...mail}), signal: AbortSignal.timeout(15000),
+    const response = await fetch(env.CONTACT_RELAY_URL, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({secret: env.CONTACT_RELAY_SECRET, id: await tokenKey(token), timestamp: Date.now(), ...mail}), signal: AbortSignal.timeout(25000),
     });
     if (!response.ok) {
       if (isTest) return json({error: [401, 403].includes(response.status)
-        ? 'テストメールを送信できませんでした。メール配信サービスの送信設定を確認する必要があります。'
+        ? 'テストメールを送信できませんでした。通知の設定を確認する必要があります。'
         : 'テストメールを送信できませんでした。時間をおいてお試しください。'}, 502);
       throw new Error('delivery unavailable');
     }
     const result = await response.json();
-    if (typeof result.id !== 'string' || !result.id) throw new Error('delivery not accepted');
+    if (result.ok !== true) throw new Error('delivery not accepted');
     return json({ok: true, ...(isTest ? {test: true} : {})});
   } catch {
     // Do not log the visitor's email, message, delivery endpoint, or upstream response.

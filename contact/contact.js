@@ -67,7 +67,7 @@
     try {
       const response = await fetch('/api/contact', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...draft, token}), signal: AbortSignal.timeout(40000),
+        body: JSON.stringify({...draft, token}), signal: AbortSignal.timeout(45000),
       });
       const body = await response.json();
       if (!response.ok || !body.ok) throw new Error(body.error || '送信できませんでした。時間をおいてお試しください。');
