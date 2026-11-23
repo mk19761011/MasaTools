@@ -38,7 +38,7 @@ if mode == 'install':
     relay_url = os.environ.get('CONTACT_SETUP_RELAY_URL', '')
     relay_secret = os.environ.get('CONTACT_SETUP_RELAY_SECRET', '')
     assert re.fullmatch(r'https://script\.google\.com/macros/s/[A-Za-z0-9_-]+/exec', relay_url)
-    assert re.fullmatch(r'[a-f0-9]{64}', relay_secret)
+    assert re.fullmatch(r'[a-fA-F0-9-]{64,128}', relay_secret)
     changed = api('PATCH', {'deployment_configs':{'production':{'env_vars':{
         'CONTACT_RELAY_URL':{'type':'plain_text','value':relay_url},
         'CONTACT_RELAY_SECRET':{'type':'secret_text','value':relay_secret},
