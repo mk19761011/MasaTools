@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WinTimeLock | MasaTools</title>
-  <meta name="description" content="WinTimeLockは、Windows PCの利用時間を曜日・祝日・時間帯ごとに制限できる無料ソフトです。最新版v1.6をダウンロードできます。" />
+  <meta name="description" content="WinTimeLockは、Windows PCの利用時間を曜日・祝日・時間帯ごとに制限できる無料ソフトです。最新版v1.7をダウンロードできます。" />
   <style>
     :root {
       --bg:#f3f7fb; --bg-soft:#edf4f6; --text:#1f2937; --muted:#5f6f82;
@@ -52,7 +52,7 @@
     <div class="cta-row">
       <a class="button mt-primary-action" href="/wintimelock/download/WinTimeLock_Setup.exe" download="WinTimeLock_Setup.exe" data-mt-download="wintimelock">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        最新版 v1.6 をダウンロード
+        最新版 1.7 をダウンロード
       </a>
       <a class="button secondary mt-secondary-action" href="https://www.vector.co.jp/soft/winnt/util/se528180.html" target="_blank" rel="noopener noreferrer">
         Vector公開ページ
@@ -60,24 +60,55 @@
       </a>
       <a class="button secondary mt-secondary-action" href="https://forms.gle/TQVGdfDHLKtSbZHZ8" target="_blank" rel="noopener noreferrer">匿名アンケートに答える</a>
     </div>
-    <p class="mt-release-info" title="公開リポジトリに配布ファイルを登録・差し替えた日時">配布ファイル更新：<time datetime="2026-08-14T11:49:00+09:00">2026/08/14 11:49</time>（日本時間）</p>
-    <p class="status-note">配布版：v1.6（アプリ更新日：2026年8月13日）</p>
+    <p class="mt-release-info">配布版：1.7（ビルド23）／2026年11月23日更新</p>
+    <p class="status-note">インストーラー：約32.2MB。Windows 10 / 11（64bit）。追加ランタイムは不要です。</p>
     <section class="block">
       <figure class="shot">
-        <img src="assets/basic-settings.png" alt="WinTimeLock v1.6 の基本設定画面" />
+        <img src="assets/basic-settings-v1.7-b23.png" alt="WinTimeLock v1.7 の基本設定画面（設定例）" />
+        <figcaption>基本設定：制限時の動作、自動起動、パスワードを設定します。画面は設定例です。</figcaption>
       </figure>
     </section>
 
     <section class="block">
-      <h2>v1.6 の主な変更点</h2>
+      <h2>主な機能</h2>
       <div class="grid">
-        <div class="feature"><h3>曜日・祝日別の利用上限</h3><p>制限時間外に使える1日の合計時間を、曜日と祝日ごとに設定できます。上限を無効にしている間も利用時間を計測し、有効にすると当日の計測済み時間を含めて判定します。</p></div>
-        <div class="feature"><h3>解除・一時利用許可</h3><p>10分、30分、1時間、6時間、翌日0時までの一時利用許可に対応しました。</p></div>
-        <div class="feature"><h3>5〜300秒カウントダウン</h3><p>誤操作時に解除できる時間を確保しながら、動作前の待ち時間を設定できます。</p></div>
-        <div class="feature"><h3>監視の再適用</h3><p>「保存して監視を開始」で一時許可を終了し、保存した設定を直ちに適用します。</p></div>
-        <div class="feature"><h3>制限時の指定動作</h3><p>PCロック・スリープ・シャットダウンに加え、任意のファイルやコマンドを起動できます。</p></div>
-        <div class="feature"><h3>祝日設定の引き継ぎ</h3><p>上書きインストール時は既存の祝日ファイルを保持するため、独自に追加した祝日を引き継げます。</p></div>
+        <div class="feature"><h3>曜日・祝日ごとの時間帯ルール</h3><p>使えない時間帯を複数設定し、一覧から選んで編集できます。日またぎの時間帯にも対応しています。</p></div>
+        <div class="feature"><h3>1日の利用時間上限</h3><p>制限時間帯以外に使える合計時間を、曜日と祝日ごとに設定できます。</p></div>
+        <div class="feature"><h3>1週間のタイムライン</h3><p>制限される時間帯と1日の上限をまとめて確認できます。編集中と保存済みの設定を切り替えて表示できます。</p></div>
+        <div class="feature"><h3>制限時の4つの動作</h3><p>PCロック・スリープ・シャットダウン・指定動作から選べます。実行前のカウントダウンは5～300秒で設定できます。</p></div>
+        <div class="feature"><h3>一時利用許可とパスワード</h3><p>管理者メニューから10分・30分・1時間・6時間、または翌日0時までの利用を許可できます。パスワードを設定すると認証を求めます。</p></div>
+        <div class="feature"><h3>自動起動と祝日CSV</h3><p>Windowsログイン時の監視開始、ログイン後の猶予、祝日CSVの選択・更新に対応しています。</p></div>
       </div>
+    </section>
+
+    <section class="block">
+      <h2>設定画面</h2>
+      <p>実際の利用履歴を含まない設定例です。各項目を開いて画面を確認できます。</p>
+      <details style="margin:18px 0">
+        <summary>使えない時間帯</summary>
+        <figure class="shot" style="margin-top:12px"><img src="assets/rules-settings-v1.7-b23.png" alt="WinTimeLock 1.7 使えない時間帯（設定例）" loading="lazy" /><figcaption>左のルール一覧から選び、右側で曜日・時間を編集します。</figcaption></figure>
+      </details>
+      <details style="margin:18px 0">
+        <summary>1日の利用時間上限</summary>
+        <figure class="shot" style="margin-top:12px"><img src="assets/daily-limit-v1.7-b23.png" alt="WinTimeLock 1.7 1日の利用時間上限（設定例）" loading="lazy" /><figcaption>曜日と祝日ごとに、制限時間帯以外に使える合計時間を設定します。</figcaption></figure>
+      </details>
+      <details style="margin:18px 0">
+        <summary>タイムライン</summary>
+        <figure class="shot" style="margin-top:12px"><img src="assets/timeline-v1.7-b23.png" alt="WinTimeLock 1.7 タイムライン（設定例）" loading="lazy" /><figcaption>青い斜線が使えない時間帯です。白い区間でも1日の利用時間上限に達すると制限されます。</figcaption></figure>
+      </details>
+      <details style="margin:18px 0">
+        <summary>祝日設定</summary>
+        <figure class="shot" style="margin-top:12px"><img src="assets/holiday-settings-v1.7-b23.png" alt="WinTimeLock 1.7 祝日設定（設定例）" loading="lazy" /><figcaption>祝日CSVの選択と更新ができます。更新すると独自に追加した祝日も置き換わります。</figcaption></figure>
+      </details>
+    </section>
+
+    <section class="block">
+      <h2>1.7の主な更新</h2>
+      <div class="note-card"><ul>
+        <li>設定画面とインストーラーを軽量化しました。</li>
+        <li>ルール編集とパスワード入力を見やすく使いやすくしました。</li>
+        <li>1週間の利用制限をタイムラインで確認できます。</li>
+      </ul></div>
     </section>
 
     <section class="block">
@@ -92,7 +123,7 @@
   </main>
 
   <footer class="footer"><small>&copy; 2026 MasaTools. All rights reserved. <span data-mt-list-link hidden>&nbsp;|&nbsp; <a href="#">ツール一覧へ戻る</a></span></small></footer>
-  <script src="/analytics/count.js" defer></script>
 <script src="/assets/masatools-nav.js" defer></script>
+  <script src="/analytics/count.js" defer></script>
 </body>
 </html>
