@@ -11,7 +11,7 @@ assert re.fullmatch(r'[a-fA-F0-9]{32}', account)
 assert project == 'masatools'
 url = f'https://api.cloudflare.com/client/v4/accounts/{account}/pages/projects/{project}'
 mode = os.environ.get('CONTACT_CONFIG_MODE', 'inspect')
-assert mode in ('inspect', 'enable', 'disable')
+assert mode in ('inspect', 'install', 'enable', 'disable')
 
 def api(method='GET', body=None):
     request = Request(url, method=method, data=None if body is None else json.dumps(body).encode(),
@@ -34,12 +34,28 @@ variables = result.get('deployment_configs', {}).get('production', {}).get('env_
 needed = ('CONTACT_RELAY_SECRET','CONTACT_RELAY_URL','CONTACT_TURNSTILE_SECRET','CONTACT_TURNSTILE_SITEKEY')
 presence = {key: bool(variables.get(key)) for key in needed}
 print(json.dumps({'present':presence, 'contact_enabled':value(variables,'CONTACT_ENABLED') == 'true'}, sort_keys=True), flush=True)
-if mode != 'inspect':
+if mode == 'install':
+    relay_url = os.environ.get('CONTACT_SETUP_RELAY_URL', '')
+    relay_secret = os.environ.get('CONTACT_SETUP_RELAY_SECRET', '')
+    assert re.fullmatch(r'https://script\.google\.com/macros/s/[A-Za-z0-9_-]+/exec', relay_url)
+    assert re.fullmatch(r'[a-f0-9]{64}', relay_secret)
+    changed = api('PATCH', {'deployment_configs':{'production':{'env_vars':{
+        'CONTACT_RELAY_URL':{'type':'plain_text','value':relay_url},
+        'CONTACT_RELAY_SECRET':{'type':'secret_text','value':relay_secret},
+        'CONTACT_ENABLED':{'type':'plain_text','value':'false'},
+        'CONTACT_TEST_ENABLED':{'type':'plain_text','value':'true'}}}}})
+    updated = changed['deployment_configs']['production']['env_vars']
+    assert all(key in updated for key in variables)
+    assert all(updated.get(key) for key in needed)
+    assert value(updated, 'CONTACT_ENABLED') == 'false'
+    print('Relay installed for fixed delivery testing; public inquiry acceptance remains disabled.', flush=True)
+elif mode != 'inspect':
     if mode == 'enable' and not all(presence.values()):
         raise SystemExit('Required configuration is missing; enable flag unchanged')
     flag = 'true' if mode == 'enable' else 'false'
     changed = api('PATCH', {'deployment_configs':{'production':{'env_vars':{
-        'CONTACT_ENABLED':{'type':'plain_text','value':flag}}}}})
+        'CONTACT_ENABLED':{'type':'plain_text','value':flag},
+        'CONTACT_TEST_ENABLED':{'type':'plain_text','value':'false'}}}}})
     updated = changed['deployment_configs']['production']['env_vars']
     assert value(updated, 'CONTACT_ENABLED') == flag
     assert all(key in updated for key in variables), 'Existing variables missing from response'

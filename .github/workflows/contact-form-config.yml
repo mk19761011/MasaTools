@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - inspect
+          - install
           - enable
           - disable
 permissions:
@@ -24,4 +25,6 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_PROJECT_NAME: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
           CONTACT_CONFIG_MODE: ${{ inputs.mode }}
+          CONTACT_SETUP_RELAY_URL: ${{ secrets.CONTACT_SETUP_RELAY_URL }}
+          CONTACT_SETUP_RELAY_SECRET: ${{ secrets.CONTACT_SETUP_RELAY_SECRET }}
         run: python3 scripts/contact-form-config.py
