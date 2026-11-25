@@ -403,8 +403,13 @@
       background: #000;
     }
     .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-    .video-item { margin-top: 18px; }
-    .video-caption { margin: 0 0 8px; text-align: center; font-weight: 700; font-size: 0.95rem; color: var(--text); }
+    /* タイトルのすぐ下に、紹介動画を2本横並びで表示する（スマホでも横並び） */
+    #video-section { margin: 20px 0 4px; }
+    #video-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .video-item { min-width: 0; }
+    .video-item .video-wrap { max-width: 360px; border-radius: 12px; }
+    .video-caption { margin: 0 0 6px; text-align: center; font-weight: 700; font-size: 0.9rem; color: var(--text); }
+    @media (max-width: 480px) { #video-list { gap: 8px; } .video-caption { font-size: 0.8rem; } }
 
     /* 絶対に読んでほしい注意（赤系で目立たせる） */
     .must {
@@ -525,6 +530,10 @@
 
   <main class="container">
 
+    <section id="video-section" aria-label="紹介動画" hidden>
+      <div id="video-list"></div>
+    </section>
+
     <section aria-labelledby="must-title">
       <div class="must">
         <h2 id="must-title">⚠️ 参加する前に、必ずお読みください</h2>
@@ -622,9 +631,6 @@
           <div class="card">
             <h3>どんなアプリ？</h3>
             <p>自宅や職場など、登録した場所に着くと、着信・通知・アラーム・音楽の音量を自動で切り替えるAndroidアプリです（Android 10以降）。無料で、広告もありません。</p>
-            <div id="video-section" hidden>
-              <div id="video-list"></div>
-            </div>
           </div>
 
           <div class="card">
