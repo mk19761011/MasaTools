@@ -51,18 +51,36 @@
     }
 
     .hero {
-      padding: 58px 0 38px;
+      padding: 22px 0 14px;
     }
 
     .hero-card {
       background: linear-gradient(135deg, #1557b0, #1a73e8 60%, #4285f4);
       color: #fff;
       border-radius: 28px;
-      padding: clamp(28px, 6vw, 58px);
+      padding: clamp(16px, 3vw, 26px);
       box-shadow: var(--shadow);
       position: relative;
       overflow: hidden;
     }
+
+    .hero-card { display: flex; align-items: center; gap: 24px; }
+    .hero-text { flex: 1; min-width: 0; position: relative; z-index: 1; }
+    .hero-qr {
+      flex: 0 0 auto;
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      color: #172033;
+      border-radius: 14px;
+      padding: 10px 10px 8px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+    }
+    .hero-qr svg { display: block; width: 132px; height: 132px; }
+    .hero-qr small { display: block; margin-top: 4px; font-size: .72rem; font-weight: 700; line-height: 1.3; }
+    /* スマホは、いま見ている画面のQRを読み取れないので隠す */
+    @media (max-width: 560px) { .hero-qr { display: none; } }
 
     .hero-card::after {
       content: "";
@@ -91,7 +109,7 @@
 
     .lead {
       max-width: 720px;
-      margin: 20px 0 0;
+      margin: 12px 0 0;
       font-size: clamp(1rem, 2.4vw, 1.18rem);
       opacity: .95;
     }
@@ -405,9 +423,9 @@
     .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     /* タイトルのすぐ下に、紹介動画を2本横並びで表示する（スマホでも横並び） */
     #video-section { margin: 20px 0 4px; }
-    #video-list { display: grid; grid-template-columns: repeat(2, minmax(0, 250px)); justify-content: center; gap: 12px; }
+    #video-list { display: grid; grid-template-columns: repeat(2, minmax(0, 330px)); justify-content: center; gap: 12px; }
     .video-item { min-width: 0; }
-    .video-item .video-wrap { max-width: 250px; border-radius: 12px; }
+    .video-item .video-wrap { max-width: 330px; border-radius: 12px; }
     .video-caption { margin: 0 0 6px; text-align: center; font-weight: 700; font-size: 0.9rem; color: var(--text); }
     @media (max-width: 480px) { #video-list { gap: 8px; } .video-caption { font-size: 0.8rem; } }
 
@@ -495,7 +513,7 @@
     .more-body p, .more-body li { color: var(--muted); }
 
     @media (max-width: 720px) {
-      .hero { padding-top: 22px; }
+      .hero { padding-top: 14px; }
       .hero-card { border-radius: 20px; }
       .two-column { grid-template-columns: 1fr; }
       .schedule { grid-template-columns: 92px 1fr; }
@@ -519,11 +537,17 @@
   <header class="hero">
     <div class="container">
       <div class="hero-card">
-        <p class="eyebrow">Google Play クローズドテスト</p>
-        <h1>音量エリアコントローラー<br>テスト参加ガイド</h1>
-        <p class="lead">
-          Androidアプリのテストへのご協力、ありがとうございます。やることは、下の3つだけです。わからなくなったら、いつでもこのページを見直してください。
-        </p>
+        <div class="hero-text">
+          <p class="eyebrow">Google Play クローズドテスト</p>
+          <h1>音量エリアコントローラー<br>テスト参加ガイド</h1>
+          <p class="lead">
+            Androidアプリのテストへのご協力、ありがとうございます。やることは、下の3つだけです。わからなくなったら、いつでもこのページを見直してください。
+          </p>
+        </div>
+        <div class="hero-qr">
+          <svg viewBox="0 0 33 33" role="img" aria-label="このページを開くQRコード" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect width="33" height="33" fill="#fff"/><path fill="#000" d="M0 0h7v1h-7zM8 0h2v1h-2zM11 0h1v1h-1zM13 0h1v1h-1zM16 0h5v1h-5zM23 0h1v1h-1zM26 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM11 1h3v1h-3zM18 1h1v1h-1zM21 1h3v1h-3zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h1v1h-1zM15 2h1v1h-1zM17 2h1v1h-1zM20 2h3v1h-3zM24 2h1v1h-1zM26 2h1v1h-1zM28 2h3v1h-3zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h2v1h-2zM14 3h3v1h-3zM20 3h3v1h-3zM26 3h1v1h-1zM28 3h3v1h-3zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM11 4h4v1h-4zM17 4h1v1h-1zM20 4h2v1h-2zM23 4h1v1h-1zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM14 5h1v1h-1zM18 5h4v1h-4zM24 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h7v1h-7zM8 7h2v1h-2zM11 7h1v1h-1zM17 7h2v1h-2zM20 7h1v1h-1zM22 7h2v1h-2zM0 8h1v1h-1zM2 8h2v1h-2zM5 8h3v1h-3zM14 8h1v1h-1zM17 8h3v1h-3zM21 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM29 8h1v1h-1zM31 8h2v1h-2zM3 9h3v1h-3zM7 9h1v1h-1zM10 9h3v1h-3zM16 9h1v1h-1zM19 9h3v1h-3zM23 9h1v1h-1zM26 9h2v1h-2zM29 9h2v1h-2zM32 9h1v1h-1zM1 10h1v1h-1zM4 10h3v1h-3zM9 10h1v1h-1zM11 10h2v1h-2zM14 10h1v1h-1zM16 10h2v1h-2zM23 10h7v1h-7zM31 10h2v1h-2zM0 11h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM10 11h1v1h-1zM13 11h3v1h-3zM18 11h2v1h-2zM27 11h1v1h-1zM29 11h1v1h-1zM0 12h2v1h-2zM5 12h2v1h-2zM9 12h3v1h-3zM18 12h1v1h-1zM21 12h1v1h-1zM24 12h2v1h-2zM27 12h3v1h-3zM31 12h2v1h-2zM2 13h3v1h-3zM9 13h1v1h-1zM16 13h3v1h-3zM21 13h5v1h-5zM27 13h1v1h-1zM31 13h1v1h-1zM0 14h1v1h-1zM2 14h1v1h-1zM4 14h4v1h-4zM9 14h1v1h-1zM14 14h4v1h-4zM21 14h1v1h-1zM23 14h1v1h-1zM26 14h1v1h-1zM28 14h2v1h-2zM1 15h3v1h-3zM8 15h3v1h-3zM12 15h3v1h-3zM16 15h1v1h-1zM19 15h5v1h-5zM25 15h2v1h-2zM29 15h2v1h-2zM1 16h1v1h-1zM4 16h5v1h-5zM12 16h1v1h-1zM15 16h1v1h-1zM19 16h4v1h-4zM25 16h2v1h-2zM28 16h3v1h-3zM0 17h1v1h-1zM2 17h2v1h-2zM7 17h1v1h-1zM10 17h1v1h-1zM12 17h1v1h-1zM14 17h4v1h-4zM20 17h7v1h-7zM28 17h2v1h-2zM31 17h2v1h-2zM1 18h3v1h-3zM6 18h4v1h-4zM11 18h2v1h-2zM15 18h1v1h-1zM17 18h1v1h-1zM22 18h1v1h-1zM27 18h2v1h-2zM30 18h2v1h-2zM0 19h1v1h-1zM2 19h2v1h-2zM7 19h1v1h-1zM10 19h2v1h-2zM13 19h1v1h-1zM15 19h2v1h-2zM20 19h2v1h-2zM25 19h1v1h-1zM28 19h1v1h-1zM31 19h2v1h-2zM0 20h1v1h-1zM2 20h1v1h-1zM6 20h1v1h-1zM8 20h2v1h-2zM12 20h2v1h-2zM18 20h3v1h-3zM27 20h1v1h-1zM29 20h2v1h-2zM0 21h1v1h-1zM3 21h2v1h-2zM7 21h4v1h-4zM13 21h3v1h-3zM17 21h2v1h-2zM24 21h3v1h-3zM30 21h1v1h-1zM32 21h1v1h-1zM2 22h1v1h-1zM5 22h2v1h-2zM10 22h1v1h-1zM13 22h1v1h-1zM16 22h1v1h-1zM18 22h1v1h-1zM22 22h4v1h-4zM27 22h2v1h-2zM31 22h2v1h-2zM1 23h3v1h-3zM10 23h4v1h-4zM16 23h1v1h-1zM19 23h1v1h-1zM22 23h3v1h-3zM27 23h1v1h-1zM29 23h1v1h-1zM31 23h2v1h-2zM0 24h1v1h-1zM4 24h4v1h-4zM9 24h1v1h-1zM11 24h1v1h-1zM14 24h4v1h-4zM20 24h1v1h-1zM22 24h7v1h-7zM32 24h1v1h-1zM8 25h2v1h-2zM11 25h7v1h-7zM19 25h1v1h-1zM22 25h1v1h-1zM24 25h1v1h-1zM28 25h2v1h-2zM31 25h1v1h-1zM0 26h7v1h-7zM8 26h1v1h-1zM10 26h2v1h-2zM19 26h1v1h-1zM22 26h3v1h-3zM26 26h1v1h-1zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h5v1h-5zM15 27h2v1h-2zM19 27h6v1h-6zM28 27h3v1h-3zM0 28h1v1h-1zM2 28h3v1h-3zM6 28h1v1h-1zM9 28h1v1h-1zM12 28h1v1h-1zM14 28h1v1h-1zM17 28h1v1h-1zM19 28h2v1h-2zM23 28h6v1h-6zM30 28h2v1h-2zM0 29h1v1h-1zM2 29h3v1h-3zM6 29h1v1h-1zM8 29h1v1h-1zM13 29h1v1h-1zM18 29h3v1h-3zM23 29h1v1h-1zM27 29h1v1h-1zM31 29h2v1h-2zM0 30h1v1h-1zM2 30h3v1h-3zM6 30h1v1h-1zM8 30h1v1h-1zM10 30h4v1h-4zM19 30h1v1h-1zM24 30h1v1h-1zM26 30h2v1h-2zM29 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM13 31h5v1h-5zM19 31h1v1h-1zM22 31h8v1h-8zM32 31h1v1h-1zM0 32h7v1h-7zM8 32h5v1h-5zM15 32h4v1h-4zM21 32h2v1h-2zM25 32h1v1h-1zM28 32h1v1h-1zM30 32h1v1h-1z"/></svg>
+          <small>スマホで<br>読み取る</small>
+        </div>
       </div>
     </div>
   </header>
