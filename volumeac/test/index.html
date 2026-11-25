@@ -403,6 +403,8 @@
       background: #000;
     }
     .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .video-item { margin-top: 18px; }
+    .video-caption { margin: 0 0 8px; text-align: center; font-weight: 700; font-size: 0.95rem; color: var(--text); }
 
     /* 絶対に読んでほしい注意（赤系で目立たせる） */
     .must {
@@ -506,7 +508,7 @@
 <body>
   <!--
     編集するのは、いちばん下の CONFIG だけ。
-    ・ショート動画ができたら videoId に YouTube の動画ID を入れる
+    ・紹介のショート動画は videos に YouTube の動画ID を入れる（上から順に表示）
   -->
 
   <header class="hero">
@@ -621,7 +623,7 @@
             <h3>どんなアプリ？</h3>
             <p>自宅や職場など、登録した場所に着くと、着信・通知・アラーム・音楽の音量を自動で切り替えるAndroidアプリです（Android 10以降）。無料で、広告もありません。</p>
             <div id="video-section" hidden>
-              <div class="video-wrap" id="video-wrap" style="margin-top:12px"></div>
+              <div id="video-list"></div>
             </div>
           </div>
 
@@ -668,7 +670,11 @@
       optInUrl: "https://play.google.com/apps/testing/com.masatools.volumeac",
       installUrl: "https://play.google.com/store/apps/details?id=com.masatools.volumeac",
       feedbackUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfjLZKa76H_3PzYtIXto4YluaZgmkntJ3Tc8DNAOj7Sc3sqZw/viewform",
-      videoId: "",         // ショート動画ができたら YouTube の動画ID（例: "hHxcxcZMMz8"）
+      // 紹介のショート動画（YouTube の動画ID）。上から順に表示します。
+      videos: [
+        { id: "AAI937DSYZM", caption: "こんなときに便利" },
+        { id: "Hp4vERDxgeo", caption: "アプリの画面" }
+      ],
       testStartDate: "",   // 例: "2026年11月1日"
       testEndDate: "",     // 例: "2026年11月15日"
       updatedDate: "2026年10月25日"
@@ -694,14 +700,31 @@
     });
 
 
-    if (CONFIG.videoId) {
-      const iframe = document.createElement("iframe");
-      iframe.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(CONFIG.videoId);
-      iframe.title = "音量エリアコントローラーの紹介動画";
-      iframe.allow = "accelerometer; encrypted-media; gyroscope; picture-in-picture";
-      iframe.allowFullscreen = true;
-      document.getElementById("video-wrap").appendChild(iframe);
-      document.getElementById("video-section").hidden = false;
+    if (Array.isArray(CONFIG.videos) && CONFIG.videos.length > 0) {
+      const list = document.getElementById("video-list");
+      CONFIG.videos.forEach((video) => {
+        if (!video || !video.id) return;
+        const item = document.createElement("div");
+        item.className = "video-item";
+        if (video.caption) {
+          const caption = document.createElement("p");
+          caption.className = "video-caption";
+          caption.textContent = video.caption;
+          item.appendChild(caption);
+        }
+        const wrap = document.createElement("div");
+        wrap.className = "video-wrap";
+        const iframe = document.createElement("iframe");
+        iframe.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(video.id);
+        iframe.title = "音量エリアコントローラーの紹介動画" + (video.caption ? "：" + video.caption : "");
+        iframe.allow = "accelerometer; encrypted-media; gyroscope; picture-in-picture";
+        iframe.allowFullscreen = true;
+        iframe.loading = "lazy";
+        wrap.appendChild(iframe);
+        item.appendChild(wrap);
+        list.appendChild(item);
+      });
+      if (list.children.length > 0) document.getElementById("video-section").hidden = false;
     }
 
     if (CONFIG.testStartDate && CONFIG.testEndDate) {
