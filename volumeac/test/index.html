@@ -405,9 +405,9 @@
     .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     /* タイトルのすぐ下に、紹介動画を2本横並びで表示する（スマホでも横並び） */
     #video-section { margin: 20px 0 4px; }
-    #video-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    #video-list { display: grid; grid-template-columns: repeat(2, minmax(0, 250px)); justify-content: center; gap: 12px; }
     .video-item { min-width: 0; }
-    .video-item .video-wrap { max-width: 360px; border-radius: 12px; }
+    .video-item .video-wrap { max-width: 250px; border-radius: 12px; }
     .video-caption { margin: 0 0 6px; text-align: center; font-weight: 700; font-size: 0.9rem; color: var(--text); }
     @media (max-width: 480px) { #video-list { gap: 8px; } .video-caption { font-size: 0.8rem; } }
 
